@@ -1,0 +1,53 @@
+{- | Module: Cardano.YTxP.Control.Parameters
+Description: Data required to work with the compiled control scripts
+-}
+module Cardano.YTxP.Control.ParametersInitial (
+  ControlParametersInitial (..),
+) where
+
+import Numeric.Natural (Natural)
+import Plutarch (Config)
+import Plutarch.Lift (PConstantDecl, PConstanted, PLifted)
+import Plutarch.Script (Script)
+
+{- | Parameters available to the YieldListValidator and YieldListMP
+during compilation (therefore not containing any script hashes).
+
+This is a GADT because the nonces must be serializable (and thus haskell types)
+as  well as able to be applied to plutarch scripts (and thus PTypes).
+
+Docs on the fields (apparently haddocks don't work as usual with GADT syntax?)
+
+   { maxYieldListSize :: !Natural
+    -- ^ If the yield list exceeds this size, blow up during STT minting
+    , nonceList :: ![nonceType]
+    -- ^ a list of nonces for the yielding staking validators.
+    -- One staking validator is compiled for each nonce
+    , wrappedScriptYieldListMP ::
+      !Script
+    -- ^ The script that the Yield List MP will wrap. This might be an admin
+    -- signature script, multisig script, etc. The expected arguments are
+    -- the redeemer and script context.
+    , wrappedScriptYieldListValidator ::
+      !Script
+    -- ^ The script that the Yield List MP will wrap. This might be an admin
+    -- signature script, multisig script, etc. The expected arguments are
+    -- the datum, redeemer, and script context
+    , compilationConfig :: Config
+    -- ^ Plutarch compilation config
+    }
+-}
+data ControlParametersInitial (nonceType :: Type) where
+  ControlParametersInitial ::
+    ( PConstantDecl nonceType
+    , nonceType ~ PLifted (PConstanted nonceType)
+    ) =>
+    { maxYieldListSize :: !Natural
+    , nonceList :: ![nonceType]
+    , scriptToWrapYieldListMP ::
+        !Script
+    , scriptToWrapYieldListValidator ::
+        !Script
+    , compilationConfig :: Config
+    } ->
+    ControlParametersInitial nonceType
