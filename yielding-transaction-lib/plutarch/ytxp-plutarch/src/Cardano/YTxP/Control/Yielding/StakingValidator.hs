@@ -1,5 +1,3 @@
-{-# LANGUAGE ImpredicativeTypes #-}
-
 module Cardano.YTxP.Control.Yielding.StakingValidator (
   -- * Staking Validator
   YieldingStakingValidatorScript (nonce, stakingValidator),
@@ -56,7 +54,7 @@ compileYieldingStakingValidator ::
 compileYieldingStakingValidator config ylstcs nonce = do
   let
     yieldingStakingValidator ::
-      forall (s :: S). Term s (PData :--> PScriptContext :--> POpaque)
+       Term s (PData :--> PScriptContext :--> POpaque)
     yieldingStakingValidator =
       mkYieldingStakingValidator ylstcs nonce
 

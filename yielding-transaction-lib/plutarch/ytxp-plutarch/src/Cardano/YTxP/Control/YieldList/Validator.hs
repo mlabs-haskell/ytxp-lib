@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-unused-top-binds #-}
-
 module Cardano.YTxP.Control.YieldList.Validator (
   -- * Validator
   YieldListValidatorScript,
