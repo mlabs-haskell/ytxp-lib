@@ -8,7 +8,6 @@ module Cardano.YTxP.Control.ParametersInitial (
 import Numeric.Natural (Natural)
 import Plutarch (Config)
 import Plutarch.Lift (PConstantDecl, PConstanted, PLifted)
-import Plutarch.Script (Script)
 import Plutarch.Api.V2 (PScriptContext)
 
 {- | Parameters available to the YieldListValidator and YieldListMP
