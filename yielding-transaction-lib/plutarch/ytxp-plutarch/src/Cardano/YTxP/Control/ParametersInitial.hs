@@ -9,12 +9,16 @@ import Numeric.Natural (Natural)
 import Plutarch (Config)
 import Plutarch.Lift (PConstantDecl, PConstanted, PLifted)
 import Plutarch.Script (Script)
+import Plutarch.Api.V2 (PScriptContext)
 
 {- | Parameters available to the YieldListValidator and YieldListMP
 during compilation (therefore not containing any script hashes).
 
 This is a GADT because the nonces must be serializable (and thus haskell types)
 as  well as able to be applied to plutarch scripts (and thus PTypes).
+
+To load the `scriptToWrap` arguments, see @unsafeTermFromScript@ from
+Cardano.YTxP.Control.Utils
 
 Docs on the fields (apparently haddocks don't work as usual with GADT syntax?)
 
@@ -23,16 +27,14 @@ Docs on the fields (apparently haddocks don't work as usual with GADT syntax?)
     , nonceList :: ![nonceType]
     -- ^ a list of nonces for the yielding staking validators.
     -- One staking validator is compiled for each nonce
-    , wrappedScriptYieldListMP ::
-      !Script
-    -- ^ The script that the Yield List MP will wrap. This might be an admin
-    -- signature script, multisig script, etc. The expected arguments are
-    -- the redeemer and script context.
-    , wrappedScriptYieldListValidator ::
-      !Script
-    -- ^ The script that the Yield List MP will wrap. This might be an admin
-    -- signature script, multisig script, etc. The expected arguments are
-    -- the datum, redeemer, and script context
+    , scriptToWrapYieldListMP ::
+        !(ClosedTerm (PData :--> PScriptContext :--> POpaque))
+    -- ^ The V2 script that the Yield List MP will wrap. This might be an admin
+    -- signature script, multisig script, etc.
+    , scriptToWrapYieldListValidator ::
+        !(ClosedTerm (PData :--> PData :--> PScriptContext :--> POpaque))
+    -- ^ The V2 script that the Yield List MP will wrap. This might be an admin
+    -- signature script, multisig script, etc.
     , compilationConfig :: Config
     -- ^ Plutarch compilation config
     }
@@ -45,9 +47,9 @@ data ControlParametersInitial (nonceType :: Type) where
     { maxYieldListSize :: !Natural
     , nonceList :: ![nonceType]
     , scriptToWrapYieldListMP ::
-        !Script
+        !(ClosedTerm (PData :--> PScriptContext :--> POpaque))
     , scriptToWrapYieldListValidator ::
-        !Script
+        !(ClosedTerm (PData :--> PData :--> PScriptContext :--> POpaque))
     , compilationConfig :: Config
     } ->
     ControlParametersInitial nonceType

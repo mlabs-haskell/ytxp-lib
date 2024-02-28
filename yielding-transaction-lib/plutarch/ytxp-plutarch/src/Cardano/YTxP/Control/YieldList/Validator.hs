@@ -12,7 +12,6 @@ import Cardano.YTxP.Control.Stubs (
   alwaysSucceedsValidator,
   noncedValidatorWrapper,
  )
-import Cardano.YTxP.Control.Vendored (applyScript)
 import Data.Text (Text)
 import Plutarch (Config, compile)
 import Plutarch.Api.V2 (PScriptContext, scriptHash)
@@ -26,11 +25,11 @@ newtype YieldListValidatorScript = YieldListValidatorScript Script
 
 compileYieldListValidator ::
   Config ->
-  Script ->
+  ClosedTerm (PData :--> PData :--> PScriptContext :--> POpaque) ->
   Either Text YieldListValidatorScript
 compileYieldListValidator config scriptToWrap = do
-  wrapper <- compile config yieldListValWrapper
-  pure $ YieldListValidatorScript $ applyScript wrapper scriptToWrap
+  script <- compile config (yieldListValWrapper # scriptToWrap)
+  pure $ YieldListValidatorScript $ script
 
 --------------------------------------------------------------------------------
 -- YieldListCTCS

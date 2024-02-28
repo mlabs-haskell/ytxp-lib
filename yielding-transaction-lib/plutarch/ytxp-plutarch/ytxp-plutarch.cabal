@@ -10,6 +10,7 @@ maintainer:    peter@mlabs.city
 flag dev
   description: Enable non-strict compilation for development
   manual:      True
+  default: False
 
 common common-language
   ghc-options:
@@ -100,7 +101,6 @@ library
   import:          common-language
   build-depends:
     , base               >=4.16
-    , mtl
     , plutarch
     , plutus-ledger-api
     , pprelude
@@ -120,3 +120,4 @@ library
     Cardano.YTxP.Control.YieldList.Validator
     Cardano.YTxP.Control.Stubs
     Cardano.YTxP.Control.Vendored
+    Cardano.YTxP.Control.Utils

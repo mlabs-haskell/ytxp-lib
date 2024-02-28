@@ -1,6 +1,6 @@
 module Cardano.YTxP.Control.Yielding.Validator (
   -- * Validator
-  YieldingValidatorScript,
+  YieldingValidatorScript (getYieldingValidatorScript),
   compileYieldingValidator,
 
   -- * Script Credential
@@ -14,8 +14,6 @@ import Cardano.YTxP.Control.Stubs (
  )
 import Cardano.YTxP.Control.YieldList.MintingPolicy (
   YieldListSTCS,
-  compileYieldListSTMP,
-  mkYieldListSTCS,
  )
 import Data.Text (Text)
 import Plutarch (Config, compile)
@@ -33,7 +31,6 @@ newtype YieldingValidatorScript = YieldingValidatorScript
   {getYieldingValidatorScript :: Script}
 
 compileYieldingValidator ::
-  forall (nonceType :: Type).
   Config ->
   YieldListSTCS ->
   (Either Text)

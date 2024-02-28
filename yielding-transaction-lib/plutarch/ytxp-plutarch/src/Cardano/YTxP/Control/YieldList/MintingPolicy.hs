@@ -30,7 +30,7 @@ compileYieldListSTMP ::
   -- | Plutarch compilation configuration
   Config ->
   Natural ->
-  Script ->
+  ClosedTerm (PData :--> PScriptContext :--> POpaque) ->
   Either Text YieldListSTMPScript
 compileYieldListSTMP config maxYieldListSize scriptToWrap = do
   let
@@ -46,9 +46,9 @@ compileYieldListSTMP config maxYieldListSize scriptToWrap = do
       )
     yieldListSTMPWrapper = mkYieldListSTMPWrapper maxYieldListSize
 
-  wrapper <- compile config yieldListSTMPWrapper
+  script  <- compile config (yieldListSTMPWrapper # scriptToWrap)
 
-  pure $ YieldListSTMPScript $ applyScript wrapper scriptToWrap
+  pure $ YieldListSTMPScript $ script
 
 --------------------------------------------------------------------------------
 -- YieldListCTCS
