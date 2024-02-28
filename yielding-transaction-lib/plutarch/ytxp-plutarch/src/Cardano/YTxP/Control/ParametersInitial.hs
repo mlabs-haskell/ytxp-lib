@@ -5,6 +5,7 @@ module Cardano.YTxP.Control.ParametersInitial (
   ControlParametersInitial (..),
 ) where
 
+import Data.Aeson (ToJSON (toJSON), FromJSON (parseJSON))
 import Numeric.Natural (Natural)
 import Plutarch (Config)
 import Plutarch.Lift (PConstantDecl, PConstanted, PLifted)
@@ -52,3 +53,9 @@ data ControlParametersInitial (nonceType :: Type) where
     , compilationConfig :: Config
     } ->
     ControlParametersInitial nonceType
+
+instance ToJSON nonceType => ToJSON (ControlParametersInitial nonceType) where
+  toJSON = error "unimplemented"
+
+instance FromJSON nonceType => FromJSON (ControlParametersInitial nonceType) where
+  parseJSON = error "unimplemented"

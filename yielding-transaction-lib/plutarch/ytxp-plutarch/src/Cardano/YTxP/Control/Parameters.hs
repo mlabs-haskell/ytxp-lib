@@ -18,6 +18,7 @@ module Cardano.YTxP.Control.Parameters (
   mkControlParameters,
 ) where
 
+import Data.Aeson (ToJSON (toJSON), FromJSON (parseJSON))
 import Cardano.YTxP.Control.ParametersInitial (
   ControlParametersInitial (
     ControlParametersInitial,
@@ -84,6 +85,14 @@ data ControlParameters (nonceType :: Type) = ControlParameters
   , yieldingScripts :: YieldingScripts nonceType
   , controlParametersInitial :: ControlParametersInitial nonceType
   }
+
+
+instance ToJSON nonceType => ToJSON (ControlParameters nonceType) where
+  toJSON = error "unimplemented"
+
+instance FromJSON nonceType => FromJSON (ControlParameters nonceType) where
+  parseJSON = error "unimplemented"
+
 
 {- | Compile all scripts, threading through the appropriate parameters and
 script hashes
