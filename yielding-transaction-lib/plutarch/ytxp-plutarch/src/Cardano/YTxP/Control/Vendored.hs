@@ -1,34 +1,11 @@
 {- | Vendored utilities from open source libraries.
 See the appropriate License for details on usage.
 -}
-module Cardano.YTxP.Control.Vendored where
+module Cardano.YTxP.Control.Vendored (applyScript) where
 
-import Data.Text (Text)
-import Data.Text qualified as Text
-import Plutarch (
-  Config (Config, tracingMode),
-  TracingMode (DetTracing, NoTracing),
-  compile,
- )
-import Plutarch.Evaluate (EvalError, evalScript)
-import Plutarch.Script (
-  Script (Script),
- )
-import PlutusLedgerApi.V1 (Data, ExBudget)
-import UntypedPlutusCore (
-  Program (
-    Program,
-    _progAnn,
-    _progTerm,
-    _progVer
-  ),
- )
+import Plutarch.Script (Script (Script))
+import UntypedPlutusCore (Program (Program, _progAnn, _progTerm, _progVer))
 import UntypedPlutusCore.Core.Type qualified as UplcType
-import UntypedPlutusCore.Evaluation.Machine.Cek (
-  CekUserError (CekEvaluationFailure, CekOutOfExError),
-  ErrorWithCause (ErrorWithCause),
-  EvaluationError (InternalEvaluationError, UserEvaluationError),
- )
 
 {- | Apply a function to an argument on the compiled 'Script' level.
 

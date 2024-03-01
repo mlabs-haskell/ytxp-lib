@@ -8,15 +8,9 @@ module Cardano.YTxP.Control.Yielding.MintingPolicy (
   mkYieldingMPCS,
 ) where
 
-import Cardano.YTxP.Control.Stubs (
-  alwaysSucceedsTwoArgumentScript,
-  noncedTwoArgumentScriptWrapper,
- )
-import Cardano.YTxP.Control.YieldList.MintingPolicy (
-  YieldListSTCS,
-  compileYieldListSTMP,
-  mkYieldListSTCS,
- )
+import Cardano.YTxP.Control.Stubs (alwaysSucceedsTwoArgumentScript,
+                                   noncedTwoArgumentScriptWrapper)
+import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
 import Data.Text (Text)
 import Plutarch (Config, compile)
 import Plutarch.Api.V2 (PScriptContext, scriptHash)

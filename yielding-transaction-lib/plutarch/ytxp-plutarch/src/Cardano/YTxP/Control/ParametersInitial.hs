@@ -5,11 +5,11 @@ module Cardano.YTxP.Control.ParametersInitial (
   ControlParametersInitial (..),
 ) where
 
-import Data.Aeson (ToJSON (toJSON), FromJSON (parseJSON))
+import Data.Aeson (FromJSON (parseJSON), ToJSON (toJSON))
 import Numeric.Natural (Natural)
 import Plutarch (Config)
-import Plutarch.Lift (PConstantDecl, PConstanted, PLifted)
 import Plutarch.Api.V2 (PScriptContext)
+import Plutarch.Lift (PConstantDecl, PConstanted, PLifted)
 
 {- | Parameters available to the YieldListValidator and YieldListMP
 during compilation (therefore not containing any script hashes).
@@ -28,11 +28,11 @@ Docs on the fields (apparently haddocks don't work as usual with GADT syntax?)
     -- ^ a list of nonces for the yielding staking validators.
     -- One staking validator is compiled for each nonce
     , scriptToWrapYieldListMP ::
-        !(ClosedTerm (PData :--> PScriptContext :--> POpaque))
+        !(forall (s :: S). Term s (PData :--> PScriptContext :--> POpaque))
     -- ^ The V2 script that the Yield List MP will wrap. This might be an admin
     -- signature script, multisig script, etc.
     , scriptToWrapYieldListValidator ::
-        !(ClosedTerm (PData :--> PData :--> PScriptContext :--> POpaque))
+        !(forall (s :: S). Term s (PData :--> PData :--> PScriptContext :--> POpaque))
     -- ^ The V2 script that the Yield List MP will wrap. This might be an admin
     -- signature script, multisig script, etc.
     , compilationConfig :: Config
@@ -47,9 +47,10 @@ data ControlParametersInitial (nonceType :: Type) where
     { maxYieldListSize :: !Natural
     , nonceList :: ![nonceType]
     , scriptToWrapYieldListMP ::
-        !(ClosedTerm (PData :--> PScriptContext :--> POpaque))
+        !(forall (s :: S). Term s (PData :--> PScriptContext :--> POpaque))
     , scriptToWrapYieldListValidator ::
-        !(ClosedTerm (PData :--> PData :--> PScriptContext :--> POpaque))
+        !(forall (s :: S).
+          Term s (PData :--> PData :--> PScriptContext :--> POpaque))
     , compilationConfig :: Config
     } ->
     ControlParametersInitial nonceType

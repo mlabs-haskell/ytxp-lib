@@ -8,10 +8,8 @@ module Cardano.YTxP.Control.YieldList.Validator (
   mkYieldListValidatorCredential,
 ) where
 
-import Cardano.YTxP.Control.Stubs (
-  alwaysSucceedsValidator,
-  noncedValidatorWrapper,
- )
+import Cardano.YTxP.Control.Stubs (alwaysSucceedsValidator,
+                                   noncedValidatorWrapper)
 import Data.Text (Text)
 import Plutarch (Config, compile)
 import Plutarch.Api.V2 (PScriptContext, scriptHash)
@@ -25,7 +23,7 @@ newtype YieldListValidatorScript = YieldListValidatorScript Script
 
 compileYieldListValidator ::
   Config ->
-  ClosedTerm (PData :--> PData :--> PScriptContext :--> POpaque) ->
+  (forall (s :: S). Term s (PData :--> PData :--> PScriptContext :--> POpaque)) ->
   Either Text YieldListValidatorScript
 compileYieldListValidator config scriptToWrap = do
   script <- compile config (yieldListValWrapper # scriptToWrap)

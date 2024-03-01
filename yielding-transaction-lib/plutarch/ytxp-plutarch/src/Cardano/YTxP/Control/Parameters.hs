@@ -18,38 +18,19 @@ module Cardano.YTxP.Control.Parameters (
   mkControlParameters,
 ) where
 
-import Data.Aeson (ToJSON (toJSON), FromJSON (parseJSON))
-import Cardano.YTxP.Control.ParametersInitial (
-  ControlParametersInitial (
-    ControlParametersInitial,
-    compilationConfig,
-    maxYieldListSize,
-    nonceList,
-    scriptToWrapYieldListMP,
-    scriptToWrapYieldListValidator
-  ),
- )
-import Cardano.YTxP.Control.YieldList.MintingPolicy (
-  YieldListSTMPScript,
-  compileYieldListSTMP,
-  mkYieldListSTCS,
- )
-import Cardano.YTxP.Control.YieldList.Validator (
-  YieldListValidatorScript,
-  compileYieldListValidator,
- )
-import Cardano.YTxP.Control.Yielding.MintingPolicy (
-  YieldingMPScript,
-  compileYieldingMP,
- )
-import Cardano.YTxP.Control.Yielding.StakingValidator (
-  YieldingStakingValidatorScript,
-  compileYieldingStakingValidator,
- )
-import Cardano.YTxP.Control.Yielding.Validator (
-  YieldingValidatorScript,
-  compileYieldingValidator,
- )
+import Cardano.YTxP.Control.ParametersInitial (ControlParametersInitial (ControlParametersInitial, compilationConfig, maxYieldListSize, nonceList, scriptToWrapYieldListMP, scriptToWrapYieldListValidator))
+import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTMPScript,
+                                                     compileYieldListSTMP,
+                                                     mkYieldListSTCS)
+import Cardano.YTxP.Control.YieldList.Validator (YieldListValidatorScript,
+                                                 compileYieldListValidator)
+import Cardano.YTxP.Control.Yielding.MintingPolicy (YieldingMPScript,
+                                                    compileYieldingMP)
+import Cardano.YTxP.Control.Yielding.StakingValidator (YieldingStakingValidatorScript,
+                                                       compileYieldingStakingValidator)
+import Cardano.YTxP.Control.Yielding.Validator (YieldingValidatorScript,
+                                                compileYieldingValidator)
+import Data.Aeson (FromJSON (parseJSON), ToJSON (toJSON))
 import Data.Text (Text)
 
 -- | Scripts that govern which transaction families can be "yielded to"

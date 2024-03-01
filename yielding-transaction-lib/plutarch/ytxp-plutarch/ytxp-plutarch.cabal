@@ -10,19 +10,23 @@ maintainer:    peter@mlabs.city
 flag dev
   description: Enable non-strict compilation for development
   manual:      True
-  default: False
+  default:     False
 
+-- Peter, 2024-03-01: I'm disabling unused packages because for some
+-- reason cabal is telling me that base is unused??
 common common-language
   ghc-options:
     -Wall -Wcompat -fprint-explicit-foralls -fprint-explicit-kinds
     -fwarn-missing-import-lists -Weverything -Wno-unsafe
     -Wno-missing-safe-haskell-mode -Wno-implicit-prelude
     -Wno-missing-kind-signatures -Wno-all-missed-specializations
+    -Wno-unused-packages
 
   if !flag(dev)
     ghc-options: -Werror
 
   default-extensions:
+    NoStarIsType
     BangPatterns
     BinaryLiterals
     ConstrainedClassMethods
@@ -59,7 +63,6 @@ common common-language
     MultiParamTypeClasses
     NamedFieldPuns
     NamedWildCards
-    NoStarIsType
     NumericUnderscores
     OverloadedLabels
     OverloadedStrings
@@ -103,15 +106,18 @@ library
     , aeson
     , base               >=4.16
     , plutarch
+    , plutus-core
     , plutus-ledger-api
     , pprelude
-    , plutus-core
     , text
 
   hs-source-dirs:  src
   exposed-modules:
     Cardano.YTxP.Control.Parameters
     Cardano.YTxP.Control.ParametersInitial
+    Cardano.YTxP.Control.Stubs
+    Cardano.YTxP.Control.Utils
+    Cardano.YTxP.Control.Vendored
     Cardano.YTxP.Control.Yielding
     Cardano.YTxP.Control.Yielding.MintingPolicy
     Cardano.YTxP.Control.Yielding.StakingValidator
@@ -119,6 +125,3 @@ library
     Cardano.YTxP.Control.YieldList
     Cardano.YTxP.Control.YieldList.MintingPolicy
     Cardano.YTxP.Control.YieldList.Validator
-    Cardano.YTxP.Control.Stubs
-    Cardano.YTxP.Control.Vendored
-    Cardano.YTxP.Control.Utils

@@ -8,19 +8,12 @@ module Cardano.YTxP.Control.Yielding.Validator (
   mkYieldingValidatorCredential,
 ) where
 
-import Cardano.YTxP.Control.Stubs (
-  alwaysSucceedsValidator,
-  noncedValidatorWrapper,
- )
-import Cardano.YTxP.Control.YieldList.MintingPolicy (
-  YieldListSTCS,
- )
+import Cardano.YTxP.Control.Stubs (alwaysSucceedsValidator,
+                                   noncedValidatorWrapper)
+import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
 import Data.Text (Text)
 import Plutarch (Config, compile)
-import Plutarch.Api.V2 (
-  PScriptContext,
-  scriptHash,
- )
+import Plutarch.Api.V2 (PScriptContext, scriptHash)
 import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (Credential (ScriptCredential))
 

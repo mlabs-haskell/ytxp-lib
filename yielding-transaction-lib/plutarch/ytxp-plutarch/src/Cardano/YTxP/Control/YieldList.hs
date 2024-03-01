@@ -14,7 +14,7 @@ module Cardano.YTxP.Control.YieldList (
   multiSigMintingPolicyWrapper,
 ) where
 
-import PlutusLedgerApi.V1.Scripts (ScriptHash) -- TODO V2 for sure?
+import PlutusLedgerApi.V1.Scripts (ScriptHash)
 import Prelude (error)
 
 --------------------------------------------------------------------------------

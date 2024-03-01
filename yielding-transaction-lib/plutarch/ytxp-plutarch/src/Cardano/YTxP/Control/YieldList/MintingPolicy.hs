@@ -8,11 +8,8 @@ module Cardano.YTxP.Control.YieldList.MintingPolicy (
   mkYieldListSTCS,
 ) where
 
-import Cardano.YTxP.Control.Stubs (
-  alwaysSucceedsTwoArgumentScript,
-  noncedTwoArgumentScriptWrapper,
- )
-import Cardano.YTxP.Control.Vendored (applyScript)
+import Cardano.YTxP.Control.Stubs (alwaysSucceedsTwoArgumentScript,
+                                   noncedTwoArgumentScriptWrapper)
 import Data.Text (Text)
 import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
@@ -26,16 +23,15 @@ import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
 newtype YieldListSTMPScript = YieldListSTMPScript Script
 
 compileYieldListSTMP ::
-  forall (nonceType :: Type).
+
   -- | Plutarch compilation configuration
   Config ->
   Natural ->
-  ClosedTerm (PData :--> PScriptContext :--> POpaque) ->
+  (forall (s :: S). Term s (PData :--> PScriptContext :--> POpaque)) ->
   Either Text YieldListSTMPScript
 compileYieldListSTMP config maxYieldListSize scriptToWrap = do
   let
     yieldListSTMPWrapper ::
-      forall (s :: S).
       ( Term
           s
           ( (PData :--> PScriptContext :--> POpaque)

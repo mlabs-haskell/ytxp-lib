@@ -6,23 +6,10 @@ module Cardano.YTxP.Control.Yielding.StakingValidator (
   -- * Credential and Nonce
 ) where
 
-import Cardano.YTxP.Control.ParametersInitial (
-  ControlParametersInitial,
-  compilationConfig,
-  nonceList,
- )
-import Cardano.YTxP.Control.Stubs (
-  alwaysSucceedsTwoArgumentScript,
-  noncedTwoArgumentScriptWrapper,
- )
-import Cardano.YTxP.Control.YieldList.MintingPolicy (
-  YieldListSTCS,
-  compileYieldListSTMP,
-  mkYieldListSTCS,
- )
+import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
 import Data.Text (Text)
 import Plutarch (Config, compile)
-import Plutarch.Api.V2 (PScriptContext, scriptHash)
+import Plutarch.Api.V2 (PScriptContext)
 import Plutarch.Lift (PConstantDecl, PConstanted, PLifted)
 import Plutarch.Script (Script)
 
