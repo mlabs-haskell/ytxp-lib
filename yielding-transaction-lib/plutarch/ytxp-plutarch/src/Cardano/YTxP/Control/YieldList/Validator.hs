@@ -27,7 +27,7 @@ compileYieldListValidator ::
   Either Text YieldListValidatorScript
 compileYieldListValidator config scriptToWrap = do
   script <- compile config (yieldListValWrapper # scriptToWrap)
-  pure $ YieldListValidatorScript $ script
+  pure $ YieldListValidatorScript script
 
 --------------------------------------------------------------------------------
 -- YieldListCTCS

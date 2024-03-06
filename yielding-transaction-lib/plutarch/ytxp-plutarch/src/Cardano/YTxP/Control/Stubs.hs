@@ -28,7 +28,7 @@ noncedValidatorWrapper ::
   Term s nonceType ->
   Term s (PData :--> PData :--> PScriptContext :--> POpaque) ->
   Term s (PData :--> PData :--> PScriptContext :--> POpaque)
-noncedValidatorWrapper nonce wrappedScript = plet nonce $ \_ ->
+noncedValidatorWrapper nonce wrappedScript = plet nonce $ const
   (plam $ \datum redeemer ctx -> wrappedScript # datum # redeemer # ctx)
 
 --------------------------------------------------------------------------------
@@ -48,5 +48,5 @@ noncedTwoArgumentScriptWrapper ::
   Term s nonceType ->
   Term s (PData :--> PScriptContext :--> POpaque) ->
   Term s (PData :--> PScriptContext :--> POpaque)
-noncedTwoArgumentScriptWrapper nonce wrappedScript = plet nonce $ \_ ->
+noncedTwoArgumentScriptWrapper nonce wrappedScript = plet nonce $ const
   (plam $ \redeemer ctx -> wrappedScript # redeemer # ctx)

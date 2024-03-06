@@ -44,7 +44,7 @@ compileYieldListSTMP config maxYieldListSize scriptToWrap = do
 
   script  <- compile config (yieldListSTMPWrapper # scriptToWrap)
 
-  pure $ YieldListSTMPScript $ script
+  pure $ YieldListSTMPScript script
 
 --------------------------------------------------------------------------------
 -- YieldListCTCS
