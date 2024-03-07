@@ -30,7 +30,8 @@ import Cardano.YTxP.Control.Yielding.StakingValidator (YieldingStakingValidatorS
                                                        compileYieldingStakingValidator)
 import Cardano.YTxP.Control.Yielding.Validator (YieldingValidatorScript,
                                                 compileYieldingValidator)
-import Data.Aeson (FromJSON (parseJSON), ToJSON (toJSON))
+import Data.Aeson (FromJSON (parseJSON), ToJSON (toEncoding, toJSON), object,
+                   pairs, withObject, (.:), (.=))
 import Data.Text (Text)
 
 -- | Scripts that govern which transaction families can be "yielded to"
@@ -48,6 +49,24 @@ data YieldListScripts = YieldListScripts
   -- any UTxO carrying the STT will be looked at for a YieldList.
   -- @since 0.1.0
   }
+
+-- | @since 0.1.0
+instance ToJSON YieldListScripts where
+  {-# INLINEABLE toJSON #-}
+  toJSON yls = object ["yieldListValidator" .= yieldListValidator yls,
+                       "yieldListMintingPolicy" .= yieldListMintingPolicy yls
+                      ]
+  {-# INLINEABLE toEncoding #-}
+  toEncoding yls = pairs $ "yieldListValidator" .= yieldListValidator yls <>
+                           "yieldListMintingPolicy" .= yieldListMintingPolicy yls
+
+-- | @since 0.1.0
+instance FromJSON YieldListScripts where
+  {-# INLINEABLE parseJSON #-}
+  parseJSON = withObject "YieldListScripts" $ \obj -> do
+    ylv <- obj .: "yieldListValidator"
+    ylmp <- obj .: "yieldListMintingPolicy"
+    pure $ YieldListScripts ylv ylmp
 
 {- | Scripts that yield to transaction families described by the datums guarded
 by the YieldListScripts.

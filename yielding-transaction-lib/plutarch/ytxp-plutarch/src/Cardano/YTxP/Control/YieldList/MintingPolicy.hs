@@ -10,6 +10,7 @@ module Cardano.YTxP.Control.YieldList.MintingPolicy (
 
 import Cardano.YTxP.Control.Stubs (alwaysSucceedsTwoArgumentScript,
                                    noncedTwoArgumentScriptWrapper)
+import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
@@ -20,7 +21,14 @@ import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
 --------------------------------------------------------------------------------
 -- YieldListSTMPScript
 
+-- | @since 0.1.0
 newtype YieldListSTMPScript = YieldListSTMPScript Script
+  deriving (
+    -- | @since 0.1.0
+    ToJSON,
+    -- | @since 0.1.0
+    FromJSON
+    ) via (HexStringScript "YieldListSTMPScript")
 
 compileYieldListSTMP ::
 
