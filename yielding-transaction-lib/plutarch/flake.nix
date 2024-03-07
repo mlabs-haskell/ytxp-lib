@@ -35,7 +35,7 @@
       imports = [
         ./pkgs.nix
         ./settings.nix
-        ./pre-commit.nix
+        #./pre-commit.nix
         #./api/build.nix
         ./ytxp-plutarch/build.nix
       ];

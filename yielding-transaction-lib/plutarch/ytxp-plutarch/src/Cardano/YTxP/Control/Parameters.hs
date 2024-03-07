@@ -34,15 +34,19 @@ import Data.Aeson (FromJSON (parseJSON), ToJSON (toJSON))
 import Data.Text (Text)
 
 -- | Scripts that govern which transaction families can be "yielded to"
+--
+-- @since 0.1.0
 data YieldListScripts = YieldListScripts
   { yieldListValidator :: YieldListValidatorScript
   -- ^ The validator where we look for UTxO(s) that carry a yieldListSTT in
   -- their values and a YieldList in their datum
+  -- @since 0.1.0
   , yieldListMintingPolicy :: YieldListSTMPScript
   -- ^ The minting policy for the yieldListSTT, which authenticates a
   -- UTxO as carrying a YieldList. Note that these STTs will _usually_ be
   -- at the yieldListValidator, but these is nothing intrinsically requiring this;
   -- any UTxO carrying the STT will be looked at for a YieldList.
+  -- @since 0.1.0
   }
 
 {- | Scripts that yield to transaction families described by the datums guarded

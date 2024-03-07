@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeApplications #-}
+
 module Cardano.YTxP.Control.YieldList.Validator (
   -- * Validator
   YieldListValidatorScript,
@@ -10,6 +12,7 @@ module Cardano.YTxP.Control.YieldList.Validator (
 
 import Cardano.YTxP.Control.Stubs (alwaysSucceedsValidator,
                                    noncedValidatorWrapper)
+import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Plutarch (Config, compile)
 import Plutarch.Api.V2 (PScriptContext, scriptHash)
@@ -19,7 +22,14 @@ import PlutusLedgerApi.V2 (Credential (ScriptCredential))
 --------------------------------------------------------------------------------
 -- YieldListValidatorScript
 
+-- | @since 0.1.0
 newtype YieldListValidatorScript = YieldListValidatorScript Script
+  deriving (
+    -- | @since 0.1.0
+    ToJSON,
+    -- | @since 0.1.0
+    FromJSON
+    ) via (HexStringScript "YieldListValidatorScript")
 
 compileYieldListValidator ::
   Config ->

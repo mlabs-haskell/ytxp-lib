@@ -55,22 +55,21 @@
                 pkgs.entr
 
                 pkgs.nil
-                inputs.pre-commit-hooks.outputs.packages.${system}.deadnix
-                inputs.pre-commit-hooks.outputs.packages.${system}.nixpkgs-fmt
+                #inputs.pre-commit-hooks.outputs.packages.${system}.deadnix
+                #inputs.pre-commit-hooks.outputs.packages.${system}.nixpkgs-fmt
 
-                inputs.pre-commit-hooks.outputs.packages.${system}.shellcheck
+                #inputs.pre-commit-hooks.outputs.packages.${system}.shellcheck
 
-                inputs.pre-commit-hooks.outputs.packages.${system}.markdownlint-cli
-                inputs.pre-commit-hooks.outputs.packages.${system}.dhall
+                #inputs.pre-commit-hooks.outputs.packages.${system}.markdownlint-cli
+                #inputs.pre-commit-hooks.outputs.packages.${system}.dhall
 
-                inputs.pre-commit-hooks.outputs.packages.${system}.purty
+                #inputs.pre-commit-hooks.outputs.packages.${system}.purty
               ];
 
               hook = ''
                 export LC_CTYPE=C.UTF-8;
                 export LC_ALL=C.UTF-8;
                 export LANG=C.UTF-8;
-                ${config.pre-commit.installationScript}
               '';
             };
           };

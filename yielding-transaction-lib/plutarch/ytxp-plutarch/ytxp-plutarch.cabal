@@ -1,11 +1,11 @@
 cabal-version: 3.0
 name:          ytxp-plutarch
-version:       0.1.0.0
+version:       0.1.0
 synopsis:
   Control scripts, types, and utilities for the YTxP architecture
 
-author:        Peter Dragos
-maintainer:    peter@mlabs.city
+author:        Peter Dragos, Koz Ross
+maintainer:    peter@mlabs.city, koz@mlabs.city
 
 flag dev
   description: Enable non-strict compilation for development
@@ -94,8 +94,12 @@ common common-language
 library pprelude
   default-language: Haskell2010
   build-depends:
+    , aeson
     , base
+    , bytestring
     , plutarch
+    , text
+    , text-builder
 
   exposed-modules:  PPrelude
   hs-source-dirs:   src
@@ -104,7 +108,7 @@ library
   import:          common-language
   build-depends:
     , aeson
-    , base               >=4.16
+    , base               ^>=4.18.1.0
     , plutarch
     , plutus-core
     , plutus-ledger-api
