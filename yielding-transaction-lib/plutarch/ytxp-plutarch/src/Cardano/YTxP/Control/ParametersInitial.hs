@@ -1,3 +1,5 @@
+{-# LANGUAGE ImpredicativeTypes #-}
+
 {- | Module: Cardano.YTxP.Control.Parameters
 Description: Data required to work with the compiled control scripts
 -}
@@ -5,11 +7,11 @@ module Cardano.YTxP.Control.ParametersInitial (
   ControlParametersInitial (..),
 ) where
 
-import Data.Aeson (FromJSON (parseJSON), ToJSON (toJSON))
+import Data.Aeson (FromJSON (parseJSON), ToJSON (toEncoding, toJSON), object,
+                   pairs, withObject, (.:), (.=))
 import Numeric.Natural (Natural)
 import Plutarch (Config)
 import Plutarch.Api.V2 (PScriptContext)
-import Plutarch.Lift (PConstantDecl, PConstanted, PLifted)
 
 {- | Parameters available to the YieldListValidator and YieldListMP
 during compilation (therefore not containing any script hashes).
@@ -20,43 +22,71 @@ as  well as able to be applied to plutarch scripts (and thus PTypes).
 To load the `scriptToWrap` arguments, see @unsafeTermFromScript@ from
 Cardano.YTxP.Control.Utils
 
-Docs on the fields (apparently haddocks don't work as usual with GADT syntax?)
-
-   { maxYieldListSize :: !Natural
-    -- ^ If the yield list exceeds this size, blow up during STT minting
-    , nonceList :: ![nonceType]
-    -- ^ a list of nonces for the yielding staking validators.
-    -- One staking validator is compiled for each nonce
-    , scriptToWrapYieldListMP ::
-        !(forall (s :: S). Term s (PData :--> PScriptContext :--> POpaque))
-    -- ^ The V2 script that the Yield List MP will wrap. This might be an admin
-    -- signature script, multisig script, etc.
-    , scriptToWrapYieldListValidator ::
-        !(forall (s :: S). Term s (PData :--> PData :--> PScriptContext :--> POpaque))
-    -- ^ The V2 script that the Yield List MP will wrap. This might be an admin
-    -- signature script, multisig script, etc.
-    , compilationConfig :: Config
-    -- ^ Plutarch compilation config
-    }
+@since 0.1.0
 -}
-data ControlParametersInitial (nonceType :: Type) where
-  ControlParametersInitial ::
-    ( PConstantDecl nonceType
-    , nonceType ~ PLifted (PConstanted nonceType)
-    ) =>
-    { maxYieldListSize :: !Natural
-    , nonceList :: ![nonceType]
-    , scriptToWrapYieldListMP ::
-        !(forall (s :: S). Term s (PData :--> PScriptContext :--> POpaque))
-    , scriptToWrapYieldListValidator ::
-        !(forall (s :: S).
-          Term s (PData :--> PData :--> PScriptContext :--> POpaque))
-    , compilationConfig :: Config
-    } ->
-    ControlParametersInitial nonceType
+data ControlParametersInitial (nonceType :: Type) =
+  ControlParametersInitial {
+    -- | If the yield list exceeds this size, blow up during STT minting
+    -- @since 0.1.0
+    maxYieldListSize :: !Natural,
+    -- | A list of nonces for the yielding staking validators. One staking
+    -- validator is compiled for each nonce.
+    -- @since 0.1.0
+    nonceList :: [nonceType],
+    -- | The V2 script that the yield list MP will wrap. This might be an admin
+    -- signature script, multisig script, etc.
+    -- @since 0.1.0
+    scriptToWrapYieldListMP :: forall (s :: S) .
+      Term s (PData :--> PScriptContext :--> POpaque),
+    -- | The V2 script that the yield list validator will wrap.
+    scriptToWrapYieldListValidator :: forall (s :: S) .
+      Term s (PData :--> PData :--> PScriptContext :--> POpaque),
+    -- | Plutarch compilation config
+    compilationConfig :: Config
+    }
 
 instance ToJSON nonceType => ToJSON (ControlParametersInitial nonceType) where
-  toJSON = error "unimplemented"
+  {-# INLINEABLE toJSON #-}
+  toJSON cpi = let conf = compilationConfig cpi in
+    object [
+      "maxYieldListSize" .= maxYieldListSize cpi,
+      "nonceList" .= nonceList cpi,
+      -- Note from Koz (08/03/24): We need this _exact_ form or the compiler
+      -- will complain with an unintelligible error message.
+      "scriptToWrapYieldListMP" .= toJSONPMintingPolicy conf (scriptToWrapYieldListMP cpi),
+      "scriptToWrapYieldListValidator" .= toJSONPValidator conf (scriptToWrapYieldListValidator cpi),
+      "compilationConfig" .= WrappedConfig conf
+      ]
+  {-# INLINEABLE toEncoding #-}
+  toEncoding cpi = let conf = compilationConfig cpi in
+    pairs $
+      "maxYieldListSize" .= maxYieldListSize cpi <>
+      "nonceList" .= nonceList cpi <>
+      "scriptToWrapYieldListMP" .= toJSONPMintingPolicy conf (scriptToWrapYieldListMP cpi) <>
+      "scriptToWrapYieldListValidator" .= toJSONPValidator conf (scriptToWrapYieldListValidator cpi) <>
+      "compilationConfig" .= WrappedConfig conf
 
 instance FromJSON nonceType => FromJSON (ControlParametersInitial nonceType) where
-  parseJSON = error "unimplemented"
+  {-# INLINEABLE parseJSON #-}
+  -- Note from Koz (08/03/24): We have to write this method in such a convoluted
+  -- way because we have to return impredicatively from the parser helpers for
+  -- the closed Plutarch terms. While this is possible with ImpredicativeTypes
+  -- enabled, this is currently broken with 'do' notation, and has been for a
+  -- while. We thus isolate the impredicatively instantiated variables inside
+  -- manual binds, and then do the rest in a 'do' for convenience.
+  --
+  -- See https://gitlab.haskell.org/ghc/ghc/-/issues/18126#note_423208.
+  parseJSON = withObject "ControlParametersInitial" $ \obj ->
+    (obj .: "scriptToWrapYieldListMP") >>=
+    parseJSONPMintingPolicy >>=
+    \mp -> (obj .: "scriptToWrapYieldListValidator") >>=
+    parseJSONPValidator >>=
+    \v -> do
+        cpiMaxYieldListSize <- obj .: "maxYieldListSize"
+        cpiNonceList <- obj .: "nonceList"
+        WrappedConfig cpiConfig <- obj .: "compilationConfig"
+        pure $ ControlParametersInitial cpiMaxYieldListSize
+                                        cpiNonceList
+                                        mp
+                                        v
+                                        cpiConfig

@@ -7,6 +7,8 @@ module Cardano.YTxP.Control.Yielding.StakingValidator (
 ) where
 
 import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
+import Data.Aeson (FromJSON (parseJSON), ToJSON (toEncoding, toJSON), object,
+                   pairs, withObject, (.:), (.=))
 import Data.Text (Text)
 import Plutarch (Config, compile)
 import Plutarch.Api.V2 (PScriptContext)
@@ -17,10 +19,33 @@ import Plutarch.Script (Script)
 -- Yielding Staking Validator
 
 -- | A yielding staking validator together with its nonce.
+--
+-- @since 0.1.0
 data YieldingStakingValidatorScript (nonceType :: Type) = YieldingStakingValidatorScript
-  { nonce :: nonceType
-  , stakingValidator :: Script
+  { -- | @since 0.1.0
+    nonce :: nonceType
+  , -- | @since 0.10
+    stakingValidator :: Script
   }
+
+-- | @since 0.1.0
+instance (ToJSON nonceType) => ToJSON (YieldingStakingValidatorScript nonceType) where
+  {-# INLINEABLE toJSON #-}
+  toJSON ysvs = object ["nonce" .= nonce ysvs,
+                        "stakingValidator" .= (HexStringScript @"StakingValidator" . stakingValidator $ ysvs)
+                       ]
+  {-# INLINEABLE toEncoding #-}
+  toEncoding ysvs = pairs $
+    "nonce" .= nonce ysvs <>
+    "stakingValidator" .= (HexStringScript @"StakingValidator" . stakingValidator $ ysvs)
+
+-- | @since 0.1.0
+instance (FromJSON nonceType) => FromJSON (YieldingStakingValidatorScript nonceType) where
+  {-# INLINEABLE parseJSON #-}
+  parseJSON = withObject "YieldingStakingValidatorScript" $ \obj -> do
+    ysvsNonce :: nonceType <- obj .: "nonce"
+    (HexStringScript ysvsStakingValidator) :: HexStringScript "StakingValidator" <- obj .: "stakingValidator"
+    pure $ YieldingStakingValidatorScript ysvsNonce ysvsStakingValidator
 
 {- | Compile a yielding staking validator that has been nonced.
 The nonce is required because each staking validator can only

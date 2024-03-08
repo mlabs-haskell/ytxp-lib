@@ -11,6 +11,7 @@ module Cardano.YTxP.Control.Yielding.Validator (
 import Cardano.YTxP.Control.Stubs (alwaysSucceedsValidator,
                                    noncedValidatorWrapper)
 import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
+import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Plutarch (Config, compile)
 import Plutarch.Api.V2 (PScriptContext, scriptHash)
@@ -20,8 +21,17 @@ import PlutusLedgerApi.V2 (Credential (ScriptCredential))
 --------------------------------------------------------------------------------
 -- Yielding Validator Script
 
+-- | @since 0.1.0
 newtype YieldingValidatorScript = YieldingValidatorScript
-  {getYieldingValidatorScript :: Script}
+  { -- | @since 0.1.0
+    getYieldingValidatorScript :: Script
+  }
+  deriving (
+    -- | @since 0.1.0
+    ToJSON,
+    -- | @since 0.1.0
+    FromJSON
+    ) via (HexStringScript "YieldingValidatorScript")
 
 compileYieldingValidator ::
   Config ->

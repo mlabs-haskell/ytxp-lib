@@ -33,6 +33,7 @@ import Cardano.YTxP.Control.Yielding.Validator (YieldingValidatorScript,
 import Data.Aeson (FromJSON (parseJSON), ToJSON (toEncoding, toJSON), object,
                    pairs, withObject, (.:), (.=))
 import Data.Text (Text)
+import Plutarch.Lift (PConstantDecl, PConstanted, PLifted)
 
 -- | Scripts that govern which transaction families can be "yielded to"
 --
@@ -70,39 +71,90 @@ instance FromJSON YieldListScripts where
 
 {- | Scripts that yield to transaction families described by the datums guarded
 by the YieldListScripts.
+
+@since 0.1.0
 -}
 data YieldingScripts (nonceType :: Type) = YieldingScripts
-  { yieldingMintingPolicy :: YieldingMPScript
-  , yieldingValidator :: YieldingValidatorScript
-  , yieldingStakingValidators :: [YieldingStakingValidatorScript nonceType]
+  {
+    -- | @since 0.1.0
+    yieldingMintingPolicy :: YieldingMPScript
+  , -- | @since 0.1.0
+    yieldingValidator :: YieldingValidatorScript
+  , -- | @since 0.1.0
+    yieldingStakingValidators :: [YieldingStakingValidatorScript nonceType]
   -- ^ We have multiple of these, because each can only be delegated to a single
   -- pool.
   }
+
+-- | @since 0.1.0
+instance (ToJSON nonceType) => ToJSON (YieldingScripts nonceType) where
+  {-# INLINEABLE toJSON #-}
+  toJSON ys = object ["yieldingMintingPolicy" .= yieldingMintingPolicy ys,
+                      "yieldingValidator" .= yieldingValidator ys,
+                      "yieldingStakingValidators" .= yieldingStakingValidators ys
+                     ]
+  {-# INLINEABLE toEncoding #-}
+  toEncoding ys = pairs $
+    "yieldingMintingPolicy" .= yieldingMintingPolicy ys <>
+    "yieldingValidator" .= yieldingValidator ys <>
+    "yieldingStakingValidators" .= yieldingStakingValidators ys
+
+-- | @since 0.1.0
+instance (FromJSON nonceType) => FromJSON (YieldingScripts nonceType) where
+  {-# INLINEABLE parseJSON #-}
+  parseJSON = withObject "YieldingScripts" $ \obj -> do
+    ysmp <- obj .: "yieldingMintingPolicy"
+    ysv <- obj .: "yieldingValidator"
+    ysvs <- obj .: "yieldingStakingValidators"
+    pure $ YieldingScripts ysmp ysv ysvs
 
 {- | Contains the compiled scripts along with the parameters
 they were compiled against. This is useful for _library consumers_
 and should contain all of the information needed to work with the
 library.
+
+@since 0.1.0
 -}
 data ControlParameters (nonceType :: Type) = ControlParameters
-  { yieldListScripts :: YieldListScripts
-  , yieldingScripts :: YieldingScripts nonceType
-  , controlParametersInitial :: ControlParametersInitial nonceType
+  {
+    -- | @since 0.1.0
+    yieldListScripts :: YieldListScripts
+  , -- | @since 0.1.0
+    yieldingScripts :: YieldingScripts nonceType
+  , -- | @since 0.1.0
+    controlParametersInitial :: ControlParametersInitial nonceType
   }
 
-
+-- | @since 0.1.0
 instance ToJSON nonceType => ToJSON (ControlParameters nonceType) where
-  toJSON = error "unimplemented"
+  {-# INLINEABLE toJSON #-}
+  toJSON cp = object [
+    "yieldListScripts" .= yieldListScripts cp,
+    "yieldingScripts" .= yieldingScripts cp,
+    "controlParametersInitial" .= controlParametersInitial cp
+    ]
+  {-# INLINEABLE toEncoding #-}
+  toEncoding cp = pairs $
+    "yieldListScripts" .= yieldListScripts cp <>
+    "yieldingScripts" .= yieldingScripts cp <>
+    "controlParametersInitial" .= controlParametersInitial cp
 
+-- | @since 0.1.0
 instance FromJSON nonceType => FromJSON (ControlParameters nonceType) where
-  parseJSON = error "unimplemented"
-
+  {-# INLINEABLE parseJSON #-}
+  parseJSON = withObject "ControlParameters" $ \obj -> do
+    yls <- obj .: "yieldListScripts"
+    ys <- obj .: "yieldingScripts"
+    cpi <- obj .: "controlParametersInitial"
+    pure $ ControlParameters yls ys cpi
 
 {- | Compile all scripts, threading through the appropriate parameters and
 script hashes
 -}
 mkControlParameters ::
   forall (nonceType :: Type).
+  (PLifted (PConstanted nonceType) ~ nonceType,
+    PConstantDecl nonceType) =>
   ControlParametersInitial nonceType ->
   Either
     Text

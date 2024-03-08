@@ -98,6 +98,7 @@ library pprelude
     , base
     , bytestring
     , plutarch
+    , plutus-core
     , text
     , text-builder
 
@@ -120,7 +121,6 @@ library
     Cardano.YTxP.Control.Parameters
     Cardano.YTxP.Control.ParametersInitial
     Cardano.YTxP.Control.Stubs
-    Cardano.YTxP.Control.Utils
     Cardano.YTxP.Control.Vendored
     Cardano.YTxP.Control.Yielding
     Cardano.YTxP.Control.Yielding.MintingPolicy
