@@ -129,3 +129,13 @@ library
     Cardano.YTxP.Control.YieldList
     Cardano.YTxP.Control.YieldList.MintingPolicy
     Cardano.YTxP.Control.YieldList.Validator
+
+executable write-config
+  import:         common-language
+  main-is:        Main.hs
+  build-depends:
+    , base
+    , pprelude
+    , ytxp-plutarch
+
+  hs-source-dirs: app/write-config
