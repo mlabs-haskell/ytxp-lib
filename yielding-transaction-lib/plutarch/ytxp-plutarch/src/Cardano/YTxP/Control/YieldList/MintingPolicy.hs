@@ -17,6 +17,7 @@ import Plutarch (Config, compile)
 import Plutarch.Api.V2 (PScriptContext, scriptHash)
 import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
+import Prettyprinter (Pretty)
 
 --------------------------------------------------------------------------------
 -- YieldListSTMPScript
@@ -29,6 +30,12 @@ newtype YieldListSTMPScript = YieldListSTMPScript Script
     -- | @since 0.1.0
     FromJSON
     ) via (HexStringScript "YieldListSTMPScript")
+  deriving (
+    --- | @since 0.1.0
+    Eq,
+    -- | @since 0.1.0
+    Pretty
+    ) via SerialForm
 
 compileYieldListSTMP ::
 

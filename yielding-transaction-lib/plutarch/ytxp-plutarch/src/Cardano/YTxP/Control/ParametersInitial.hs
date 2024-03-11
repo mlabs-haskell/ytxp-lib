@@ -12,6 +12,7 @@ import Data.Aeson (FromJSON (parseJSON), ToJSON (toEncoding, toJSON), object,
 import Numeric.Natural (Natural)
 import Plutarch (Config)
 import Plutarch.Api.V2 (PScriptContext)
+import Prettyprinter (Pretty (pretty), braces, punctuate, sep, (<+>))
 
 {- | Parameters available to the YieldListValidator and YieldListMP
 during compilation (therefore not containing any script hashes).
@@ -45,6 +46,32 @@ data ControlParametersInitial (nonceType :: Type) =
     compilationConfig :: Config
     }
 
+-- | @since 0.1.0
+instance (Eq nonceType) => Eq (ControlParametersInitial nonceType) where
+  {-# INLINEABLE (==) #-}
+  cpi1 == cpi2 = let conf1 = compilationConfig cpi1
+                     conf2 = compilationConfig cpi2 in
+    equateConfig conf1 conf2 &&
+    maxYieldListSize cpi1 == maxYieldListSize cpi2 &&
+    nonceList cpi1 == nonceList cpi2 &&
+    -- Note from Koz (11/03/24): If we get this far, the two Configs are equal,
+    -- so it doesn't matter which one we use.
+    equatePValidator conf1 (scriptToWrapYieldListValidator cpi1) (scriptToWrapYieldListValidator cpi2) &&
+    equatePMintingPolicy conf1 (scriptToWrapYieldListMP cpi1) (scriptToWrapYieldListMP cpi2)
+
+-- | @since 0.1.0
+instance (Pretty nonceType) => Pretty (ControlParametersInitial nonceType) where
+  {-# INLINEABLE pretty #-}
+  pretty cpi = let conf = compilationConfig cpi in
+    ("ControlParametersInitial" <+>) . braces . sep . punctuate "," $ [
+      "maxYieldListSize:" <+> (pretty . maxYieldListSize $ cpi),
+      "nonceList:" <+> (pretty . nonceList $ cpi),
+      "scriptToWrapYieldListMP:" <+> prettyPMintingPolicy conf (scriptToWrapYieldListMP cpi),
+      "scriptToWrapYieldListValidator:" <+> prettyPValidator conf (scriptToWrapYieldListValidator cpi),
+      "compilationConfig:" <+> prettyConfig conf
+      ]
+
+-- | @since 0.1.0
 instance ToJSON nonceType => ToJSON (ControlParametersInitial nonceType) where
   {-# INLINEABLE toJSON #-}
   toJSON cpi = let conf = compilationConfig cpi in
@@ -66,6 +93,7 @@ instance ToJSON nonceType => ToJSON (ControlParametersInitial nonceType) where
       "scriptToWrapYieldListValidator" .= toJSONPValidator conf (scriptToWrapYieldListValidator cpi) <>
       "compilationConfig" .= WrappedConfig conf
 
+-- | @since 0.1.0
 instance FromJSON nonceType => FromJSON (ControlParametersInitial nonceType) where
   {-# INLINEABLE parseJSON #-}
   -- Note from Koz (08/03/24): We have to write this method in such a convoluted

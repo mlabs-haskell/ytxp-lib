@@ -18,6 +18,7 @@ import Plutarch (Config, compile)
 import Plutarch.Api.V2 (PScriptContext, scriptHash)
 import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (Credential (ScriptCredential))
+import Prettyprinter (Pretty)
 
 --------------------------------------------------------------------------------
 -- YieldListValidatorScript
@@ -30,6 +31,12 @@ newtype YieldListValidatorScript = YieldListValidatorScript Script
     -- | @since 0.1.0
     FromJSON
     ) via (HexStringScript "YieldListValidatorScript")
+  deriving (
+    -- | @since 0.1.0
+    Eq,
+    -- | @since 0.1.0
+    Pretty
+    ) via SerialForm
 
 compileYieldListValidator ::
   Config ->

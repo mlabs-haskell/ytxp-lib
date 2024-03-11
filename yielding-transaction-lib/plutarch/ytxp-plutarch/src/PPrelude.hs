@@ -14,10 +14,17 @@ module PPrelude (
   module Plutarch.Prelude,
   HexStringScript (HexStringScript),
   WrappedConfig (WrappedConfig),
+  SerialForm (SerialForm),
   toJSONPValidator,
   toJSONPMintingPolicy,
   parseJSONPValidator,
-  parseJSONPMintingPolicy
+  parseJSONPMintingPolicy,
+  equateConfig,
+  prettyConfig,
+  equatePValidator,
+  equatePMintingPolicy,
+  prettyPValidator,
+  prettyPMintingPolicy
 ) where
 
 import Control.Monad ((<=<), (>=>))
@@ -41,8 +48,123 @@ import Plutarch.Internal (Config (Config), RawTerm (RCompiled), Term (Term),
 import Plutarch.Prelude
 import Plutarch.Script (Script (Script), deserialiseScript, serialiseScript)
 import Prelude
+import Prettyprinter (Doc, Pretty (pretty), braces, punctuate, sep, (<+>))
 import Text.Builder qualified as TBuilder
 import UntypedPlutusCore.Core.Type qualified as UPLC
+
+-- | Avoids an orphan 'Eq' instance for 'Config'.
+--
+-- @since 0.1.0
+equateConfig :: Config -> Config -> Bool
+equateConfig (Config tm1) (Config tm2) = case tm1 of
+  DetTracing -> case tm2 of
+    DetTracing -> True
+    _ -> False
+  DoTracing -> case tm2 of
+    DoTracing -> True
+    _ -> False
+  DoTracingAndBinds -> case tm2 of
+    DoTracingAndBinds -> True
+    _ -> False
+  NoTracing -> case tm2 of
+    NoTracing -> True
+    _ -> False
+
+-- | Avoids an orphan 'Pretty' instance for 'Config'.
+prettyConfig :: forall (ann :: Type) . Config -> Doc ann
+prettyConfig (Config tm) =
+  ("Config" <+>) . braces . sep . punctuate "," $ [
+    "tracingMode:" <+> case tm of
+                         DetTracing -> "DetTracing"
+                         DoTracing -> "DoTracing"
+                         DoTracingAndBinds -> "DoTracingAndBinds"
+                         NoTracing -> "NoTracing"
+    ]
+
+-- | Try and compile both Plutarch validators, then compare them as 'Either's, treating
+-- 'Right's as if they were 'SerialForm's. Use the provided 'Config' to do the
+-- compilation.
+--
+-- @since 0.1.0
+equatePValidator ::
+  Config ->
+  (forall (s :: S) . Term s (PData :--> PData :--> PScriptContext :--> POpaque)) ->
+  (forall (s :: S) . Term s (PData :--> PData :--> PScriptContext :--> POpaque)) ->
+  Bool
+equatePValidator conf v1 v2 = case compile conf v1 of
+  Left err -> case compile conf v2 of
+    Left err' -> err == err'
+    Right _ -> False
+  Right s1 -> case compile conf v2 of
+    Left _ -> False
+    Right s2 -> SerialForm s1 == SerialForm s2
+
+-- | Try and compile both Plutarch minting policies, then compare them as
+-- 'Either's, treating 'Right's as if they were 'SerialForm's. Use the provided
+-- 'Config' to do the compilation.
+--
+-- @since 0.1.0
+equatePMintingPolicy ::
+  Config ->
+  (forall (s :: S) . Term s (PData :--> PScriptContext :--> POpaque)) ->
+  (forall (s :: S) . Term s (PData :--> PScriptContext :--> POpaque)) ->
+  Bool
+equatePMintingPolicy conf v1 v2 = case compile conf v1 of
+  Left err -> case compile conf v2 of
+    Left err' -> err == err'
+    Right _ -> False
+  Right s1 -> case compile conf v2 of
+    Left _ -> False
+    Right s2 -> SerialForm s1 == SerialForm s2
+
+-- | Prettyprint a Plutarch validator as if it was a 'SerialForm', assuming it
+-- compiles. Otherwise, prettyprint it as its error message. Use the provided
+-- 'Config' to do the compilation.
+--
+-- @since 0.1.0
+prettyPValidator :: forall (ann :: Type) .
+  Config ->
+  (forall (s :: S) . Term s (PData :--> PData :--> PScriptContext :--> POpaque)) ->
+  Doc ann
+prettyPValidator conf v = case compile conf v of
+  Left err -> pretty err
+  Right s -> pretty (SerialForm s)
+
+-- | Prettyprint a Plutarch minting policy as if it was a 'SerialForm', assuming it
+-- compiles. Otherwise, prettyprint it as its error message. Use the provided
+-- 'Config' to do the compilation.
+--
+-- @since 0.1.0
+prettyPMintingPolicy :: forall (ann :: Type) .
+  Config ->
+  (forall (s :: S) . Term s (PData :--> PScriptContext :--> POpaque)) ->
+  Doc ann
+prettyPMintingPolicy conf v = case compile conf v of
+  Left err -> pretty err
+  Right s -> pretty (SerialForm s)
+
+-- | Helper newtype for deriving 'Eq' and 'Pretty' for 'Script' wrappers, based
+-- on their serialized form. While this is perhaps not a fully faithful
+-- equality, it's suitable for our purposes.
+--
+-- @since 0.1.0
+newtype SerialForm = SerialForm Script
+
+-- | @since 0.1.0
+instance Eq SerialForm where
+  {-# INLINEABLE (==) #-}
+  (SerialForm s1) == (SerialForm s2) =
+    serialiseScript s1 == serialiseScript s2
+
+-- | @since 0.1.0
+instance Pretty SerialForm where
+  {-# INLINEABLE pretty #-}
+  pretty (SerialForm script) =
+    pretty .
+    TBuilder.run .
+    foldMap TBuilder.unsignedHexadecimal .
+    SBS.unpack .
+    serialiseScript $ script
 
 -- | Helper for serializing 'Config's.
 --

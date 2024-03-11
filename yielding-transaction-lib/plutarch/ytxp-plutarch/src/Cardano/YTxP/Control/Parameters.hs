@@ -34,6 +34,7 @@ import Data.Aeson (FromJSON (parseJSON), ToJSON (toEncoding, toJSON), object,
                    pairs, withObject, (.:), (.=))
 import Data.Text (Text)
 import Plutarch.Lift (PConstantDecl, PConstanted, PLifted)
+import Prettyprinter (Pretty (pretty), braces, punctuate, sep, (<+>))
 
 -- | Scripts that govern which transaction families can be "yielded to"
 --
@@ -50,6 +51,19 @@ data YieldListScripts = YieldListScripts
   -- any UTxO carrying the STT will be looked at for a YieldList.
   -- @since 0.1.0
   }
+  deriving stock (
+    -- | @since 0.1.0
+    Eq
+    )
+
+-- | @since 0.1.0
+instance Pretty YieldListScripts where
+  {-# INLINEABLE pretty #-}
+  pretty yls =
+    ("YieldListScripts" <+>) . braces . sep . punctuate "," $ [
+      "yieldListValidator: " <+> (pretty . yieldListValidator $ yls),
+      "yieldListMintingPolicy: " <+> (pretty . yieldListMintingPolicy $ yls)
+      ]
 
 -- | @since 0.1.0
 instance ToJSON YieldListScripts where
