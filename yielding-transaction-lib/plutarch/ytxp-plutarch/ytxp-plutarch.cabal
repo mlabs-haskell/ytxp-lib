@@ -171,7 +171,11 @@ executable write-config
   import:         common-language
   main-is:        Main.hs
   build-depends:
+    , aeson
+    , aeson-pretty
     , base
+    , bytestring
+    , directory
     , pprelude
     , ytxp-plutarch
 
