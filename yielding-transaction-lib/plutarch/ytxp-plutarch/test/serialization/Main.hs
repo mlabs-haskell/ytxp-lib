@@ -8,17 +8,21 @@ import Plutarch.Internal (Config (Config),
                           TracingMode (DetTracing, DoTracing, DoTracingAndBinds, NoTracing))
 import Test.Laws (aesonLawsWith)
 import Test.QuickCheck (Gen, arbitrary, elements)
-import Test.Tasty (defaultMain, testGroup)
+import Test.Tasty (adjustOption, defaultMain, testGroup)
 import Test.Tasty.Golden (goldenVsString)
+import Test.Tasty.QuickCheck (QuickCheckTests)
 import Test.Utils (noShrink)
 
 main :: IO ()
-main = defaultMain . testGroup "serialization" $ [
+main = defaultMain . adjustOption go . testGroup "serialization" $ [
   aesonLawsWith @(ControlParametersInitial Integer) genCPI noShrink,
   goldenVsString "ControlParametersInitial Integer"
                  "goldens/ControlParametersInitialInteger.golden"
                  (pure . encode $ sampleYLS)
   ]
+  where
+    go :: QuickCheckTests -> QuickCheckTests
+    go = max 10_000
 
 -- Golden data
 

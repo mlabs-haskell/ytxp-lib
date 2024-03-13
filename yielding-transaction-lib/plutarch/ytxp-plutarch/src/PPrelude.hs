@@ -159,12 +159,7 @@ instance Eq SerialForm where
 -- | @since 0.1.0
 instance Pretty SerialForm where
   {-# INLINEABLE pretty #-}
-  pretty (SerialForm script) =
-    pretty .
-    TBuilder.run .
-    foldMap TBuilder.unsignedHexadecimal .
-    SBS.unpack .
-    serialiseScript $ script
+  pretty (SerialForm script) = pretty . mungeScript $ script
 
 -- | Helper for serializing 'Config's.
 --
@@ -314,7 +309,7 @@ instance (KnownSymbol scriptLabel) => FromJSON (HexStringScript scriptLabel) whe
 -- Munges a 'Script' into a 'Text' form suitable for JSON serialization
 mungeScript :: Script -> Text
 mungeScript script =
-  TBuilder.run $ "0x" <> (foldMap TBuilder.unsignedHexadecimal . SBS.unpack . serialiseScript $ script)
+  TBuilder.run $ "0x" <> (foldMap toPaddedHex . SBS.unpack . serialiseScript $ script)
 
 toPairs :: forall (m :: Type -> Type) (a :: Type) .
   MonadFail m => [a] -> m [(a, a)]
@@ -337,3 +332,9 @@ decodeFromHexPair (nibble1, nibble2) = do
 unsafeTermFromScript :: forall (a :: S -> Type). Script -> forall (s :: S). Term s a
 unsafeTermFromScript (Script script) =
   Term $ const $ pure $ TermResult (RCompiled $ UPLC._progTerm script) []
+
+-- Ensures we pad hex values to be exactly 2 digits.
+toPaddedHex :: Word8 -> TBuilder.Builder
+toPaddedHex w8 = if w8 < 128
+               then "0" <> TBuilder.unsignedHexadecimal w8
+               else TBuilder.unsignedHexadecimal w8

@@ -126,13 +126,11 @@ library testlib
   build-depends:
     , aeson
     , base
-    , bytestring
     , pprelude
     , prettyprinter
     , QuickCheck
     , tasty
     , tasty-quickcheck
-    , text
 
   hs-source-dirs:  testlib
   exposed-modules:
