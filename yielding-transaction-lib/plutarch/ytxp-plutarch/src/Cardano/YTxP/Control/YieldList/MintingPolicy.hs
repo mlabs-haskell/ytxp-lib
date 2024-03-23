@@ -8,37 +8,46 @@ module Cardano.YTxP.Control.YieldList.MintingPolicy (
   mkYieldListSTCS,
 ) where
 
-import Cardano.YTxP.Control.Stubs (alwaysSucceedsTwoArgumentScript,
-                                   noncedTwoArgumentScriptWrapper)
+-- import Cardano.YTxP.Control.Stubs (alwaysSucceedsTwoArgumentScript,
+--                                    noncedTwoArgumentScriptWrapper)
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
-import Plutarch.Api.V2 (PScriptContext, scriptHash)
+import Plutarch.Api.V1.Value (
+  padaToken,
+ )
+import Plutarch.Api.V2 (PScriptContext, PScriptPurpose (PMinting), scriptHash)
 import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
 import Prettyprinter (Pretty)
+import Utils (
+  phasOnlyOnePubKeyInputAndNoTokenWithSymbol,
+  phasOnlyOnePubKeyOutputAndNoTokenWithSymbol,
+  phasTokenOfCurrencySymbolTokenNameAndAmount,
+ )
 
 --------------------------------------------------------------------------------
 -- YieldListSTMPScript
 
 -- | @since 0.1.0
 newtype YieldListSTMPScript = YieldListSTMPScript Script
-  deriving (
-    -- | @since 0.1.0
-    ToJSON,
-    -- | @since 0.1.0
-    FromJSON
-    ) via (HexStringScript "YieldListSTMPScript")
-  deriving (
-    --- | @since 0.1.0
-    Eq,
-    -- | @since 0.1.0
-    Pretty
-    ) via SerialForm
+  deriving
+    ( -- | @since 0.1.0
+      ToJSON
+    , -- | @since 0.1.0
+      FromJSON
+    )
+    via (HexStringScript "YieldListSTMPScript")
+  deriving
+    ( --- | @since 0.1.0
+      Eq
+    , -- | @since 0.1.0
+      Pretty
+    )
+    via SerialForm
 
 compileYieldListSTMP ::
-
   -- | Plutarch compilation configuration
   Config ->
   Natural ->
@@ -57,7 +66,7 @@ compileYieldListSTMP config maxYieldListSize scriptToWrap = do
       )
     yieldListSTMPWrapper = mkYieldListSTMPWrapper maxYieldListSize
 
-  script  <- compile config (yieldListSTMPWrapper # scriptToWrap)
+  script <- compile config (yieldListSTMPWrapper # scriptToWrap)
 
   pure $ YieldListSTMPScript script
 
@@ -89,10 +98,39 @@ mkYieldListSTMPWrapper ::
     )
 mkYieldListSTMPWrapper
   _maxYieldListSize =
-    plam $ \_scriptToWrap ->
-      noncedTwoArgumentScriptWrapper @PString
-        "YieldListSTMP"
-        alwaysSucceedsTwoArgumentScript
+    plam $ \_scriptToWrap _redeemer context' -> unTermCont $ do
+      let txInfo = pfromData $ pfield @"txInfo" # context'
+          purpose = pfromData $ pfield @"purpose" # context'
+          mint = pfromData $ pfield @"mint" # txInfo
+          inputs = pfromData $ pfield @"inputs" # txInfo
+          outputs = pfromData $ pfield @"outputs" # txInfo
+
+      PMinting ((pfield @"_0" #) -> yieldListSymbol) <- pmatchC purpose
+
+      pguardC "Only one token with yield list symbol and empty token name is minted" $
+        phasTokenOfCurrencySymbolTokenNameAndAmount
+          # mint
+          # yieldListSymbol
+          # padaToken
+          # 1
+
+      -- TODO: Check just for yieldListSymbol not token too, update helper for that
+      pguardC
+        "Only one wallet input, that does not contain yield list symbol, allowed"
+        $ phasOnlyOnePubKeyInputAndNoTokenWithSymbol
+          # inputs
+          # yieldListSymbol
+          # padaToken
+
+      -- TODO: Same as above
+      pguardC
+        "Only one wallet output, that does not contain yield list symbol, allowed"
+        $ phasOnlyOnePubKeyOutputAndNoTokenWithSymbol
+          # outputs
+          # yieldListSymbol
+          # padaToken
+
+      pure $ popaque $ pconstant ()
 
 {-
 use maxYieldListSize and yieldListMPWrapper to build a minting policy that

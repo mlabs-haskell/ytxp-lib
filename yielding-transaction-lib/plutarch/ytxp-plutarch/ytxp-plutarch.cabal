@@ -143,6 +143,7 @@ library
     , aeson
     , base               ^>=4.18.1.0
     , plutarch
+    , plutarch-extra
     , plutus-core
     , plutus-ledger-api
     , pprelude
@@ -162,6 +163,7 @@ library
     Cardano.YTxP.Control.YieldList
     Cardano.YTxP.Control.YieldList.MintingPolicy
     Cardano.YTxP.Control.YieldList.Validator
+    Utils
 
 -- Executables
 

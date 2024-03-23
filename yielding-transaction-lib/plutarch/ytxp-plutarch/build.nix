@@ -21,6 +21,7 @@
 
           # Plutarch itself
           "${inputs.plutarch}"
+          "${inputs.plutarch}/plutarch-extra"
 
           # Ytxp Plutarch API TODO (still stubbed from LBF)
           #"${config.packages.lbf-demo-plutus-api-plutarch}"
