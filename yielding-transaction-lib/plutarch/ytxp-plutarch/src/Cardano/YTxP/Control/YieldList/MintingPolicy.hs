@@ -12,6 +12,13 @@ module Cardano.YTxP.Control.YieldList.MintingPolicy (
 --                                    noncedTwoArgumentScriptWrapper)
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
+import LambdaBuffers.Runtime.Plutarch.LamVal (pfromPlutusDataPTryFrom)
+import LambdaBuffers.YieldList.Plutarch (
+  YieldListPolicyRedeemer (
+    YieldListPolicyRedeemer'Burn,
+    YieldListPolicyRedeemer'Mint
+  ),
+ )
 import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
 import Plutarch.Api.V1.Value (
@@ -27,9 +34,6 @@ import Utils (
   phasOnlyOneValidScriptOutputWithToken,
   phasTokenOfCurrencySymbolTokenNameAndAmount,
  )
--- import LambdaBuffers.YieldList (
---   YieldListPolicyRedeemer (YieldListPolicyRedeemer'Mint)
---  )
 
 --------------------------------------------------------------------------------
 -- YieldListSTMPScript
@@ -102,7 +106,7 @@ mkYieldListSTMPWrapper ::
     )
 mkYieldListSTMPWrapper
   _maxYieldListSize =
-    plam $ \_scriptToWrap _redeemer context' -> unTermCont $ do
+    plam $ \_scriptToWrap redeemer context' -> unTermCont $ do
       let txInfo = pfromData $ pfield @"txInfo" # context'
           purpose = pfromData $ pfield @"purpose" # context'
           mint = pfromData $ pfield @"mint" # txInfo
@@ -111,37 +115,44 @@ mkYieldListSTMPWrapper
 
       PMinting ((pfield @"_0" #) -> yieldListSymbol) <- pmatchC purpose
 
-      pguardC "Only one token with yield list symbol and empty token name is minted" $
-        phasTokenOfCurrencySymbolTokenNameAndAmount
-          # mint
-          # yieldListSymbol
-          # padaToken
-          # 1
+      yieldPolicyRedeemer <-
+        pletC $ pfromData $ pfromPlutusDataPTryFrom @YieldListPolicyRedeemer # redeemer
 
-      -- TODO: Check just for yieldListSymbol not token too, update helper for that
-      pguardC
-        "Only one wallet input, that does not contain yield list symbol, allowed"
-        $ phasOnlyOnePubKeyInputAndNoTokenWithSymbol
-          # inputs
-          # yieldListSymbol
-          # padaToken
+      pure $ pmatch yieldPolicyRedeemer $ \case
+        YieldListPolicyRedeemer'Mint -> unTermCont $ do
+          pguardC "Only one token with yield list symbol and empty token name is minted" $
+            phasTokenOfCurrencySymbolTokenNameAndAmount
+              # mint
+              # yieldListSymbol
+              # padaToken
+              # 1
 
-      -- TODO: Same as above
-      pguardC
-        "Only one wallet output, that does not contain yield list symbol, allowed"
-        $ phasOnlyOnePubKeyOutputAndNoTokenWithSymbol
-          # outputs
-          # yieldListSymbol
-          # padaToken
+          -- TODO: Check just for yieldListSymbol not token too, update helper for that
+          pguardC
+            "Only one wallet input, that does not contain yield list symbol, allowed"
+            $ phasOnlyOnePubKeyInputAndNoTokenWithSymbol
+              # inputs
+              # yieldListSymbol
+              # padaToken
 
-      pguardC
-        "Contains valid script output"
-        $ phasOnlyOneValidScriptOutputWithToken
-          # outputs
-          # yieldListSymbol
-          # padaToken
+          -- TODO: Same as above
+          pguardC
+            "Only one wallet output, that does not contain yield list symbol, allowed"
+            $ phasOnlyOnePubKeyOutputAndNoTokenWithSymbol
+              # outputs
+              # yieldListSymbol
+              # padaToken
 
-      pure $ popaque $ pconstant ()
+          pguardC
+            "Contains valid script output"
+            $ phasOnlyOneValidScriptOutputWithToken
+              # outputs
+              # yieldListSymbol
+              # padaToken
+
+          pure $ popaque $ pconstant ()
+        YieldListPolicyRedeemer'Burn -> unTermCont $ do
+          pure $ popaque $ pconstant ()
 
 {-
 use maxYieldListSize and yieldListMPWrapper to build a minting policy that

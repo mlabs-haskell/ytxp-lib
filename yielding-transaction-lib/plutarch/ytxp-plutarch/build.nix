@@ -25,7 +25,7 @@
           "${inputs'.lbf.packages.lbr-plutus-haskell-src}"
 
           # Ytxp LB application types
-          "${config.packages.ytxp-lib-types-haskell}"
+          "${config.packages.ytxp-lib-types-plutarch}"
 
           # Plutarch itself
           "${inputs.plutarch}"
