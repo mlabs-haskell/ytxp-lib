@@ -24,6 +24,7 @@ import Prettyprinter (Pretty)
 import Utils (
   phasOnlyOnePubKeyInputAndNoTokenWithSymbol,
   phasOnlyOnePubKeyOutputAndNoTokenWithSymbol,
+  phasOnlyOneValidScriptOutputWithToken,
   phasTokenOfCurrencySymbolTokenNameAndAmount,
  )
 
@@ -126,6 +127,13 @@ mkYieldListSTMPWrapper
       pguardC
         "Only one wallet output, that does not contain yield list symbol, allowed"
         $ phasOnlyOnePubKeyOutputAndNoTokenWithSymbol
+          # outputs
+          # yieldListSymbol
+          # padaToken
+
+      pguardC
+        "Contains valid script output"
+        $ phasOnlyOneValidScriptOutputWithToken
           # outputs
           # yieldListSymbol
           # padaToken

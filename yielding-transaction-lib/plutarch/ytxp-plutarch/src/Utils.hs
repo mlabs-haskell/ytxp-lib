@@ -1,9 +1,8 @@
 module Utils (
   phasTokenOfCurrencySymbolTokenNameAndAmount,
   phasOnlyOnePubKeyInputAndNoTokenWithSymbol,
+  phasOnlyOneValidScriptOutputWithToken,
   phasOnlyOnePubKeyOutputAndNoTokenWithSymbol,
-  phasValidOutputDatum,
-  pisScriptCredential,
 )
 where
 
@@ -23,6 +22,7 @@ import Plutarch.Api.V2 (
   PTxOut,
   PValue,
  )
+import Plutarch.Extra.Maybe (pjust, pnothing)
 
 {- | Check that there is only token of given `PCurrencySymbol`
  and `PTokenName` with given amount contained in the given PValue.
@@ -80,7 +80,7 @@ ptxOutListCheck ::
 ptxOutListCheck = phoistAcyclic $
   plam $ \txOuts symbol tokenName ->
     pmatch txOuts $ \case
-      PCons txOut xs ->
+      PCons txOut tailOfList ->
         ( ( pvalueOf
               # (pfromData $ pfield @"value" # txOut)
               # symbol
@@ -88,7 +88,7 @@ ptxOutListCheck = phoistAcyclic $
           )
             #== pconstant 0
         )
-          #&& (pnull # xs)
+          #&& (pnull # tailOfList)
       _ -> pconstant False
 
 -- | Get all the `PubKey` outputs from the list of `PTxOut`
@@ -129,6 +129,78 @@ pisPubKey = phoistAcyclic $
     pmatch credential $ \case
       PPubKeyCredential _ -> pconstant True
       _ -> pconstant False
+
+-- | Check that there is one script output with a token with the
+-- given `PCurrencySymbol` and `PTokenName` and that the `PValue`
+-- at this output contains no other tokens aside from Ada and that
+-- the output also contains a valid (according to the spec) `POutputDatum`.
+phasOnlyOneValidScriptOutputWithToken ::
+  forall (s :: S).
+  Term
+    s
+    ( PBuiltinList PTxOut
+        :--> PCurrencySymbol
+        :--> PTokenName
+        :--> PBool
+    )
+phasOnlyOneValidScriptOutputWithToken = phoistAcyclic $
+  plam $ \txOuts symbol tokenName ->
+    pmatch (phasOneScriptOutputWithToken # txOuts # symbol # tokenName) $ \case
+      PNothing -> pconstant False
+      PJust txOut ->
+        (pcontainsOnlyAdaAndGivenToken # txOut # symbol)
+          #&& phasValidOutputDatum
+          # txOut
+
+-- | TODO: Implement
+pcontainsOnlyAdaAndGivenToken ::
+  forall (s :: S).
+  Term s (PTxOut :--> PCurrencySymbol :--> PBool)
+pcontainsOnlyAdaAndGivenToken = phoistAcyclic $
+  plam $
+    \_txOut _symbol -> pconstant False
+
+{- | Check that there is one script output in the list of `PXOut`
+that contains one token with the given `PCurrencySymbol` and `PTokenName`
+-}
+phasOneScriptOutputWithToken ::
+  forall (s :: S).
+  Term
+    s
+    ( PBuiltinList PTxOut
+        :--> PCurrencySymbol
+        :--> PTokenName
+        :--> PMaybe PTxOut
+    )
+phasOneScriptOutputWithToken = phoistAcyclic $
+  plam $ \txOuts symbol tokenName ->
+    pmatch (pcheckForScriptOutputWithToken # txOuts # symbol # tokenName) $ \case
+      PCons txOut tailOfList -> pif (pnull # tailOfList) (pjust # txOut) pnothing
+      _ -> pnothing
+
+{- | Filters the given list of `PTxOut` for a script output containing
+one token with given `PCurrencySymbol` and `PTokenName`
+-}
+pcheckForScriptOutputWithToken ::
+  forall (s :: S).
+  Term
+    s
+    ( PBuiltinList PTxOut
+        :--> PCurrencySymbol
+        :--> PTokenName
+        :--> PBuiltinList PTxOut
+    )
+pcheckForScriptOutputWithToken = phoistAcyclic $
+  plam $ \txOuts symbol tokenName ->
+    pfilter
+      # ( plam $ \txOut ->
+            ( pisScriptCredential
+                # (pfromData $ pfield @"credential" #$ pfromData $ pfield @"address" # txOut)
+            )
+              #&& (pvalueOf # (pfromData $ pfield @"value" # txOut) # symbol # tokenName)
+              #== (pconstant 1)
+        )
+      # txOuts
 
 -- | Check the output contains a valid datum (not finished)
 phasValidOutputDatum ::
