@@ -11,6 +11,7 @@ import Plutarch.Api.V1 (
  )
 import Plutarch.Api.V1.Value (
   PTokenName,
+  padaSymbol,
   pvalueOf,
  )
 import Plutarch.Api.V2 (
@@ -22,6 +23,7 @@ import Plutarch.Api.V2 (
   PTxOut,
   PValue,
  )
+import Plutarch.Extra.Map (pkeys)
 import Plutarch.Extra.Maybe (pjust, pnothing)
 
 {- | Check that there is only token of given `PCurrencySymbol`
@@ -130,10 +132,11 @@ pisPubKey = phoistAcyclic $
       PPubKeyCredential _ -> pconstant True
       _ -> pconstant False
 
--- | Check that there is one script output with a token with the
--- given `PCurrencySymbol` and `PTokenName` and that the `PValue`
--- at this output contains no other tokens aside from Ada and that
--- the output also contains a valid (according to the spec) `POutputDatum`.
+{- | Check that there is one script output with a token with the
+given `PCurrencySymbol` and `PTokenName` and that the `PValue`
+at this output contains no other tokens aside from Ada and that
+the output also contains a valid (according to the spec) `POutputDatum`.
+-}
 phasOnlyOneValidScriptOutputWithToken ::
   forall (s :: S).
   Term
@@ -148,17 +151,40 @@ phasOnlyOneValidScriptOutputWithToken = phoistAcyclic $
     pmatch (phasOneScriptOutputWithToken # txOuts # symbol # tokenName) $ \case
       PNothing -> pconstant False
       PJust txOut ->
-        (pcontainsOnlyAdaAndGivenToken # txOut # symbol)
+        (pcontainsOnlyAdaAndGivenSymbol # txOut # symbol)
           #&& phasValidOutputDatum
           # txOut
 
--- | TODO: Implement
-pcontainsOnlyAdaAndGivenToken ::
+{- | Check that the given `PTxOut` does not contain any tokens
+other than Ada and tokens with the given `PCurrencySymbol`
+-}
+pcontainsOnlyAdaAndGivenSymbol ::
   forall (s :: S).
   Term s (PTxOut :--> PCurrencySymbol :--> PBool)
-pcontainsOnlyAdaAndGivenToken = phoistAcyclic $
+pcontainsOnlyAdaAndGivenSymbol = phoistAcyclic $
   plam $
-    \_txOut _symbol -> pconstant False
+    \txOut symbol -> pnull #$ pgetOtherNonAdaSymbols # txOut # symbol
+
+{- | This helpers returns a list of all `PCurrencySymbol` contained
+ in the `value` of the given `PTxOut` except symbols that match
+ the given `PCurrencySymbol` argument or the `Ada` symbol.
+-}
+pgetOtherNonAdaSymbols ::
+  forall (s :: S).
+  Term s (PTxOut :--> PCurrencySymbol :--> PBuiltinList (PAsData PCurrencySymbol))
+pgetOtherNonAdaSymbols = phoistAcyclic $
+  plam $
+    \txOut symbol ->
+      pfilter
+        # ( plam $ \symbolInValue ->
+              ( pnot
+                  #$ (pfromData symbolInValue)
+                  #== symbol
+                  #|| (pfromData symbolInValue)
+                  #== padaSymbol
+              )
+          )
+        # (pkeys #$ pto $ pfromData $ pfield @"value" # txOut)
 
 {- | Check that there is one script output in the list of `PXOut`
 that contains one token with the given `PCurrencySymbol` and `PTokenName`
