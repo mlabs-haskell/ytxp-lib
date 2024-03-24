@@ -15,17 +15,21 @@
           "${inputs'.lbf.packages.lbf-prelude-plutarch}"
           "${inputs'.lbf.packages.lbf-plutus-plutarch}"
           "${inputs'.lbf.packages.lbr-plutarch-src}"
+
           # Prelude
           "${inputs'.lbf.packages.lbf-prelude-haskell}"
           "${inputs'.lbf.packages.lbr-prelude-haskell-src}"
 
+          # LBs PlutusTx
+          "${inputs'.lbf.packages.lbf-plutus-haskell}"
+          "${inputs'.lbf.packages.lbr-plutus-haskell-src}"
+
+          # Ytxp LB application types
+          "${config.packages.ytxp-lib-types-haskell}"
+
           # Plutarch itself
           "${inputs.plutarch}"
           "${inputs.plutarch}/plutarch-extra"
-
-          # Ytxp Plutarch API TODO (still stubbed from LBF)
-          #"${config.packages.lbf-demo-plutus-api-plutarch}"
-          #"${config.packages.lbf-demo-config-api-haskell}"
         ];
 
         devShellTools = config.settings.shell.tools;

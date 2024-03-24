@@ -27,6 +27,9 @@ import Utils (
   phasOnlyOneValidScriptOutputWithToken,
   phasTokenOfCurrencySymbolTokenNameAndAmount,
  )
+-- import LambdaBuffers.YieldList (
+--   YieldListPolicyRedeemer (YieldListPolicyRedeemer'Mint)
+--  )
 
 --------------------------------------------------------------------------------
 -- YieldListSTMPScript

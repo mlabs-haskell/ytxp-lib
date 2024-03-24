@@ -149,6 +149,9 @@ library
     , pprelude
     , prettyprinter
     , text
+    , ytxp-lib-types-haskell
+    , lbr-plutus
+    , lbr-prelude
 
   hs-source-dirs:  src
   exposed-modules:

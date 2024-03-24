@@ -1,0 +1,13 @@
+module YieldList
+
+import Prelude (Eq)
+import Plutus.V1 (PlutusData)
+
+-- | Redeemer for `mkYieldListSTMPWrapper` policy
+sum YieldListPolicyRedeemer =
+    -- | Mint branch
+    Mint
+  | -- | Burn branch
+    Burn
+derive Eq YieldListPolicyRedeemer
+derive PlutusData YieldListPolicyRedeemer
