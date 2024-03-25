@@ -4,6 +4,8 @@ module Utils (
   phasOnlyOneValidScriptOutputWithToken,
   phasOnlyOnePubKeyOutputAndNoTokenWithSymbol,
   poutputsDoNotContainTokenWithSymbol,
+  phasOnlyOneInputWithTxOutRefSymbolAndTokenName,
+  phasNoScriptOutput,
 )
 where
 
@@ -12,21 +14,65 @@ import Plutarch.Api.V1 (
   PCredential (PPubKeyCredential),
  )
 import Plutarch.Api.V1.Value (
+  PCurrencySymbol,
   PTokenName,
+  PValue,
   padaSymbol,
   pvalueOf,
  )
 import Plutarch.Api.V2 (
   AmountGuarantees,
   KeyGuarantees,
-  PCurrencySymbol,
   POutputDatum (POutputDatum),
-  PTxInInfo,
+  PTxInInfo (PTxInInfo),
   PTxOut,
-  PValue,
+  PTxOutRef,
  )
 import Plutarch.Extra.Map (pkeys)
 import Plutarch.Extra.Maybe (pjust, pnothing)
+
+phasOnlyOneInputWithTxOutRefSymbolAndTokenName ::
+  forall (s :: S).
+  Term
+    s
+    ( PBuiltinList PTxInInfo
+        :--> PTxOutRef
+        :--> PCurrencySymbol
+        :--> PTokenName
+        :--> PBool
+    )
+phasOnlyOneInputWithTxOutRefSymbolAndTokenName = phoistAcyclic $
+  plam $ \inputs txRef symbol tokenName ->
+    pmatch (pfindTxInByTxOutRef # inputs # txRef) $ \case
+      PCons txInInfo tailOfList ->
+        pnull
+          # tailOfList
+          #&& ( pvalueOf
+                  # (pfromData $ pfield @"value" #$ pfromData $ pfield @"resolved" # txInInfo)
+                  # symbol
+                  # tokenName
+              )
+          #== pconstant 1
+      _ -> pconstant False
+
+-- | Variation on an LPE function that returns a list instead of a maybe
+pfindTxInByTxOutRef ::
+  forall (s :: S).
+  Term
+    s
+    ( PBuiltinList PTxInInfo
+        :--> PTxOutRef
+        :--> PBuiltinList PTxInInfo
+    )
+pfindTxInByTxOutRef = phoistAcyclic $
+  plam $ \inputs txOutRef ->
+    pfilter
+      # plam
+        ( \input ->
+            pmatch input $ \(PTxInInfo txInInfo) ->
+              (pdata txOutRef #== pfield @"outRef" # txInInfo)
+        )
+      #$ inputs
 
 -- | Check that the outputs do not contain a token with the given symbol
 poutputsDoNotContainTokenWithSymbol ::
@@ -246,8 +292,7 @@ pcheckForScriptOutputWithToken = phoistAcyclic $
   plam $ \txOuts symbol tokenName ->
     pfilter
       # ( plam $ \txOut ->
-            ( pisScriptCredential
-                # (pfromData $ pfield @"credential" #$ pfromData $ pfield @"address" # txOut)
+            ( pisScriptCredential # txOut
             )
               #&& (pvalueOf # (pfromData $ pfield @"value" # txOut) # symbol # tokenName)
               #== (pconstant 1)
@@ -264,8 +309,21 @@ phasValidOutputDatum = phoistAcyclic $
       POutputDatum _ -> pconstant True
       _ -> pconstant False
 
--- | Check that the given credential is a `PScriptCredential`
-pisScriptCredential :: forall (s :: S). Term s (PCredential :--> PBool)
+-- | Check that the given list of `PTxOut` contains no script outputs
+phasNoScriptOutput ::
+  forall (s :: S).
+  Term s (PBuiltinList PTxOut :--> PBool)
+phasNoScriptOutput = phoistAcyclic $
+  plam $ \txOuts ->
+    pmatch (pfilter # pisScriptCredential # txOuts) $ \case
+      PNil -> pconstant True
+      _ -> pconstant False
+
+-- | Check that the given `PTxOut` is a `PScriptCredential`
+pisScriptCredential :: forall (s :: S). Term s (PTxOut :--> PBool)
 pisScriptCredential = phoistAcyclic $
   plam $
-    \credential -> pnot #$ pisPubKey # credential
+    \txOut ->
+      pnot #$ pisPubKey #$ pfromData $
+        pfield @"credential" #$ pfromData $
+          pfield @"address" # txOut

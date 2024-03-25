@@ -8,8 +8,6 @@ module Cardano.YTxP.Control.YieldList.MintingPolicy (
   mkYieldListSTCS,
 ) where
 
--- import Cardano.YTxP.Control.Stubs (alwaysSucceedsTwoArgumentScript,
---                                    noncedTwoArgumentScriptWrapper)
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import LambdaBuffers.Runtime.Plutarch.LamVal (pfromPlutusDataPTryFrom)
@@ -92,8 +90,38 @@ mkYieldListSTCS (YieldListSTMPScript script) =
 --------------------------------------------------------------------------------
 -- Helpers (Unexported)
 
-{- | A YieldListSTMP unapplied to its arguments: this script wraps another
-script
+{- |
+  The `mkYieldListSTMPWrapper` is a YieldListST minting policy unapplied to its arguments,
+  the script wraps another script, while performing additional checks of its own, which are outlined below.
+
+  There are two potential validation branches: `Mint` and `Burn`.
+
+  When the supplied redeemer is `Mint` the policy checks:
+    - Exactly one token with an empty token name and the YieldListSTCS
+      (as fetched from the `ScriptPurpose`) is minted
+    - Only a single wallet input UTxO is present and this input does not contain a YieldListSTT
+    - The minted token is sent to a UTxO at a script address
+    - The UTxO receiving the minted token carries a valid `YieldList` in it's datum.
+      In particular the following is checked:
+        * The type fully decodes (using `TryFrom`)
+        * Hashes must be well-formed (of the correct length)
+        * The yield list must be no larger than the max list size (provided as an argument)
+        * No tokens except Ada and the YieldListSTMP are present at the recipient UTxO
+        * Only a single wallet output is present
+        * That wallet output does not contain a YieldListSTT
+
+  When the supplied redeemer is `Burn` the policy checks:
+    - Exactly one token is burned
+    - Exactly one UTxO carrying a token with the `YieldListSTCS` appears at the input
+    - Exactly zero UTxOs carrying tokens with the `YieldListSTCS` appear at the output
+
+  Note that the YLSTMP does not provide any additional security guarantees by itself.
+  These must be library-user-defined via wrapping scripts.
+  Some examples include:
+    - initialSpend (one-shot)
+    - multisig
+    - admin sig
+    - governance wrappers
 -}
 mkYieldListSTMPWrapper ::
   forall (s :: S).
@@ -163,36 +191,3 @@ mkYieldListSTMPWrapper
               # yieldListSymbol
 
           pure $ popaque $ pconstant ()
-
-{-
-use maxYieldListSize and yieldListMPWrapper to build a minting policy that
-takes the wrapper and add in logic according to the semantics in
-the spec; copied below
-
-3.  Semantics
-
-    The minting policy only succeeds when exactly one of the following conditions
-    hold:
-
-    -   Exactly one token with an empty token name and the YieldListSTCS (as fetched from the \`ScriptPurpose\`)
-        is minted, and
-        -   Only a single wallet input UTxO is present
-            - This input does not contain a YieldListSTT
-        -   The minted token is sent to a UTxO at a script address, and
-        -   The UTxO receiving the minted token carries a valid `YieldList` in it's datum.
-            &ldquo;Validity&rdquo; here means that the type fully decodes (i.e., use \`TryFrom\` in plutarch
-            or `TryFromData` in plutus-tx). In particular, AT LEAST the following conditions must be checked:
-            -   Hashes must be well-formed (of the correct length)
-            -   The yield list must be no larger than the max list size (to defend against large datum attacks)
-            -   Any additional checks determined by further security and safety analysis
-        - No tokens besides the ada and the YieldListSTMP are present at the recipient UTxO
-        - Only a single wallet output is present, and the wallet output does not contain a YieldListSTT
-    -   Exactly one token is burned, and
-        -   Exactly one UTxO carrying a token with the `YieldListSTCS` appears at the input
-        -   Exactly zero UTxOs carrying tokens with the `YieldListSTCS` appear at the output
-
-    Note that the YLSTMP does not provide any additional security guarantees by itself. These
-    <span class="underline">must</span> be library-user-defined via wrapping scripts. Examples include initialSpend (one-shot),
-    multisig, admin sig, or governance wrappers.
-
--}
