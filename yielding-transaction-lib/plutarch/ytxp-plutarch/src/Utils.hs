@@ -39,21 +39,11 @@ poutputsDoNotContainTokenWithSymbol ::
     )
 poutputsDoNotContainTokenWithSymbol = phoistAcyclic $
   plam $ \txOuts symbol ->
-    pmatch (pfilter # (poutputDoesNotContainTokenWithSymbol # symbol) # txOuts) $ \case
+    pmatch (pfilter # (poutputContainsTokenWithSymbol # symbol) # txOuts) $ \case
       PNil -> pconstant True
       _ -> pconstant False
 
--- | Check that the given output does not contain any tokens with given `PCurrenySymbol`
-poutputDoesNotContainTokenWithSymbol ::
-  forall (s :: S).
-  Term s (PCurrencySymbol :--> PTxOut :--> PBool)
-poutputDoesNotContainTokenWithSymbol = phoistAcyclic $
-  plam $
-    \symbol txOut -> pnot #$ poutputContainsTokenWithSymbol # symbol # txOut
-
-{- | Check that the given output contains at least one token with the given symbol
-Defined to be used in negative check, and to allow for potential reuse later
--}
+-- | Check that the given output contains at least one token with the given symbol
 poutputContainsTokenWithSymbol ::
   forall (s :: S).
   Term s (PCurrencySymbol :--> PTxOut :--> PBool)
