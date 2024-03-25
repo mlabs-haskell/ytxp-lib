@@ -84,36 +84,35 @@ input does not contain token with the given `CurrencySymbol`
 -}
 phasOnlyOnePubKeyInputAndNoTokenWithSymbol ::
   forall (s :: S).
-  Term s (PBuiltinList PTxInInfo :--> PCurrencySymbol :--> PTokenName :--> PBool)
+  Term s (PBuiltinList PTxInInfo :--> PCurrencySymbol :--> PBool)
 phasOnlyOnePubKeyInputAndNoTokenWithSymbol = phoistAcyclic $
-  plam $ \inputs symbol tokenName ->
-    ptxOutListCheck # (pgetPubKeyInputs # inputs) # symbol # tokenName
+  plam $ \inputs symbol ->
+    ptxOutListCheck # (pgetPubKeyInputs # inputs) # symbol
 
 {- | Check there is only one `PubKey` output and ensure that
 output does not contain token with the given `CurrencySymbol`
 -}
 phasOnlyOnePubKeyOutputAndNoTokenWithSymbol ::
   forall (s :: S).
-  Term s (PBuiltinList PTxOut :--> PCurrencySymbol :--> PTokenName :--> PBool)
+  Term s (PBuiltinList PTxOut :--> PCurrencySymbol :--> PBool)
 phasOnlyOnePubKeyOutputAndNoTokenWithSymbol = phoistAcyclic $
   plam $
-    \txOuts symbol tokenName ->
-      ptxOutListCheck # (pgetPubKeyOutputs # txOuts) # symbol # tokenName
+    \txOuts symbol ->
+      ptxOutListCheck # (pgetPubKeyOutputs # txOuts) # symbol
 
 {- | Helper for checking that there is exactly one element in the `PTxOut` list
 and that element does not contain a token with the given `CurrenySymbol`
 -}
 ptxOutListCheck ::
   forall (s :: S).
-  Term s (PBuiltinList PTxOut :--> PCurrencySymbol :--> PTokenName :--> PBool)
+  Term s (PBuiltinList PTxOut :--> PCurrencySymbol :--> PBool)
 ptxOutListCheck = phoistAcyclic $
-  plam $ \txOuts symbol tokenName ->
+  plam $ \txOuts symbol ->
     pmatch txOuts $ \case
       PCons txOut tailOfList ->
-        ( ( pvalueOf
-              # (pfromData $ pfield @"value" # txOut)
+        ( ( psymbolValueOf
               # symbol
-              # tokenName
+              # (pfromData $ pfield @"value" # txOut)
           )
             #== pconstant 0
         )

@@ -128,22 +128,19 @@ mkYieldListSTMPWrapper
               # padaToken
               # 1
 
-          -- TODO: Check just for yieldListSymbol not token too, update helper for that
           pguardC
             "Only one wallet input, that does not contain yield list symbol, allowed"
             $ phasOnlyOnePubKeyInputAndNoTokenWithSymbol
               # inputs
               # yieldListSymbol
-              # padaToken
 
-          -- TODO: Same as above
           pguardC
             "Only one wallet output, that does not contain yield list symbol, allowed"
             $ phasOnlyOnePubKeyOutputAndNoTokenWithSymbol
               # outputs
               # yieldListSymbol
-              # padaToken
 
+          -- TODO: Finish the valid datum part
           pguardC
             "Contains valid script output"
             $ phasOnlyOneValidScriptOutputWithToken
