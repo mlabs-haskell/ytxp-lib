@@ -3,9 +3,11 @@ module Utils (
   phasOnlyOnePubKeyInputAndNoTokenWithSymbol,
   phasOnlyOneValidScriptOutputWithToken,
   phasOnlyOnePubKeyOutputAndNoTokenWithSymbol,
+  poutputsDoNotContainTokenWithSymbol,
 )
 where
 
+import Cardano.YTxP.Control.Vendored (psymbolValueOf)
 import Plutarch.Api.V1 (
   PCredential (PPubKeyCredential),
  )
@@ -25,6 +27,41 @@ import Plutarch.Api.V2 (
  )
 import Plutarch.Extra.Map (pkeys)
 import Plutarch.Extra.Maybe (pjust, pnothing)
+
+-- | Check that the outputs do not contain a token with the given symbol
+poutputsDoNotContainTokenWithSymbol ::
+  forall (s :: S).
+  Term
+    s
+    ( PBuiltinList PTxOut
+        :--> PCurrencySymbol
+        :--> PBool
+    )
+poutputsDoNotContainTokenWithSymbol = phoistAcyclic $
+  plam $ \txOuts symbol ->
+    pmatch (pfilter # (poutputDoesNotContainTokenWithSymbol # symbol) # txOuts) $ \case
+      PNil -> pconstant True
+      _ -> pconstant False
+
+-- | Check that the given output does not contain any tokens with given `PCurrenySymbol`
+poutputDoesNotContainTokenWithSymbol ::
+  forall (s :: S).
+  Term s (PCurrencySymbol :--> PTxOut :--> PBool)
+poutputDoesNotContainTokenWithSymbol = phoistAcyclic $
+  plam $
+    \symbol txOut -> pnot #$ poutputContainsTokenWithSymbol # symbol # txOut
+
+{- | Check that the given output contains at least one token with the given symbol
+Defined to be used in negative check, and to allow for potential reuse later
+-}
+poutputContainsTokenWithSymbol ::
+  forall (s :: S).
+  Term s (PCurrencySymbol :--> PTxOut :--> PBool)
+poutputContainsTokenWithSymbol = phoistAcyclic $
+  plam $
+    \symbol txOut ->
+      (pconstant 0)
+        #< (psymbolValueOf # symbol #$ pfromData $ pfield @"value" # txOut)
 
 {- | Check that there is only token of given `PCurrencySymbol`
  and `PTokenName` with given amount contained in the given PValue.

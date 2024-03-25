@@ -33,6 +33,7 @@ import Utils (
   phasOnlyOnePubKeyOutputAndNoTokenWithSymbol,
   phasOnlyOneValidScriptOutputWithToken,
   phasTokenOfCurrencySymbolTokenNameAndAmount,
+  poutputsDoNotContainTokenWithSymbol,
  )
 
 --------------------------------------------------------------------------------
@@ -152,6 +153,18 @@ mkYieldListSTMPWrapper
 
           pure $ popaque $ pconstant ()
         YieldListPolicyRedeemer'Burn -> unTermCont $ do
+          pguardC "Only one token with yield list symbol and empty token name is burned" $
+            phasTokenOfCurrencySymbolTokenNameAndAmount
+              # mint
+              # yieldListSymbol
+              # padaToken
+              # (-1)
+
+          pguardC "Outputs must not contain token with YieldListSTCS" $
+            poutputsDoNotContainTokenWithSymbol
+              # outputs
+              # yieldListSymbol
+
           pure $ popaque $ pconstant ()
 
 {-
