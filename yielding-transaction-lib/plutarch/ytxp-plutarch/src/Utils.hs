@@ -5,6 +5,8 @@ module Utils (
   phasOnlyOnePubKeyOutputAndNoTokenWithSymbol,
   poutputsDoNotContainTokenWithSymbol,
   phasOnlyOneInputWithTxOutRefSymbolAndTokenName,
+  pisPubKeyOutput,
+  pisScriptOutput,
   phasNoScriptOutput,
 )
 where
@@ -292,7 +294,7 @@ pcheckForScriptOutputWithToken = phoistAcyclic $
   plam $ \txOuts symbol tokenName ->
     pfilter
       # ( plam $ \txOut ->
-            ( pisScriptCredential # txOut
+            ( pisScriptOutput # txOut
             )
               #&& (pvalueOf # (pfromData $ pfield @"value" # txOut) # symbol # tokenName)
               #== (pconstant 1)
@@ -315,13 +317,13 @@ phasNoScriptOutput ::
   Term s (PBuiltinList PTxOut :--> PBool)
 phasNoScriptOutput = phoistAcyclic $
   plam $ \txOuts ->
-    pmatch (pfilter # pisScriptCredential # txOuts) $ \case
+    pmatch (pfilter # pisScriptOutput # txOuts) $ \case
       PNil -> pconstant True
       _ -> pconstant False
 
 -- | Check that the given `PTxOut` is a `PScriptCredential`
-pisScriptCredential :: forall (s :: S). Term s (PTxOut :--> PBool)
-pisScriptCredential = phoistAcyclic $
+pisScriptOutput :: forall (s :: S). Term s (PTxOut :--> PBool)
+pisScriptOutput = phoistAcyclic $
   plam $
     \txOut ->
       pnot #$ pisPubKey #$ pfromData $
