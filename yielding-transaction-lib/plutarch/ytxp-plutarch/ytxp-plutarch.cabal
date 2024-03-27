@@ -150,6 +150,7 @@ library
     , prettyprinter
     , text
     , plutus-tx
+    , generics-sop
 
   hs-source-dirs:  src
   exposed-modules:

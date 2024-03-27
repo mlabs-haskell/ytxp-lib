@@ -5,7 +5,7 @@
 Description: Defines shared data types and utilities for YieldList scripts
 -}
 module Cardano.YTxP.Control.YieldList (
-  YieldList,
+  YieldListDatum,
   YieldedToHash,
   YieldListMPWrapperRedeemer,
   PYieldListMPWrapperRedeemer (PMint, PBurn),
@@ -17,12 +17,32 @@ module Cardano.YTxP.Control.YieldList (
   multiSigMintingPolicyWrapper,
 ) where
 
+-- PDataFields,
+
 import Cardano.YTxP.Control.Vendored (
   DerivePConstantViaEnum (DerivePConstantEnum),
+  -- PlutusTypeDataList,
   EnumIsData (EnumIsData),
   PlutusTypeEnumData,
+  -- ProductIsData(ProductIsData),
+  -- DerivePConstantViaDataList(DerivePConstantViaDataList),
  )
 import GHC.Generics (Generic)
+-- PLiftData,
+-- PlutusTypeNewtype,
+-- PShow,
+
+-- PConstantData,
+
+-- PBuiltinList,
+
+import Generics.SOP qualified as SOP
+import Plutarch.Api.V2 (PScriptHash)
+import Plutarch.DataRepr (
+  DerivePConstantViaData (
+    DerivePConstantViaData
+  ),
+ )
 import Plutarch.Lift (
   PConstantDecl,
   PLifted,
@@ -33,27 +53,105 @@ import Plutarch.Prelude (
   DerivePlutusType,
   PAsData,
   PData,
+  PDataRecord,
   PEq,
   PIsData,
+  PLabeledType ((:=)),
   PTryFrom,
   PlutusType,
+  PlutusTypeData,
   S,
+  Term,
  )
 import PlutusLedgerApi.V1.Scripts (ScriptHash)
 import PlutusTx qualified
-import Prelude (Bounded, Enum, Show, error)
+import Prelude (Bounded, Enum, Eq, Show, error)
 
 --------------------------------------------------------------------------------
 -- Types
 
--- | A collection of hashes that YieldingScripts can yield to
-newtype YieldList = YieldList [YieldedToHash] -- FIXME
-
--- | A single hash that a yielding script can yield to
+{- | A single hash that a yielding script can yield to
+A yielded to script can be a validator, minting policy or a stake validator
+-}
 data YieldedToHash -- FIXME
   = YieldedToValidator ScriptHash
   | YieldedToMP ScriptHash
   | YieldedToSV ScriptHash
+  deriving stock
+    ( Show
+    , Generic
+    , Eq
+    )
+
+PlutusTx.makeIsDataIndexed
+  ''YieldedToHash
+  [ ('YieldedToValidator, 0)
+  , ('YieldedToMP, 1)
+  , ('YieldedToSV, 2)
+  ]
+
+data PYieldedToHash (s :: S)
+  = PYieldedToValidator (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
+  | PYieldedToMP (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
+  | PYieldedToSV (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
+  deriving stock
+    ( Generic
+    )
+  deriving anyclass
+    ( PlutusType
+    , PIsData
+    )
+
+instance DerivePlutusType PYieldedToHash where
+  type DPTStrat _ = PlutusTypeData
+
+instance PTryFrom PData PYieldedToHash
+
+instance PUnsafeLiftDecl PYieldedToHash where
+  type PLifted PYieldedToHash = YieldedToHash
+
+deriving via
+  (DerivePConstantViaData YieldedToHash PYieldedToHash)
+  instance
+    (PConstantDecl YieldedToHash)
+
+{- | The `YieldListDatum` holds a collection of hashes that YieldingScripts can yield to.
+The length of the datum is checked upon creation in `mkYieldListSTMPWrapper` to ensure
+that the length of the list does not exceed the max list length passed as a parameter to that script.
+TODO(Nigel): Get it working
+-}
+data YieldListDatum = YieldListDatum
+  { yieldedToScripts :: [YieldedToHash]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass (SOP.Generic)
+
+-- deriving (PlutusTx.ToData, PlutusTx.FromData) via (ProductIsData YieldListDatum)
+
+-- deriving via
+--   (DerivePConstantViaDataList YieldListDatum PYieldListDatum)
+--   instance
+--     (PConstantDecl YieldListDatum)
+--
+-- newtype PYieldListDatum (s :: S)
+--   = PYieldListDatum
+--       ( Term
+--           s
+--           ( PDataRecord
+--               '[ "yieldedToScripts" ':= PBuiltinList (PAsData PYieldedToHash)
+--                ]
+--           )
+--       )
+--   deriving stock (Generic)
+--   deriving anyclass (PlutusType, PIsData, PEq, PDataFields)
+--
+-- instance DerivePlutusType PYieldListDatum where
+--   type DPTStrat _ = PlutusTypeDataList
+--
+-- instance PUnsafeLiftDecl PYieldListDatum where
+--   type PLifted _ = YieldListDatum
+--
+-- instance PTryFrom PData (PAsData PYieldListDatum)
 
 -- | Redeemer for `mkYieldListMPWrapper`.
 data YieldListMPWrapperRedeemer

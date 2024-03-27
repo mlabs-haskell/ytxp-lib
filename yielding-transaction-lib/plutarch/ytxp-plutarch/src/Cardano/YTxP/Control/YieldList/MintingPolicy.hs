@@ -99,7 +99,7 @@ mkYieldListSTCS (YieldListSTMPScript script) =
     - The minted token is sent to a UTxO at a script address
     - The UTxO receiving the minted token carries a valid `YieldList` in it's datum.
       In particular the following is checked:
-        * The type fully decodes (using `TryFrom`)
+        * The type fully decodes (using `PTryFrom`)
         * Hashes must be well-formed (of the correct length)
         * The yield list must be no larger than the max list size (provided as an argument)
         * No tokens except Ada and the YieldListSTMP are present at the recipient UTxO
