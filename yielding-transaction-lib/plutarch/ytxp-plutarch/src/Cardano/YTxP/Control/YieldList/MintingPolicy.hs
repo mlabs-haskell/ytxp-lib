@@ -8,15 +8,11 @@ module Cardano.YTxP.Control.YieldList.MintingPolicy (
   mkYieldListSTCS,
 ) where
 
+import Cardano.YTxP.Control.YieldList (
+  PYieldListMPWrapperRedeemer (PBurn, PMint),
+ )
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
-import LambdaBuffers.Runtime.Plutarch.LamVal (pfromPlutusDataPTryFrom)
-import LambdaBuffers.YieldList.Plutarch (
-  YieldListPolicyRedeemer (
-    YieldListPolicyRedeemer'Burn,
-    YieldListPolicyRedeemer'Mint
-  ),
- )
 import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
 import Plutarch.Api.V1.Value (
@@ -145,10 +141,10 @@ mkYieldListSTMPWrapper
       PMinting ((pfield @"_0" #) -> yieldListSymbol) <- pmatchC purpose
 
       yieldPolicyRedeemer <-
-        pletC $ pfromData $ pfromPlutusDataPTryFrom @YieldListPolicyRedeemer # redeemer
+        pfromData . fst <$> ptryFromC @(PAsData PYieldListMPWrapperRedeemer) redeemer
 
       pure $ pmatch yieldPolicyRedeemer $ \case
-        YieldListPolicyRedeemer'Mint -> unTermCont $ do
+        PMint -> unTermCont $ do
           pguardC "Only one token with yield list symbol and empty token name is minted" $
             phasTokenOfCurrencySymbolTokenNameAndAmount
               # mint
@@ -177,7 +173,7 @@ mkYieldListSTMPWrapper
               # padaToken
 
           pure $ popaque $ pconstant ()
-        YieldListPolicyRedeemer'Burn -> unTermCont $ do
+        PBurn -> unTermCont $ do
           pguardC "Only one token with yield list symbol and empty token name is burned" $
             phasTokenOfCurrencySymbolTokenNameAndAmount
               # mint

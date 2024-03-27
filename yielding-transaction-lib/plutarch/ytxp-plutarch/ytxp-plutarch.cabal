@@ -149,10 +149,7 @@ library
     , pprelude
     , prettyprinter
     , text
-    , ytxp-lib-types-plutarch
-    , lbr-plutus
-    , lbr-prelude
-    , lbr-plutarch
+    , plutus-tx
 
   hs-source-dirs:  src
   exposed-modules:

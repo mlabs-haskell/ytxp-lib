@@ -36,9 +36,7 @@
         ./nix/pkgs.nix
         ./nix/settings.nix
         ./nix/pre-commit.nix
-        #./api/build.nix
         ./ytxp-plutarch/build.nix
-        ./ytxp-plutarch/types/build.nix
       ];
       debug = true;
       systems = [ "x86_64-linux" "x86_64-darwin" ];

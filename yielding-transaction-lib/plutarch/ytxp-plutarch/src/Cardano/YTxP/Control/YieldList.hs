@@ -1,3 +1,4 @@
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
 {- | Module: Cardano.YTxP.Control.YieldList
@@ -6,6 +7,8 @@ Description: Defines shared data types and utilities for YieldList scripts
 module Cardano.YTxP.Control.YieldList (
   YieldList,
   YieldedToHash,
+  YieldListMPWrapperRedeemer,
+  PYieldListMPWrapperRedeemer (PMint, PBurn),
   immutableValidatorWrapper,
   adminSigValidatorWrapper,
   multiSigValidatorWrapper,
@@ -14,8 +17,31 @@ module Cardano.YTxP.Control.YieldList (
   multiSigMintingPolicyWrapper,
 ) where
 
+import Cardano.YTxP.Control.Vendored (
+  DerivePConstantViaEnum (DerivePConstantEnum),
+  EnumIsData (EnumIsData),
+  PlutusTypeEnumData,
+ )
+import GHC.Generics (Generic)
+import Plutarch.Lift (
+  PConstantDecl,
+  PLifted,
+  PUnsafeLiftDecl,
+ )
+import Plutarch.Prelude (
+  DPTStrat,
+  DerivePlutusType,
+  PAsData,
+  PData,
+  PEq,
+  PIsData,
+  PTryFrom,
+  PlutusType,
+  S,
+ )
 import PlutusLedgerApi.V1.Scripts (ScriptHash)
-import Prelude (error)
+import PlutusTx qualified
+import Prelude (Bounded, Enum, Show, error)
 
 --------------------------------------------------------------------------------
 -- Types
@@ -28,6 +54,52 @@ data YieldedToHash -- FIXME
   = YieldedToValidator ScriptHash
   | YieldedToMP ScriptHash
   | YieldedToSV ScriptHash
+
+-- | Redeemer for `mkYieldListMPWrapper`.
+data YieldListMPWrapperRedeemer
+  = -- | Mint branch
+    Mint
+  | -- | Burn branch
+    Burn
+  deriving stock
+    ( Show
+    , Generic
+    , Enum
+    , Bounded
+    )
+  deriving
+    ( PlutusTx.ToData
+    , PlutusTx.FromData
+    )
+    via (EnumIsData YieldListMPWrapperRedeemer)
+
+-- | Plutarch-level version of 'YieldListMPWrapperRedeemer'.
+data PYieldListMPWrapperRedeemer (s :: S)
+  = PMint
+  | PBurn
+  deriving stock
+    ( Generic
+    , Enum
+    , Bounded
+    )
+  deriving anyclass
+    ( PlutusType
+    , PIsData
+    , PEq
+    )
+
+instance PTryFrom PData (PAsData PYieldListMPWrapperRedeemer)
+
+instance DerivePlutusType PYieldListMPWrapperRedeemer where
+  type DPTStrat _ = PlutusTypeEnumData
+
+instance PUnsafeLiftDecl PYieldListMPWrapperRedeemer where
+  type PLifted PYieldListMPWrapperRedeemer = YieldListMPWrapperRedeemer
+
+deriving via
+  (DerivePConstantViaEnum YieldListMPWrapperRedeemer PYieldListMPWrapperRedeemer)
+  instance
+    (PConstantDecl YieldListMPWrapperRedeemer)
 
 --------------------------------------------------------------------------------
 -- Validator Wrappers
