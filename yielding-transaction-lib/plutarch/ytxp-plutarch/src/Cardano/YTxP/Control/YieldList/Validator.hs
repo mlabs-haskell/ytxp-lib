@@ -31,7 +31,6 @@ import PlutusLedgerApi.V2 (Credential (ScriptCredential))
 import Prettyprinter (Pretty)
 import Utils (
   pands,
-  pisPubKeyOutput,
  )
 
 --------------------------------------------------------------------------------
@@ -213,7 +212,12 @@ phasOnlyTwoInputsPubKeyWithNoSymbolScriptWithSymbol txInInfos =
                             PPubKeyCredential _ ->
                               ( ( psymbolValueOf
                                     # symbol
-                                    # (pfromData $ pfield @"value" #$ pfromData $ pfield @"resolved" # inputTwo)
+                                    # ( pfromData
+                                          $ pfield @"value"
+                                            #$ pfromData
+                                          $ pfield @"resolved"
+                                            # inputTwo
+                                      )
                                 )
                                   #== pconstant 0
                               )
@@ -252,8 +256,20 @@ phasOnlyOneOutputIsPubKeyAndNoSymbol outputs =
       PCons output tailOfList ->
         pnull
           # tailOfList
-          #&& pisPubKeyOutput
-          # output
-          #&& (psymbolValueOf # symbol # (pfromData $ pfield @"value" # output))
+          #&& ( pmatch
+                  ( pfromData
+                      $ pfield @"credential"
+                        #$ pfromData
+                      $ pfield @"address"
+                        # output
+                  )
+                  $ \case
+                    PPubKeyCredential _ -> pconstant True
+                    _ -> pconstant False
+              )
+          #&& ( psymbolValueOf
+                  # symbol
+                  # (pfromData $ pfield @"value" # output)
+              )
           #== pconstant 0
       PNil -> pconstant False

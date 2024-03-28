@@ -1,13 +1,8 @@
 module Utils (
   phasTokenOfCurrencySymbolTokenNameAndAmount,
-  phasOnlyOnePubKeyInputAndNoTokenWithSymbol,
   phasOnlyOneValidScriptOutputWithToken,
   phasOnlyOnePubKeyOutputAndNoTokenWithSymbol,
   poutputsDoNotContainTokenWithSymbol,
-  phasOnlyOneInputWithTxOutRefSymbolAndTokenName,
-  pisPubKeyOutput,
-  pisScriptOutput,
-  phasNoScriptOutput,
   pands,
 )
 where
@@ -27,9 +22,7 @@ import Plutarch.Api.V2 (
   AmountGuarantees,
   KeyGuarantees,
   POutputDatum (POutputDatum),
-  PTxInInfo (PTxInInfo),
   PTxOut,
-  PTxOutRef,
  )
 import Plutarch.Extra.Map (pkeys)
 import Plutarch.Extra.Maybe (pjust, pnothing)
@@ -42,49 +35,6 @@ pands ts' =
   case nonEmpty ts' of
     Nothing -> pcon PTrue
     Just ts -> foldl1 (#&&) ts
-
-phasOnlyOneInputWithTxOutRefSymbolAndTokenName ::
-  forall (s :: S).
-  Term
-    s
-    ( PBuiltinList PTxInInfo
-        :--> PTxOutRef
-        :--> PCurrencySymbol
-        :--> PTokenName
-        :--> PBool
-    )
-phasOnlyOneInputWithTxOutRefSymbolAndTokenName = phoistAcyclic $
-  plam $ \inputs txRef symbol tokenName ->
-    pmatch (pfindTxInByTxOutRef # inputs # txRef) $ \case
-      PCons txInInfo tailOfList ->
-        pnull
-          # tailOfList
-          #&& ( pvalueOf
-                  # (pfromData $ pfield @"value" #$ pfromData $ pfield @"resolved" # txInInfo)
-                  # symbol
-                  # tokenName
-              )
-          #== pconstant 1
-      _ -> pconstant False
-
--- | Variation on an LPE function that returns a list instead of a maybe
-pfindTxInByTxOutRef ::
-  forall (s :: S).
-  Term
-    s
-    ( PBuiltinList PTxInInfo
-        :--> PTxOutRef
-        :--> PBuiltinList PTxInInfo
-    )
-pfindTxInByTxOutRef = phoistAcyclic $
-  plam $ \inputs txOutRef ->
-    pfilter
-      # plam
-        ( \input ->
-            pmatch input $ \(PTxInInfo txInInfo) ->
-              (pdata txOutRef #== pfield @"outRef" # txInInfo)
-        )
-      #$ inputs
 
 -- | Check that the outputs do not contain a token with the given symbol
 poutputsDoNotContainTokenWithSymbol ::
@@ -137,16 +87,6 @@ phasTokenOfCurrencySymbolTokenNameAndAmount = phoistAcyclic $
       #&& (plength #$ pto $ pto $ pto value)
       #== 2
 
-{- | Check there is only one `PubKey` input and ensure that
-input does not contain token with the given `CurrencySymbol`
--}
-phasOnlyOnePubKeyInputAndNoTokenWithSymbol ::
-  forall (s :: S).
-  Term s (PBuiltinList PTxInInfo :--> PCurrencySymbol :--> PBool)
-phasOnlyOnePubKeyInputAndNoTokenWithSymbol = phoistAcyclic $
-  plam $ \inputs symbol ->
-    ptxOutListCheck # (pgetPubKeyInputs # inputs) # symbol
-
 {- | Check there is only one `PubKey` output and ensure that
 output does not contain token with the given `CurrencySymbol`
 -}
@@ -181,22 +121,6 @@ ptxOutListCheck = phoistAcyclic $
 pgetPubKeyOutputs ::
   forall (s :: S). Term s (PBuiltinList PTxOut :--> PBuiltinList PTxOut)
 pgetPubKeyOutputs = pfilter # pisPubKeyOutput
-
--- | Get all the `PubKey` inputs from the list of `PTxInInfo`
-pgetPubKeyInputs ::
-  forall (s :: S). Term s (PBuiltinList PTxInInfo :--> PBuiltinList PTxOut)
-pgetPubKeyInputs = phoistAcyclic $
-  plam $ \inputs ->
-    pfoldr
-      # plam
-        ( \txInInfo acc ->
-            pif
-              (pisPubKeyOutput #$ pfromData $ pfield @"resolved" # txInInfo)
-              (pcons # (pfromData $ pfield @"resolved" # txInInfo) # acc)
-              acc
-        )
-      # pnil
-      # inputs
 
 -- | Check that the `PTxOut` is a `PubKey` output
 pisPubKeyOutput :: forall (s :: S). Term s (PTxOut :--> PBool)
@@ -319,16 +243,6 @@ phasValidOutputDatum = phoistAcyclic $
   plam $ \txOut ->
     pmatch (pfromData $ pfield @"datum" # txOut) $ \case
       POutputDatum _ -> pconstant True
-      _ -> pconstant False
-
--- | Check that the given list of `PTxOut` contains no script outputs
-phasNoScriptOutput ::
-  forall (s :: S).
-  Term s (PBuiltinList PTxOut :--> PBool)
-phasNoScriptOutput = phoistAcyclic $
-  plam $ \txOuts ->
-    pmatch (pfilter # pisScriptOutput # txOuts) $ \case
-      PNil -> pconstant True
       _ -> pconstant False
 
 -- | Check that the given `PTxOut` is a `PScriptCredential`

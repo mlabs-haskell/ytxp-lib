@@ -8,6 +8,7 @@ module Cardano.YTxP.Control.YieldList.MintingPolicy (
   mkYieldListSTCS,
 ) where
 
+import Cardano.YTxP.Control.Vendored (psymbolValueOf)
 import Cardano.YTxP.Control.YieldList (
   PYieldListMPWrapperRedeemer (PBurn, PMint),
  )
@@ -15,16 +16,24 @@ import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
+import Plutarch.Api.V1 (
+  PCredential (PPubKeyCredential),
+ )
 import Plutarch.Api.V1.Value (
+  PCurrencySymbol,
   padaToken,
  )
-import Plutarch.Api.V2 (PScriptContext, PScriptPurpose (PMinting), scriptHash)
+import Plutarch.Api.V2 (
+  PScriptContext,
+  PScriptPurpose (PMinting),
+  PTxInInfo,
+  scriptHash,
+ )
 import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
 import Prettyprinter (Pretty)
 import Utils (
   pands,
-  phasOnlyOnePubKeyInputAndNoTokenWithSymbol,
   phasOnlyOnePubKeyOutputAndNoTokenWithSymbol,
   phasOnlyOneValidScriptOutputWithToken,
   phasTokenOfCurrencySymbolTokenNameAndAmount,
@@ -155,16 +164,11 @@ mkYieldListSTMPWrapper
                       # yieldListSymbol
                       # padaToken
                       # 1
-                  , phasOnlyOnePubKeyInputAndNoTokenWithSymbol
-                      # inputs
-                      # yieldListSymbol
-                  , phasOnlyOnePubKeyOutputAndNoTokenWithSymbol
+                  , phasOnlyOneInputPubKeyAndTokenWithSymbol inputs # yieldListSymbol
+                  , -- TODO(Nigel): Combine these two output checks into one efficient function
+                    phasOnlyOnePubKeyOutputAndNoTokenWithSymbol
                       # outputs
                       # yieldListSymbol
-                  , phasOnlyOneValidScriptOutputWithToken
-                      # outputs
-                      # yieldListSymbol
-                      # padaToken
                   , phasOnlyOneValidScriptOutputWithToken
                       # outputs
                       # yieldListSymbol
@@ -192,3 +196,44 @@ mkYieldListSTMPWrapper
             $ \case
               PTrue -> pconstant ()
               PFalse -> perror
+
+{- | Checks that there is only one input in the provided inputs,
+ and that input is a pub key input,
+ and it does not contain any token with the given symbol.
+-}
+phasOnlyOneInputPubKeyAndTokenWithSymbol ::
+  forall (s :: S).
+  Term s (PBuiltinList PTxInInfo) ->
+  Term s (PCurrencySymbol :--> PBool)
+phasOnlyOneInputPubKeyAndTokenWithSymbol inputs =
+  plam $ \symbol ->
+    pmatch inputs $
+      \case
+        PCons input tailOfList ->
+          pnull
+            # tailOfList
+            #&& ( pmatch
+                    ( pfromData
+                        $ pfield @"credential"
+                          #$ pfromData
+                        $ pfield @"address"
+                          #$ pfromData
+                        $ pfield @"resolved" # input
+                    )
+                    $ \case
+                      PPubKeyCredential _ -> pconstant True
+                      _ -> pconstant False
+                )
+            #&& ( -- TODO(Nigel):
+                  -- Replace this somehow without inlining whole psymbolValueOf function
+                  -- (see guide on no nested plutarch-level functions)
+                  psymbolValueOf
+                    # symbol
+                    #$ pfromData
+                    $ pfield @"value"
+                      #$ pfromData
+                    $ pfield @"resolved"
+                      # input
+                )
+            #== pconstant 0
+        _ -> pconstant False
