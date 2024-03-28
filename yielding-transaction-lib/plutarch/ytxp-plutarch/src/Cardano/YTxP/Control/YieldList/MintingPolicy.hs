@@ -23,6 +23,7 @@ import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
 import Prettyprinter (Pretty)
 import Utils (
+  pands,
   phasOnlyOnePubKeyInputAndNoTokenWithSymbol,
   phasOnlyOnePubKeyOutputAndNoTokenWithSymbol,
   phasOnlyOneValidScriptOutputWithToken,
@@ -145,45 +146,49 @@ mkYieldListSTMPWrapper
 
       pure $ pmatch yieldPolicyRedeemer $ \case
         PMint -> unTermCont $ do
-          pguardC "Only one token with yield list symbol and empty token name is minted" $
-            phasTokenOfCurrencySymbolTokenNameAndAmount
-              # mint
-              # yieldListSymbol
-              # padaToken
-              # 1
-
-          pguardC
-            "Only one wallet input, that does not contain yield list symbol, allowed"
-            $ phasOnlyOnePubKeyInputAndNoTokenWithSymbol
-              # inputs
-              # yieldListSymbol
-
-          pguardC
-            "Only one wallet output, that does not contain yield list symbol, allowed"
-            $ phasOnlyOnePubKeyOutputAndNoTokenWithSymbol
-              # outputs
-              # yieldListSymbol
-
-          -- TODO: Finish the valid datum part
-          pguardC
-            "Contains valid script output"
-            $ phasOnlyOneValidScriptOutputWithToken
-              # outputs
-              # yieldListSymbol
-              # padaToken
-
-          pure $ popaque $ pconstant ()
+          pure
+            $ popaque
+            $ pmatch
+              ( pands
+                  [ phasTokenOfCurrencySymbolTokenNameAndAmount
+                      # mint
+                      # yieldListSymbol
+                      # padaToken
+                      # 1
+                  , phasOnlyOnePubKeyInputAndNoTokenWithSymbol
+                      # inputs
+                      # yieldListSymbol
+                  , phasOnlyOnePubKeyOutputAndNoTokenWithSymbol
+                      # outputs
+                      # yieldListSymbol
+                  , phasOnlyOneValidScriptOutputWithToken
+                      # outputs
+                      # yieldListSymbol
+                      # padaToken
+                  , phasOnlyOneValidScriptOutputWithToken
+                      # outputs
+                      # yieldListSymbol
+                      # padaToken
+                  ]
+              )
+            $ \case
+              PTrue -> pconstant ()
+              PFalse -> perror
         PBurn -> unTermCont $ do
-          pguardC "Only one token with yield list symbol and empty token name is burned" $
-            phasTokenOfCurrencySymbolTokenNameAndAmount
-              # mint
-              # yieldListSymbol
-              # padaToken
-              # (-1)
-
-          pguardC "Outputs must not contain token with YieldListSTCS" $
-            poutputsDoNotContainTokenWithSymbol
-              # outputs
-              # yieldListSymbol
-
-          pure $ popaque $ pconstant ()
+          pure
+            $ popaque
+            $ pmatch
+              ( pands
+                  [ phasTokenOfCurrencySymbolTokenNameAndAmount
+                      # mint
+                      # yieldListSymbol
+                      # padaToken
+                      # (-1)
+                  , poutputsDoNotContainTokenWithSymbol
+                      # outputs
+                      # yieldListSymbol
+                  ]
+              )
+            $ \case
+              PTrue -> pconstant ()
+              PFalse -> perror

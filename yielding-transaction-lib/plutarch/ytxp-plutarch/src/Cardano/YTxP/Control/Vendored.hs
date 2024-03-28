@@ -23,14 +23,12 @@ import GHC.TypeLits (ErrorMessage (ShowType, Text, (:$$:), (:<>:)), TypeError)
 import Generics.SOP qualified as SOP
 import Plutarch.Api.V1.Value (
   PCurrencySymbol,
-  PValue (PValue),
+  PValue,
  )
 import Plutarch.Api.V2 (
   AmountGuarantees,
   KeyGuarantees,
-  PMap (PMap),
  )
-import Plutarch.Extra.Maybe (pexpectJustC)
 import Plutarch.Internal.Generic (PCode, PGeneric, gpfrom, gpto)
 import Plutarch.Internal.PlutusType (
   PlutusTypeStrat (
@@ -44,6 +42,7 @@ import Plutarch.Lift (
   PConstantDecl (PConstantRepr, PConstanted, pconstantFromRepr, pconstantToRepr),
   PLifted,
  )
+import Plutarch.List (pfoldl')
 import Plutarch.Script (Script (Script))
 import PlutusTx (
   FromData (fromBuiltinData),
@@ -76,92 +75,35 @@ applyScript f a =
     (Script Program {_progTerm = aTerm, _progVer = aVer}) = a
 
 {- | Get the sum of all values belonging to a particular CurrencySymbol.
-
-Vendored from LPE
-TODO: Licensing info
-
-   @since 1.1.0
+Modified version of LPE function with same purpose.
 -}
 psymbolValueOf ::
-  forall (keys :: KeyGuarantees) (amounts :: AmountGuarantees) (s :: S).
-  Term s (PCurrencySymbol :--> PValue keys amounts :--> PInteger)
-psymbolValueOf =
-  phoistAcyclic $
-    plam $ \sym value'' -> unTermCont $ do
-      PValue value' <- pmatchC value''
-      PMap value <- pmatchC value'
-      m' <-
-        pexpectJustC 0 (plookupAssoc # pfstBuiltin # psndBuiltin # pdata sym # value)
-      PMap m <- pmatchC (pfromData m')
-      pure $ pfoldr # plam (\x v -> pfromData (psndBuiltin # x) + v) # 0 # m
-
-{- | Treats a list-like structure as an assoc list. More precisely, given a
- list-like structure of key-value pairs, a method of extracting the key and
- the value, and a \'target\' key, returns the corresponding value, or
- 'PNothing' if there isn't one.
-
- = Note
-
- There may be multiple mappings for a specific key; in such a situation, only
- the /first/ match is returned. In general, this requires time proportional to
- the length of the list-like structure, as we may have to check every entry.
-
- Vendored from LPE
- TODO: Licensing info
-
- @since 3.6.0
--}
-plookupAssoc ::
   forall
-    (k :: S -> Type)
-    (v :: S -> Type)
-    (kv :: S -> Type)
-    (ell :: (S -> Type) -> S -> Type)
+    (keys :: KeyGuarantees)
+    (amounts :: AmountGuarantees)
     (s :: S).
-  (PElemConstraint ell kv, PListLike ell, PEq k) =>
-  Term s ((kv :--> k) :--> (kv :--> v) :--> k :--> ell kv :--> PMaybe v)
-plookupAssoc = phoistAcyclic $
-  plam $ \getKey getVal target kvs ->
-    pmatch (pfindJust # (go # getKey # target) # kvs) $ \case
-      PNothing -> pcon PNothing
-      PJust kv -> pcon . PJust $ getVal # kv
-  where
-    go ::
-      forall (s' :: S).
-      Term s' ((kv :--> k) :--> k :--> kv :--> PMaybe kv)
-    go = phoistAcyclic $
-      plam $ \getKey target kv ->
-        pif
-          (target #== (getKey # kv))
-          (pcon . PJust $ kv)
-          (pcon PNothing)
-
-{- | A combination of 'pmap' and 'pfind', but without needing an intermediate
- structure. More precisely, searched for the first element in a list-like
- structure that produces a 'PJust' argument, returning it if found; otherwise,
- produces 'PNothing'.
-
- Vendored from LPE
- TODO: Licensing info
-
- @since 3.6.0
--}
-pfindJust ::
-  forall (b :: S -> Type) (ell :: (S -> Type) -> S -> Type) (a :: S -> Type) (s :: S).
-  (PElemConstraint ell a, PListLike ell) =>
-  Term s ((a :--> PMaybe b) :--> ell a :--> PMaybe b)
-pfindJust = phoistAcyclic $ plam $ \f -> precList (go f) (const $ pcon PNothing)
-  where
-    go ::
-      forall (s' :: S).
-      Term s' (a :--> PMaybe b) ->
-      Term s' (ell a :--> PMaybe b) ->
-      Term s' a ->
-      Term s' (ell a) ->
-      Term s' (PMaybe b)
-    go f self x xs = pmatch (f # x) $ \case
-      PNothing -> self # xs
-      PJust v -> pcon $ PJust v
+  Term s (PCurrencySymbol :--> PValue keys amounts :--> PInteger)
+psymbolValueOf = phoistAcyclic $
+  plam $ \policyId value ->
+    let valueMap = pto (pto value)
+        go = pfix #$ plam $ \self valueMap' ->
+          pelimList
+            ( \symbolAndTokens rest ->
+                pif
+                  (pfromData (pfstBuiltin # symbolAndTokens) #== policyId)
+                  ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
+                     in pfoldl'
+                          ( \acc tokenAndAmount ->
+                              (pfromData $ psndBuiltin # tokenAndAmount) + acc
+                          )
+                          # 0
+                          # tokens
+                  )
+                  (self # rest)
+            )
+            0
+            valueMap'
+     in go # valueMap
 
 --------------------------------------------------------------------------------
 -- PEnumData
@@ -345,7 +287,7 @@ type family UD (p :: [S -> Type]) :: [S -> Type] where
   UD '[] = '[]
 
 type family PUnlabel (n :: [PLabeledType]) :: [S -> Type] where
-  PUnlabel ((_ ':= p) ': xs) = p ': PUnlabel xs
+  PUnlabel ((_ ' := p) ': xs) = p ': PUnlabel xs
   PUnlabel '[] = '[]
 
 type family MatchTypes' (n :: [S -> Type]) (m :: [S -> Type]) :: Bool where
@@ -364,13 +306,13 @@ type family MatchTypesError (n :: [S -> Type]) (m :: [S -> Type]) (a :: Bool) ::
             -- Note(Nigel): Added space between tick and operator to avoid the error:
             -- `The suffix use of a ‘:$$:’ might be repurposed as special syntax'
             -- Not sure if there's a flag that can help here?
-            ':$$: 'Text "\tMismatch between constituent Haskell and Plutarch types"
-            ':$$: 'Text "Constituent Haskell Types: "
-            ':$$: 'Text "\t"
-              ':<>: 'ShowType n
-            ':$$: 'Text "Constituent Plutarch Types: "
-            ':$$: 'Text "\t"
-              ':<>: 'ShowType m
+            ' :$$: 'Text "\tMismatch between constituent Haskell and Plutarch types"
+            ' :$$: 'Text "Constituent Haskell Types: "
+            ' :$$: 'Text "\t"
+               ' :<>: 'ShowType n
+            ' :$$: 'Text "Constituent Plutarch Types: "
+            ' :$$: 'Text "\t"
+              ' :<>: 'ShowType m
         )
     )
 

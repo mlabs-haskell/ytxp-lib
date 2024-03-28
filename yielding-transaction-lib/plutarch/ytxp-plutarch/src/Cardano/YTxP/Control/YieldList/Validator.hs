@@ -14,6 +14,9 @@ import Cardano.YTxP.Control.Vendored (psymbolValueOf)
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Plutarch (Config, compile)
+import Plutarch.Api.V1 (
+  PCredential (PPubKeyCredential),
+ )
 import Plutarch.Api.V1.Value (PCurrencySymbol, padaToken, pvalueOf)
 import Plutarch.Api.V2 (
   PScriptContext,
@@ -27,6 +30,7 @@ import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (Credential (ScriptCredential))
 import Prettyprinter (Pretty)
 import Utils (
+  pands,
   pisPubKeyOutput,
  )
 
@@ -119,42 +123,40 @@ mkYieldListValidatorWrapper = plam $ \_scriptToWrap yieldListSymbol _datum _rede
 
   PSpending ((pfield @"_0" #) -> yieldListInputRef) <- pmatchC purpose
 
-  pguardC
-    ( "Must be exactly two inputs:"
-        <> " one wallet input that does not contain a token with YieldListSTCS"
-        <> " and one yield list validator input with exactly one token with YieldListSTCS"
-    )
-    $ phasOnlyTwoInputsPubKeyWithNoSymbolScriptWithSymbol
-      # inputs
-      # yieldListSymbol
-      # yieldListInputRef
-
-  pguardC
-    "Only one output allowed - a wallet output that does not contain the yield list symbol"
-    $ phasOnlyOneOutputIsPubKeyAndNoSymbol
-      # outputs
-      # yieldListSymbol
-
-  pure $ popaque $ pconstant ()
+  pure
+    $ popaque
+    $ pmatch
+      ( pands
+          [ phasOnlyTwoInputsPubKeyWithNoSymbolScriptWithSymbol inputs
+              # yieldListSymbol
+              # yieldListInputRef
+          , phasOnlyOneOutputIsPubKeyAndNoSymbol outputs # yieldListSymbol
+          ]
+      )
+    $ \case
+      PTrue -> pconstant ()
+      PFalse -> perror
 
 {- | This function checks that there are exactly two inputs in the given input list,
 that one of these inputs is a pub key input and the other one is a script input,
 that the pub key input does not contain a token with the given symbol (YieldListSTCS here),
 and that the script input contains exactly one token with the given symbol,
 and the `outRef` of this input matches the given `PTxOutRef` (the YieldList validator itself here)
-Written like this to keep iterations through the list etc. to a minimum.
+
+It is written in this manner (repetition etc.) in order to make the script as efficient as possible.
+For example, we avoid abstracting out some repeated patterns into nested Plutarch-level helper functions,
+as this would come at the cost of an increase in Ex-units.
 -}
 phasOnlyTwoInputsPubKeyWithNoSymbolScriptWithSymbol ::
-  forall (s :: S).
+  Term s (PBuiltinList PTxInInfo) ->
   Term
     s
-    ( PBuiltinList PTxInInfo
-        :--> PCurrencySymbol
+    ( PCurrencySymbol
         :--> PTxOutRef
         :--> PBool
     )
-phasOnlyTwoInputsPubKeyWithNoSymbolScriptWithSymbol = phoistAcyclic $
-  plam $ \txInInfos symbol txOutRef ->
+phasOnlyTwoInputsPubKeyWithNoSymbolScriptWithSymbol txInInfos =
+  plam $ \symbol txOutRef ->
     pmatch txInInfos $ \case
       PCons inputOne tailOfListOne ->
         pmatch tailOfListOne $ \case
@@ -163,96 +165,89 @@ phasOnlyTwoInputsPubKeyWithNoSymbolScriptWithSymbol = phoistAcyclic $
           PCons inputTwo tailOfListTwo ->
             pnull
               # tailOfListTwo
-              #&& ( pmatch (ptxInInfoIsPubKey # inputOne) $ \case
-                      -- If the first input is a pub key input then we check that
-                      -- it does not contain a token with the YieldListSTCS,
-                      -- and that the second input is a yield list validator one that contains exactly one yield list token
-                      PTrue ->
-                        pcheckPubKeyInput
-                          # inputOne
-                          # symbol
-                          #&& pcheckScriptInput
-                          # inputTwo
-                          # symbol
-                          # txOutRef
-                      -- If the first input is not a pubkey input then we check that
-                      -- the second input is pub key input and it does not contain a token with the YieldListSTCS,
-                      -- and that the first input is a yield list validator input that contains exactly one yield list token
-                      PFalse ->
-                        (ptxInInfoIsPubKey # inputTwo)
-                          #&& pcheckPubKeyInput
-                          # inputTwo
-                          # symbol
-                          #&& pcheckScriptInput
-                          # inputOne
-                          # symbol
-                          # txOutRef
+              #&& ( pmatch
+                      ( pfromData
+                          $ pfield @"credential"
+                            #$ pfromData
+                          $ pfield @"address"
+                            #$ pfromData
+                          $ pfield @"resolved" # inputOne
+                      )
+                      $ \case
+                        -- If the first input is a pub key input then we check that
+                        -- it does not contain a token with the YieldListSTCS,
+                        -- and that the second input is a yield list validator one that
+                        -- contains exactly one yield list token
+                        PPubKeyCredential _ ->
+                          ( psymbolValueOf
+                              # symbol
+                              # (pfromData $ pfield @"value" #$ pfromData $ pfield @"resolved" # inputOne)
+                              #== pconstant 0
+                          )
+                            #&& ( txOutRef
+                                    #== (pfromData $ pfield @"outRef" # inputTwo)
+                                    #&& ( pvalueOf
+                                            # ( pfromData
+                                                  $ pfield @"value"
+                                                    #$ pfromData
+                                                  $ pfield @"resolved" # inputTwo
+                                              )
+                                            # symbol
+                                            # padaToken
+                                        )
+                                    #== pconstant 1
+                                )
+                        -- If the first input is not a pubkey input then we check that
+                        -- the second input is pub key input and it does not contain a token with the YieldListSTCS,
+                        -- and that the first input is a yield list validator input
+                        -- that contains exactly one yield list token
+                        _ -> pmatch
+                          ( pfromData
+                              $ pfield @"credential"
+                                #$ pfromData
+                              $ pfield @"address"
+                                #$ pfromData
+                              $ pfield @"resolved" # inputTwo
+                          )
+                          $ \case
+                            PPubKeyCredential _ ->
+                              ( ( psymbolValueOf
+                                    # symbol
+                                    # (pfromData $ pfield @"value" #$ pfromData $ pfield @"resolved" # inputTwo)
+                                )
+                                  #== pconstant 0
+                              )
+                                #&& ( txOutRef
+                                        #== (pfromData $ pfield @"outRef" # inputOne)
+                                        #&& ( pvalueOf
+                                                # ( pfromData
+                                                      $ pfield @"value"
+                                                        #$ pfromData
+                                                      $ pfield @"resolved" # inputOne
+                                                  )
+                                                # symbol
+                                                # padaToken
+                                            )
+                                        #== pconstant 1
+                                    )
+                            _ -> pconstant False
                   )
           PNil -> pconstant False
       PNil -> pconstant False
-
--- | Check the credential is a `PubKeyCredential`
-ptxInInfoIsPubKey ::
-  forall (s :: S).
-  Term s (PTxInInfo :--> PBool)
-ptxInInfoIsPubKey = phoistAcyclic $
-  plam $
-    \txInInfo -> pisPubKeyOutput #$ pfromData $ pfield @"resolved" # txInInfo
-
--- | Check that there are no tokens with given symbol in the input
-pcheckPubKeyInput ::
-  forall (s :: S).
-  Term
-    s
-    ( PTxInInfo
-        :--> PCurrencySymbol
-        :--> PBool
-    )
-pcheckPubKeyInput = phoistAcyclic $
-  plam $ \txInInfo symbol ->
-    ( psymbolValueOf
-        # symbol
-        # (pfromData $ pfield @"value" #$ pfromData $ pfield @"resolved" # txInInfo)
-    )
-      #== pconstant 0
-
-{- | Check that the given input is a script input and that it
-contains exactly one token with the given symbol
--}
-pcheckScriptInput ::
-  forall (s :: S).
-  Term
-    s
-    ( PTxInInfo
-        :--> PCurrencySymbol
-        :--> PTxOutRef
-        :--> PBool
-    )
-pcheckScriptInput = phoistAcyclic $
-  plam $ \txInInfo symbol txOutRef ->
-    txOutRef
-      #== (pfromData $ pfield @"outRef" # txInInfo)
-      #&& ( pvalueOf
-              # (pfromData $ pfield @"value" #$ pfromData $ pfield @"resolved" # txInInfo)
-              # symbol
-              # padaToken
-          )
-      #== pconstant 1
 
 {- | Check that there is only one output in the given list,
 that the output is a `PubKey` output,
 and that the input does not contain a token with the given symbol.
 -}
 phasOnlyOneOutputIsPubKeyAndNoSymbol ::
-  forall (s :: S).
+  Term s (PBuiltinList PTxOut) ->
   Term
     s
-    ( PBuiltinList PTxOut
-        :--> PCurrencySymbol
+    ( PCurrencySymbol
         :--> PBool
     )
-phasOnlyOneOutputIsPubKeyAndNoSymbol = phoistAcyclic $
-  plam $ \outputs symbol ->
+phasOnlyOneOutputIsPubKeyAndNoSymbol outputs =
+  plam $ \symbol ->
     pmatch outputs $ \case
       PCons output tailOfList ->
         pnull

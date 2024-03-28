@@ -91,9 +91,9 @@ PlutusTx.makeIsDataIndexed
   ]
 
 data PYieldedToHash (s :: S)
-  = PYieldedToValidator (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
-  | PYieldedToMP (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
-  | PYieldedToSV (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
+  = PYieldedToValidator (Term s (PDataRecord '["scriptHash" ' := PScriptHash]))
+  | PYieldedToMP (Term s (PDataRecord '["scriptHash" ' := PScriptHash]))
+  | PYieldedToSV (Term s (PDataRecord '["scriptHash" ' := PScriptHash]))
   deriving stock
     ( Generic
     )

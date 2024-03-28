@@ -8,6 +8,7 @@ module Utils (
   pisPubKeyOutput,
   pisScriptOutput,
   phasNoScriptOutput,
+  pands,
 )
 where
 
@@ -32,6 +33,15 @@ import Plutarch.Api.V2 (
  )
 import Plutarch.Extra.Map (pkeys)
 import Plutarch.Extra.Maybe (pjust, pnothing)
+import Data.List.NonEmpty (nonEmpty)
+
+-- | Like Haskell's `and` but for Plutarch terms
+-- `Plutarch.Bool` has the same function but does not export it.
+pands :: [Term s PBool] -> Term s PBool
+pands ts' =
+  case nonEmpty ts' of
+    Nothing -> pcon PTrue
+    Just ts -> foldl1 (#&&) ts
 
 phasOnlyOneInputWithTxOutRefSymbolAndTokenName ::
   forall (s :: S).
