@@ -116,7 +116,6 @@ library pprelude
     , plutus-core
     , prettyprinter
     , text
-    , text-builder
 
   exposed-modules:  PPrelude
   hs-source-dirs:   src
@@ -187,9 +186,11 @@ test-suite serialization
   main-is:        Main.hs
   build-depends:
     , aeson
+    , bytestring
     , plutarch
     , QuickCheck
     , tasty-golden
     , tasty-quickcheck
+    , text
 
   hs-source-dirs: test/serialization
