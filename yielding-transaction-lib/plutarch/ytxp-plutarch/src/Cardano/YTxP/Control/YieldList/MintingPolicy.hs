@@ -37,7 +37,6 @@ import Utils (
   phasOnlyOnePubKeyOutputAndNoTokenWithSymbol,
   phasOnlyOneValidScriptOutputWithToken,
   phasTokenOfCurrencySymbolTokenNameAndAmount,
-  poutputsDoNotContainTokenWithSymbol,
  )
 
 --------------------------------------------------------------------------------
@@ -105,7 +104,7 @@ mkYieldListSTCS (YieldListSTMPScript script) =
   When the supplied redeemer is `Mint` the policy checks:
     - Exactly one token with an empty token name and the YieldListSTCS
       (as fetched from the `ScriptPurpose`) is minted
-    - Only a single wallet input UTxO is present and this input does not contain a YieldListSTT
+    - Only a single wallet input UTxO is present
     - The minted token is sent to a UTxO at a script address
     - The UTxO receiving the minted token carries a valid `YieldList` in it's datum.
       In particular the following is checked:
@@ -118,8 +117,7 @@ mkYieldListSTCS (YieldListSTMPScript script) =
 
   When the supplied redeemer is `Burn` the policy checks:
     - Exactly one token is burned
-    - Exactly one UTxO carrying a token with the `YieldListSTCS` appears at the input
-    - Exactly zero UTxOs carrying tokens with the `YieldListSTCS` appear at the output
+    - Exactly one UTxO carrying exactly one token with the `YieldListSTCS` appears at the input
 
   Note that the YLSTMP does not provide any additional security guarantees by itself.
   These must be library-user-defined via wrapping scripts.
@@ -164,7 +162,7 @@ mkYieldListSTMPWrapper
                       # yieldListSymbol
                       # padaToken
                       # 1
-                  , phasOnlyOneInputPubKeyAndTokenWithSymbol inputs # yieldListSymbol
+                  , phasOnlyOneInputPubKey inputs
                   , -- TODO(Nigel): Combine these two output checks into one efficient function
                     phasOnlyOnePubKeyOutputAndNoTokenWithSymbol
                       # outputs
@@ -188,9 +186,7 @@ mkYieldListSTMPWrapper
                       # yieldListSymbol
                       # padaToken
                       # (-1)
-                  , poutputsDoNotContainTokenWithSymbol
-                      # outputs
-                      # yieldListSymbol
+                  , phasOnlyOneInputWithExactlyOneTokenWithSymbol inputs # yieldListSymbol
                   ]
               )
             $ \case
@@ -198,42 +194,46 @@ mkYieldListSTMPWrapper
               PFalse -> perror
 
 {- | Checks that there is only one input in the provided inputs,
- and that input is a pub key input,
- and it does not contain any token with the given symbol.
+ and that input is a pub key input.
 -}
-phasOnlyOneInputPubKeyAndTokenWithSymbol ::
-  forall (s :: S).
+phasOnlyOneInputPubKey ::
+  Term s (PBuiltinList PTxInInfo) ->
+  Term s PBool
+phasOnlyOneInputPubKey inputs =
+  pmatch inputs $
+    \case
+      PCons input tailOfList ->
+        pnull
+          # tailOfList
+          #&& ( pmatch
+                  ( pfromData
+                      $ pfield @"credential"
+                        #$ pfromData
+                      $ pfield @"address"
+                        #$ pfromData
+                      $ pfield @"resolved" # input
+                  )
+                  $ \case
+                    PPubKeyCredential _ -> pconstant True
+                    _ -> pconstant False
+              )
+      _ -> pconstant False
+
+-- | Not optimised yet
+phasOnlyOneInputWithExactlyOneTokenWithSymbol ::
   Term s (PBuiltinList PTxInInfo) ->
   Term s (PCurrencySymbol :--> PBool)
-phasOnlyOneInputPubKeyAndTokenWithSymbol inputs =
+phasOnlyOneInputWithExactlyOneTokenWithSymbol inputs =
   plam $ \symbol ->
-    pmatch inputs $
-      \case
-        PCons input tailOfList ->
-          pnull
-            # tailOfList
-            #&& ( pmatch
-                    ( pfromData
-                        $ pfield @"credential"
-                          #$ pfromData
-                        $ pfield @"address"
-                          #$ pfromData
-                        $ pfield @"resolved" # input
-                    )
-                    $ \case
-                      PPubKeyCredential _ -> pconstant True
-                      _ -> pconstant False
-                )
-            #&& ( -- TODO(Nigel):
-                  -- Replace this somehow without inlining whole psymbolValueOf function
-                  -- (see guide on no nested plutarch-level functions)
-                  psymbolValueOf
-                    # symbol
-                    #$ pfromData
-                    $ pfield @"value"
-                      #$ pfromData
-                    $ pfield @"resolved"
-                      # input
-                )
-            #== pconstant 0
-        _ -> pconstant False
+    plength
+      # ( pfilter
+            # ( plam $ \input ->
+                  ( psymbolValueOf
+                      # symbol
+                      # (pfromData $ pfield @"value" #$ pfromData $ pfield @"resolved" # input)
+                      #== 1
+                  )
+              )
+            # inputs
+        )
+      #== pconstant 1

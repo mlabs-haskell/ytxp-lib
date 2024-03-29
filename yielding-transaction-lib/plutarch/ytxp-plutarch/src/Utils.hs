@@ -2,7 +2,6 @@ module Utils (
   phasTokenOfCurrencySymbolTokenNameAndAmount,
   phasOnlyOneValidScriptOutputWithToken,
   phasOnlyOnePubKeyOutputAndNoTokenWithSymbol,
-  poutputsDoNotContainTokenWithSymbol,
   pands,
 )
 where
@@ -35,31 +34,6 @@ pands ts' =
   case nonEmpty ts' of
     Nothing -> pcon PTrue
     Just ts -> foldl1 (#&&) ts
-
--- | Check that the outputs do not contain a token with the given symbol
-poutputsDoNotContainTokenWithSymbol ::
-  forall (s :: S).
-  Term
-    s
-    ( PBuiltinList PTxOut
-        :--> PCurrencySymbol
-        :--> PBool
-    )
-poutputsDoNotContainTokenWithSymbol = phoistAcyclic $
-  plam $ \txOuts symbol ->
-    pmatch (pfilter # (poutputContainsTokenWithSymbol # symbol) # txOuts) $ \case
-      PNil -> pconstant True
-      _ -> pconstant False
-
--- | Check that the given output contains at least one token with the given symbol
-poutputContainsTokenWithSymbol ::
-  forall (s :: S).
-  Term s (PCurrencySymbol :--> PTxOut :--> PBool)
-poutputContainsTokenWithSymbol = phoistAcyclic $
-  plam $
-    \symbol txOut ->
-      (pconstant 0)
-        #< (psymbolValueOf # symbol #$ pfromData $ pfield @"value" # txOut)
 
 {- | Check that there is only token of given `PCurrencySymbol`
  and `PTokenName` with given amount contained in the given PValue.
