@@ -8,7 +8,6 @@ module Cardano.YTxP.Control.YieldList.MintingPolicy (
   mkYieldListSTCS,
 ) where
 
-import Cardano.YTxP.Control.Vendored (psymbolValueOf)
 import Cardano.YTxP.Control.YieldList (
   PYieldListMPWrapperRedeemer (PBurn, PMint),
  )
@@ -16,27 +15,17 @@ import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
-import Plutarch.Api.V1 (
-  PCredential (PPubKeyCredential),
- )
-import Plutarch.Api.V1.Value (
-  PCurrencySymbol,
-  padaToken,
- )
-import Plutarch.Api.V2 (
-  PScriptContext,
-  PScriptPurpose (PMinting),
-  PTxInInfo,
-  scriptHash,
- )
+import Plutarch.Api.V2 (PScriptContext, PScriptPurpose (PMinting), scriptHash)
 import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
 import Prettyprinter (Pretty)
 import Utils (
   pands,
-  phasOnlyOnePubKeyOutputAndNoTokenWithSymbol,
+  pemptyTokenName,
+  phasNoScriptInputWithToken,
+  phasOnlyOneInputWithExactlyOneTokenWithSymbol,
   phasOnlyOneValidScriptOutputWithToken,
-  phasTokenOfCurrencySymbolTokenNameAndAmount,
+  pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount,
  )
 
 --------------------------------------------------------------------------------
@@ -104,7 +93,6 @@ mkYieldListSTCS (YieldListSTMPScript script) =
   When the supplied redeemer is `Mint` the policy checks:
     - Exactly one token with an empty token name and the YieldListSTCS
       (as fetched from the `ScriptPurpose`) is minted
-    - Only a single wallet input UTxO is present
     - The minted token is sent to a UTxO at a script address
     - The UTxO receiving the minted token carries a valid `YieldList` in it's datum.
       In particular the following is checked:
@@ -112,8 +100,17 @@ mkYieldListSTCS (YieldListSTMPScript script) =
         * Hashes must be well-formed (of the correct length)
         * The yield list must be no larger than the max list size (provided as an argument)
         * No tokens except Ada and the YieldListSTMP are present at the recipient UTxO
-        * Only a single wallet output is present
-        * That wallet output does not contain a YieldListSTT
+    - Due to the wrapping script there is a potential for other script inputs and outputs beyond the ones
+      accounted for in this script. There may also be other wallet inputs and outputs, depending on the
+      type of wrapping script.
+
+      We need to ensure that these other inputs or outputs do not carry a YieldListSTT:
+        * We check that there is no wallet output carrying a YieldListSTT
+          (We do not need to check the wallet inputs as a YieldListSTT is never
+           sent to a wallet output to begin with)
+        * We check that there is only one script output containing a YieldListSTT,
+          the one minted in the transaction being validated
+        * We check that no script input contains a YieldListSTT
 
   When the supplied redeemer is `Burn` the policy checks:
     - Exactly one token is burned
@@ -157,20 +154,31 @@ mkYieldListSTMPWrapper
             $ popaque
             $ pmatch
               ( pands
-                  [ phasTokenOfCurrencySymbolTokenNameAndAmount
-                      # mint
-                      # yieldListSymbol
-                      # padaToken
-                      # 1
-                  , phasOnlyOneInputPubKey inputs
-                  , -- TODO(Nigel): Combine these two output checks into one efficient function
-                    phasOnlyOnePubKeyOutputAndNoTokenWithSymbol
-                      # outputs
-                      # yieldListSymbol
-                  , phasOnlyOneValidScriptOutputWithToken
-                      # outputs
-                      # yieldListSymbol
-                      # padaToken
+                  [ ptraceIfFalse
+                      "Must mint exactly one YieldList token with an empty token name"
+                      $ pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount
+                        # mint
+                        # yieldListSymbol
+                        # pemptyTokenName
+                        # 1
+                  , -- We combine a few of the checks into one with this check for efficieny,
+                    -- this check ensures that there is exactly one valid script output with a YieldListSTT,
+                    -- it also ensures that no other script output contains a YieldListSTT,
+                    -- and that no wallet output contains a YieldListSTT.
+                    ptraceIfFalse
+                      ( mconcat
+                          [ "Must have exactly one valid script output with yield list token"
+                          , ", and no other outputs with one or more yield list token"
+                          ]
+                      )
+                      $ phasOnlyOneValidScriptOutputWithToken
+                        outputs
+                        # yieldListSymbol
+                  , ptraceIfFalse
+                      "Cannot have script input that contains a YieldListSTT"
+                      $ phasNoScriptInputWithToken
+                        inputs
+                        # yieldListSymbol
                   ]
               )
             $ \case
@@ -181,59 +189,20 @@ mkYieldListSTMPWrapper
             $ popaque
             $ pmatch
               ( pands
-                  [ phasTokenOfCurrencySymbolTokenNameAndAmount
-                      # mint
-                      # yieldListSymbol
-                      # padaToken
-                      # (-1)
-                  , phasOnlyOneInputWithExactlyOneTokenWithSymbol inputs # yieldListSymbol
+                  [ ptraceIfFalse
+                      "Must burn exactly one yield list token"
+                      $ pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount
+                        # mint
+                        # yieldListSymbol
+                        # pemptyTokenName
+                        # (-1)
+                  , ptraceIfFalse
+                      "Must have exactly one input that carries exactly one yield list token"
+                      $ phasOnlyOneInputWithExactlyOneTokenWithSymbol
+                        inputs
+                        # yieldListSymbol
                   ]
               )
             $ \case
               PTrue -> pconstant ()
               PFalse -> perror
-
-{- | Checks that there is only one input in the provided inputs,
- and that input is a pub key input.
--}
-phasOnlyOneInputPubKey ::
-  Term s (PBuiltinList PTxInInfo) ->
-  Term s PBool
-phasOnlyOneInputPubKey inputs =
-  pmatch inputs $
-    \case
-      PCons input tailOfList ->
-        pnull
-          # tailOfList
-          #&& ( pmatch
-                  ( pfromData
-                      $ pfield @"credential"
-                        #$ pfromData
-                      $ pfield @"address"
-                        #$ pfromData
-                      $ pfield @"resolved" # input
-                  )
-                  $ \case
-                    PPubKeyCredential _ -> pconstant True
-                    _ -> pconstant False
-              )
-      _ -> pconstant False
-
--- | Not optimised yet
-phasOnlyOneInputWithExactlyOneTokenWithSymbol ::
-  Term s (PBuiltinList PTxInInfo) ->
-  Term s (PCurrencySymbol :--> PBool)
-phasOnlyOneInputWithExactlyOneTokenWithSymbol inputs =
-  plam $ \symbol ->
-    plength
-      # ( pfilter
-            # ( plam $ \input ->
-                  ( psymbolValueOf
-                      # symbol
-                      # (pfromData $ pfield @"value" #$ pfromData $ pfield @"resolved" # input)
-                      #== 1
-                  )
-              )
-            # inputs
-        )
-      #== pconstant 1
