@@ -35,7 +35,6 @@
       imports = [
         ./nix/pkgs.nix
         ./nix/settings.nix
-        ./nix/pre-commit.nix
         ./ytxp-plutarch/build.nix
       ];
       debug = true;

@@ -10,20 +10,6 @@
         inherit (config.settings.haskell) index-state compiler-nix-name;
 
         dependencies = [
-          # LB base schema and runtimes libs
-          # Plutarch
-          "${inputs'.lbf.packages.lbf-prelude-plutarch}"
-          "${inputs'.lbf.packages.lbf-plutus-plutarch}"
-          "${inputs'.lbf.packages.lbr-plutarch-src}"
-
-          # Prelude
-          "${inputs'.lbf.packages.lbf-prelude-haskell}"
-          "${inputs'.lbf.packages.lbr-prelude-haskell-src}"
-
-          # LBs PlutusTx
-          "${inputs'.lbf.packages.lbf-plutus-haskell}"
-          "${inputs'.lbf.packages.lbr-plutus-haskell-src}"
-
           # Plutarch itself
           "${inputs.plutarch}"
           "${inputs.plutarch}/plutarch-extra"
