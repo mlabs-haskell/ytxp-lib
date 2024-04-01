@@ -13,7 +13,6 @@ import Cardano.YTxP.Control.YieldList (
  )
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
-import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
 import Plutarch.Api.V2 (PScriptContext, PScriptPurpose (PMinting), scriptHash)
 import Plutarch.Script (Script)
@@ -51,7 +50,7 @@ newtype YieldListSTMPScript = YieldListSTMPScript Script
 compileYieldListSTMP ::
   -- | Plutarch compilation configuration
   Config ->
-  Natural ->
+  Integer ->
   (forall (s :: S). Term s (PData :--> PScriptContext :--> POpaque)) ->
   Either Text YieldListSTMPScript
 compileYieldListSTMP config maxYieldListSize scriptToWrap = do
@@ -126,7 +125,7 @@ mkYieldListSTCS (YieldListSTMPScript script) =
 -}
 mkYieldListSTMPWrapper ::
   forall (s :: S).
-  Natural ->
+  Integer ->
   Term
     s
     ( (PData :--> PScriptContext :--> POpaque)
@@ -135,7 +134,7 @@ mkYieldListSTMPWrapper ::
         :--> POpaque
     )
 mkYieldListSTMPWrapper
-  _maxYieldListSize =
+  maxYieldListSize =
     plam $ \_scriptToWrap redeemer context' -> unTermCont $ do
       let txInfo = pfromData $ pfield @"txInfo" # context'
           purpose = pfromData $ pfield @"purpose" # context'
@@ -172,6 +171,7 @@ mkYieldListSTMPWrapper
                           ]
                       )
                       $ phasOnlyOneValidScriptOutputWithToken
+                        maxYieldListSize
                         outputs
                         # yieldListSymbol
                   , ptraceIfFalse

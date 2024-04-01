@@ -1,3 +1,4 @@
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
@@ -6,7 +7,9 @@ Description: Defines shared data types and utilities for YieldList scripts
 -}
 module Cardano.YTxP.Control.YieldList (
   YieldListDatum,
+  PYieldListDatum (PYieldListDatum),
   YieldedToHash,
+  PYieldedToHash (PYieldedToValidator, PYieldedToMP, PYieldedToSV),
   YieldListMPWrapperRedeemer,
   PYieldListMPWrapperRedeemer (PMint, PBurn),
   immutableValidatorWrapper,
@@ -17,55 +20,23 @@ module Cardano.YTxP.Control.YieldList (
   multiSigMintingPolicyWrapper,
 ) where
 
--- PDataFields,
-
 import Cardano.YTxP.Control.Vendored (
+  DerivePConstantViaDataList (DerivePConstantViaDataList),
   DerivePConstantViaEnum (DerivePConstantEnum),
-  -- PlutusTypeDataList,
   EnumIsData (EnumIsData),
+  PlutusTypeDataList,
   PlutusTypeEnumData,
-  -- ProductIsData(ProductIsData),
-  -- DerivePConstantViaDataList(DerivePConstantViaDataList),
+  ProductIsData (ProductIsData),
  )
-import GHC.Generics (Generic)
--- PLiftData,
--- PlutusTypeNewtype,
--- PShow,
-
--- PConstantData,
-
--- PBuiltinList,
-
 import Generics.SOP qualified as SOP
 import Plutarch.Api.V2 (PScriptHash)
 import Plutarch.DataRepr (
-  DerivePConstantViaData (
-    DerivePConstantViaData
-  ),
+  DerivePConstantViaData (DerivePConstantViaData),
+  PDataFields,
  )
-import Plutarch.Lift (
-  PConstantDecl,
-  PLifted,
-  PUnsafeLiftDecl,
- )
-import Plutarch.Prelude (
-  DPTStrat,
-  DerivePlutusType,
-  PAsData,
-  PData,
-  PDataRecord,
-  PEq,
-  PIsData,
-  PLabeledType ((:=)),
-  PTryFrom,
-  PlutusType,
-  PlutusTypeData,
-  S,
-  Term,
- )
+import Plutarch.Lift (PConstantDecl, PLifted, PUnsafeLiftDecl)
 import PlutusLedgerApi.V1.Scripts (ScriptHash)
 import PlutusTx qualified
-import Prelude (Bounded, Enum, Eq, Show, error)
 
 --------------------------------------------------------------------------------
 -- Types
@@ -105,7 +76,7 @@ data PYieldedToHash (s :: S)
 instance DerivePlutusType PYieldedToHash where
   type DPTStrat _ = PlutusTypeData
 
-instance PTryFrom PData PYieldedToHash
+instance PTryFrom PData (PAsData PYieldedToHash)
 
 instance PUnsafeLiftDecl PYieldedToHash where
   type PLifted PYieldedToHash = YieldedToHash
@@ -118,40 +89,38 @@ deriving via
 {- | The `YieldListDatum` holds a collection of hashes that YieldingScripts can yield to.
 The length of the datum is checked upon creation in `mkYieldListSTMPWrapper` to ensure
 that the length of the list does not exceed the max list length passed as a parameter to that script.
-TODO(Nigel): Get it working
 -}
 data YieldListDatum = YieldListDatum
   { yieldedToScripts :: [YieldedToHash]
   }
   deriving stock (Show, Eq, Generic)
   deriving anyclass (SOP.Generic)
+  deriving (PlutusTx.ToData, PlutusTx.FromData) via (ProductIsData YieldListDatum)
 
--- deriving (PlutusTx.ToData, PlutusTx.FromData) via (ProductIsData YieldListDatum)
+deriving via
+  (DerivePConstantViaDataList YieldListDatum PYieldListDatum)
+  instance
+    (PConstantDecl YieldListDatum)
 
--- deriving via
---   (DerivePConstantViaDataList YieldListDatum PYieldListDatum)
---   instance
---     (PConstantDecl YieldListDatum)
---
--- newtype PYieldListDatum (s :: S)
---   = PYieldListDatum
---       ( Term
---           s
---           ( PDataRecord
---               '[ "yieldedToScripts" ':= PBuiltinList (PAsData PYieldedToHash)
---                ]
---           )
---       )
---   deriving stock (Generic)
---   deriving anyclass (PlutusType, PIsData, PEq, PDataFields)
---
--- instance DerivePlutusType PYieldListDatum where
---   type DPTStrat _ = PlutusTypeDataList
---
--- instance PUnsafeLiftDecl PYieldListDatum where
---   type PLifted _ = YieldListDatum
---
--- instance PTryFrom PData (PAsData PYieldListDatum)
+newtype PYieldListDatum (s :: S)
+  = PYieldListDatum
+      ( Term
+          s
+          ( PDataRecord
+              '[ "yieldedToScripts" ' := PBuiltinList (PAsData PYieldedToHash)
+               ]
+          )
+      )
+  deriving stock (Generic)
+  deriving anyclass (PlutusType, PIsData, PEq, PDataFields)
+
+instance DerivePlutusType PYieldListDatum where
+  type DPTStrat _ = PlutusTypeDataList
+
+instance PUnsafeLiftDecl PYieldListDatum where
+  type PLifted _ = YieldListDatum
+
+instance PTryFrom PData (PAsData PYieldListDatum)
 
 -- | Redeemer for `mkYieldListMPWrapper`.
 data YieldListMPWrapperRedeemer
