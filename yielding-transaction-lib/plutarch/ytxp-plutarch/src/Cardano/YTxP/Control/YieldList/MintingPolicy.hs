@@ -6,6 +6,9 @@ module Cardano.YTxP.Control.YieldList.MintingPolicy (
   -- * Currency Symbol
   YieldListSTCS,
   mkYieldListSTCS,
+
+  -- * Helpers
+  pcontainsYieldListSTT,
 ) where
 
 import Cardano.YTxP.Control.YieldList (
@@ -15,6 +18,7 @@ import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
+import Plutarch.Api.V1.Value (PValue, pvalueOf)
 import Plutarch.Api.V2 (PScriptContext, PScriptPurpose (PMinting), scriptHash)
 import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
@@ -72,7 +76,7 @@ compileYieldListSTMP config maxYieldListSize scriptToWrap = do
   pure $ YieldListSTMPScript script
 
 --------------------------------------------------------------------------------
--- YieldListCTCS
+-- YieldListSTCS
 
 -- | Opaque, semantic newtype for the YieldList state thread currency symbol
 newtype YieldListSTCS = YieldListSTCS CurrencySymbol
@@ -206,3 +210,9 @@ mkYieldListSTMPWrapper
             $ \case
               PTrue -> pconstant ()
               PFalse -> perror
+
+-- | Checks that the given 'PValue' contains the YieldListSTT
+pcontainsYieldListSTT :: YieldListSTCS -> Term s (PValue anyKey anyAmount :--> PBool)
+pcontainsYieldListSTT (YieldListSTCS symbol) =
+  plam $ \value ->
+    pvalueOf # value # pconstant symbol # pconstant "" #== 1

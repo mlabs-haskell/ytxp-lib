@@ -1,7 +1,7 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE DataKinds             #-}
+{-# LANGUAGE PolyKinds             #-}
 {-# LANGUAGE QuantifiedConstraints #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE UndecidableInstances  #-}
 
 {- | Vendored utilities from open source libraries.
 See the appropriate License for details on usage.
@@ -10,45 +10,38 @@ module Cardano.YTxP.Control.Vendored (
   DerivePConstantViaEnum (..),
   EnumIsData (..),
   ProductIsData (..),
+  unProductIsData,
   DerivePConstantViaDataList (..),
   PlutusTypeEnumData,
   PlutusTypeDataList,
   applyScript,
   psymbolValueOf,
+  ptryFromOutputDatum,
 ) where
 
 import Data.Coerce (coerce)
+import Data.Functor.Identity (Identity (Identity, runIdentity))
 import Data.Kind (Constraint)
+import Data.Maybe (fromJust)
+import Data.Proxy (Proxy (Proxy))
 import GHC.TypeLits (ErrorMessage (ShowType, Text, (:$$:), (:<>:)), TypeError)
+import Generics.SOP (hcmap, hcollapse, hctraverse, mapIK, mapKI,
+                     productTypeFrom, productTypeTo, unI)
 import Generics.SOP qualified as SOP
-import Plutarch.Api.V1.Value (
-  PCurrencySymbol,
-  PValue,
- )
-import Plutarch.Api.V2 (
-  AmountGuarantees,
-  KeyGuarantees,
- )
+import Plutarch.Api.V1.Value (PCurrencySymbol, PValue)
+import Plutarch.Api.V2 (AmountGuarantees, KeyGuarantees, PDatum, PDatumHash,
+                        PMap,
+                        POutputDatum (PNoOutputDatum, POutputDatum, POutputDatumHash))
 import Plutarch.Internal.Generic (PCode, PGeneric, gpfrom, gpto)
-import Plutarch.Internal.PlutusType (
-  PlutusTypeStrat (
-    DerivedPInner,
-    PlutusTypeStratConstraint,
-    derivedPCon,
-    derivedPMatch
-  ),
- )
-import Plutarch.Lift (
-  PConstantDecl (PConstantRepr, PConstanted, pconstantFromRepr, pconstantToRepr),
-  PLifted,
- )
+import Plutarch.Internal.PlutusType (PlutusTypeStrat (DerivedPInner, PlutusTypeStratConstraint, derivedPCon, derivedPMatch))
+import Plutarch.Lift (PConstantDecl (PConstantRepr, PConstanted, pconstantFromRepr, pconstantToRepr),
+                      PLifted)
 import Plutarch.List (pfoldl')
 import Plutarch.Script (Script (Script))
-import PlutusTx (
-  FromData (fromBuiltinData),
-  ToData (toBuiltinData),
-  UnsafeFromData (unsafeFromBuiltinData),
- )
+import PlutusLedgerApi.V1 (BuiltinData (BuiltinData))
+import PlutusTx (Data (List), FromData (fromBuiltinData),
+                 ToData (toBuiltinData), UnsafeFromData (unsafeFromBuiltinData),
+                 fromData, toData)
 import UntypedPlutusCore (Program (Program, _progAnn, _progTerm, _progVer))
 import UntypedPlutusCore.Core.Type qualified as UplcType
 
@@ -346,3 +339,128 @@ instance PlutusTypeStrat PlutusTypeDataList where
     SOP.SOP (SOP.Z (x' SOP.:* SOP.Nil)) -> x'
     SOP.SOP (SOP.S x') -> case x' of {}
   derivedPMatch x f = f (gpto $ SOP.SOP $ SOP.Z $ x SOP.:* SOP.Nil)
+
+-- | @since 3.8.0
+unProductIsData ::
+  forall (a :: Type).
+  ProductIsData a ->
+  a
+unProductIsData = coerce
+
+{- |
+  Generically convert a Product-Type to 'BuiltinData' with the 'List' repr.
+
+  @since 1.1.0
+-}
+gProductToBuiltinData ::
+  forall (a :: Type) (repr :: [Type]).
+  (SOP.IsProductType a repr, SOP.All ToData repr) =>
+  a ->
+  BuiltinData
+gProductToBuiltinData x =
+  BuiltinData $ List $ hcollapse $ hcmap (Proxy @ToData) (mapIK toData) $ productTypeFrom x
+
+{- |
+  Generically convert a Product-type from a 'BuiltinData' 'List' repr.
+
+  @since 1.1.0
+-}
+gProductFromBuiltinData ::
+  forall (a :: Type) (repr :: [Type]).
+  (SOP.IsProductType a repr, SOP.All FromData repr) =>
+  BuiltinData ->
+  Maybe a
+gProductFromBuiltinData (BuiltinData (List xs)) = do
+  prod <- SOP.fromList @repr xs
+  productTypeTo <$> hctraverse (Proxy @FromData) (unI . mapKI fromData) prod
+gProductFromBuiltinData _ = Nothing
+
+{- |
+  Unsafe version of 'gProductFromBuiltinData'.
+
+  @since 1.1.0
+-}
+gProductFromBuiltinDataUnsafe ::
+  forall (a :: Type) (repr :: [Type]).
+  (SOP.IsProductType a repr, SOP.All UnsafeFromData repr) =>
+  BuiltinData ->
+  a
+gProductFromBuiltinDataUnsafe (BuiltinData (List xs)) =
+  let prod = fromJust $ SOP.fromList @repr xs
+   in productTypeTo $
+        runIdentity $
+          hctraverse
+            (Proxy @UnsafeFromData)
+            (unI . mapKI (Identity . unsafeFromBuiltinData . BuiltinData))
+            prod
+gProductFromBuiltinDataUnsafe _ = error "invalid representation"
+
+-- | @since 1.1.0
+instance
+  forall (h :: Type) (p :: S -> Type).
+  (PlutusTx.FromData h, PlutusTx.ToData h, PLift p) =>
+  PConstantDecl (DerivePConstantViaDataList h p)
+  where
+  type PConstantRepr (DerivePConstantViaDataList h p) = [PlutusTx.Data]
+  type PConstanted (DerivePConstantViaDataList h p) = p
+  pconstantToRepr (DerivePConstantViaDataList x) = case PlutusTx.toData x of
+    (PlutusTx.List xs) -> xs
+    _ -> error "ToData repr is not a List!"
+  pconstantFromRepr = coerce (PlutusTx.fromData @h . PlutusTx.List)
+
+-- | @since 1.1.0
+instance
+  forall (a :: Type) (repr :: [Type]).
+  (SOP.IsProductType a repr, SOP.All ToData repr) =>
+  ToData (ProductIsData a)
+  where
+  toBuiltinData = coerce (gProductToBuiltinData @a)
+
+-- | @since 1.1.0
+instance
+  forall (a :: Type) (repr :: [Type]).
+  (SOP.IsProductType a repr, SOP.All UnsafeFromData repr) =>
+  UnsafeFromData (ProductIsData a)
+  where
+  unsafeFromBuiltinData = coerce (gProductFromBuiltinDataUnsafe @a)
+
+-- | @since 1.1.0
+instance
+  forall (a :: Type) (repr :: [Type]).
+  (SOP.IsProductType a repr, SOP.All FromData repr) =>
+  FromData (ProductIsData a)
+  where
+  fromBuiltinData = coerce (gProductFromBuiltinData @a)
+
+---------------------------
+
+{- | Extract the datum from a 'POutputDatum'.
+
+     @since 3.0.3
+-}
+ptryFromOutputDatum ::
+  forall (keys :: KeyGuarantees) (s :: S) (a :: S -> Type).
+  (PTryFrom PData a) =>
+  Term
+    s
+    ( POutputDatum
+        :--> PMap keys PDatumHash PDatum
+        :--> a
+    )
+ptryFromOutputDatum = phoistAcyclic $
+  plam $ \od m -> pmatch od $ \case
+    PNoOutputDatum _ ->
+      ptraceError "no datum"
+    POutputDatum (pfromData . (pfield @"outputDatum" #) -> datum) ->
+      ptrace "inline datum" $ flip ptryFrom fst $ pto datum
+    POutputDatumHash ((pfield @"datumHash" #) -> hash) ->
+      ptrace "datum hash" $
+        precList
+          ( \self x xs ->
+              pif
+                (pfstBuiltin # x #== hash)
+                (flip ptryFrom fst $ pto $ pfromData $ psndBuiltin # x)
+                (self # xs)
+          )
+          (const $ ptraceError "datum hash not found")
+          # pto m
