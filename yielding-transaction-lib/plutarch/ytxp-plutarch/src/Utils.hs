@@ -9,29 +9,21 @@ module Utils (
   poutputsDoNotContainToken,
   pemptyTokenName,
   pands,
+  pscriptHashToCurrencySymbol,
 )
 where
 
 import Cardano.YTxP.Control.Vendored (psymbolValueOf)
 import Data.List.NonEmpty (nonEmpty)
 import Plutarch.Api.V1 (PCredential (PPubKeyCredential, PScriptCredential))
-import Plutarch.Api.V1.Value (
-  PCurrencySymbol,
-  PTokenName,
-  PValue,
-  padaSymbol,
-  pvalueOf,
- )
-import Plutarch.Api.V2 (
-  AmountGuarantees,
-  KeyGuarantees,
-  POutputDatum (POutputDatum),
-  PTxInInfo,
-  PTxOut,
-  PTxOutRef,
- )
+import Plutarch.Api.V1.Value (PCurrencySymbol, PTokenName, PValue, padaSymbol,
+                              pvalueOf)
+import Plutarch.Api.V2 (AmountGuarantees, KeyGuarantees,
+                        POutputDatum (POutputDatum), PTxInInfo, PTxOut,
+                        PTxOutRef)
 import Plutarch.Extra.Map (pkeys)
 import Plutarch.List (pfoldl')
+import Plutarch.Unsafe (punsafeCoerce)
 
 {- | Like Haskell's `and` but for Plutarch terms
 `Plutarch.Bool` has the same function but does not export it.
@@ -525,3 +517,7 @@ phasOnlyOneInputWithExactlyOneTokenWithSymbol inputs =
 -- | Empty token name
 pemptyTokenName :: Term s PTokenName
 pemptyTokenName = pconstant ""
+
+-- | Convert a `ScriptHash` to a `CurrencySymbol`, which has the same representation
+pscriptHashToCurrencySymbol :: Term s (PScriptHash :--> PCurrencySymbol)
+pscriptHashToCurrencySymbol = punsafeCoerce

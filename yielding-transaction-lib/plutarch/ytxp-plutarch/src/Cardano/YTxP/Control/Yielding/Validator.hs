@@ -18,8 +18,8 @@ import Plutarch.Api.V1.Address (PCredential (PScriptCredential))
 import Plutarch.Api.V2 (PScriptContext, PStakingCredential (PStakingHash),
                         scriptHash)
 import Plutarch.Script (Script)
-import Plutarch.Unsafe (punsafeCoerce)
 import PlutusLedgerApi.V2 (Credential (ScriptCredential))
+import Utils (pscriptHashToCurrencySymbol)
 
 --------------------------------------------------------------------------------
 -- Yielding Validator Script
@@ -106,11 +106,7 @@ mkYieldingValidator ylstcs = plam $ \_datum redeemer ctx -> unTermCont $ do
                   # txInfoInputs
         PYieldedToMP ((pfield @"scriptHash" #) -> hash') ->
           let txInfoMints = pfromData $ pfield @"mint" # txInfo
-              -- FIXME: This converts a `ScriptHash` to a `CurrencySymbol`, which has the same representation,
-              --  should I:
-              --    - Create an explicit helper (that still uses `punsafeCoerce` underneath)?
-              --    - Manually destruct and reconstruct the `CurrencySymbol`?
-              currencySymbol = punsafeCoerce hash'
+              currencySymbol = pscriptHashToCurrencySymbol hash'
            in -- FIXME: This could literally be a `plookup`, but because of the standard of avoiding
               -- optional types, I have to do this. So the question is, how much extra cost is there
               -- using optional types, and is it worth it making the code arguably less readable for
