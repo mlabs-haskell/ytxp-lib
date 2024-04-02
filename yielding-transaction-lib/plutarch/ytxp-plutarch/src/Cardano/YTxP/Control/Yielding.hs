@@ -8,14 +8,12 @@ module Cardano.YTxP.Control.Yielding (
 )
 where
 
-import Cardano.YTxP.Control.Vendored (punsafeFromInlineDatum)
-import Cardano.YTxP.Control.YieldList (PYieldListDatum, PYieldedToHash,
-                                       getYieldedToHashByIndex)
+import Cardano.YTxP.Control.YieldList (PYieldedToHash, getYieldedToHashByIndex)
 import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS,
                                                      pcontainsYieldListSTT)
-import Plutarch.Api.V2 (KeyGuarantees (Unsorted), PDatum, PDatumHash, PMap,
-                        PTxInInfo)
+import Plutarch.Api.V2 (PTxInInfo)
 import Plutarch.DataRepr (PDataFields)
+import Utils (punsafeFromInlineDatum)
 
 -- | Represents an index into a YieldList
 newtype YieldListIndex = YieldListIndex Integer -- FIXME which Int/Integer/Positive

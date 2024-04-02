@@ -16,7 +16,6 @@ module Cardano.YTxP.Control.Vendored (
   PlutusTypeDataList,
   applyScript,
   psymbolValueOf,
-  punsafeFromInlineDatum,
 ) where
 
 import Data.Coerce (coerce)
@@ -443,21 +442,3 @@ instance
   FromData (ProductIsData a)
   where
   fromBuiltinData = coerce (gProductFromBuiltinData @a)
-
----------------------------
-
-{- | Extract the datum from a 'POutputDatum', expecting it to be an inline datum.
--}
-punsafeFromInlineDatum ::
-  forall (keys :: KeyGuarantees) (s :: S) (a :: S -> Type).
-  Term
-    s
-    ( POutputDatum
-        :--> a
-    )
-punsafeFromInlineDatum = phoistAcyclic $
-  plam $ \od -> pmatch od $ \case
-    POutputDatum (pfromData . (pfield @"outputDatum" #) -> datum) ->
-      -- FIXME: Not sure if using `punsafeCoerce` is the best call here
-      ptrace "inline datum" $ punsafeCoerce $ pto datum
-    _ -> ptraceError "Invalid datum type, inline datum expected"

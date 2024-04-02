@@ -10,6 +10,8 @@ module Utils (
   pemptyTokenName,
   pands,
   pscriptHashToCurrencySymbol,
+  punsafeFromInlineDatum,
+  pmember,
 )
 where
 
@@ -18,9 +20,9 @@ import Data.List.NonEmpty (nonEmpty)
 import Plutarch.Api.V1 (PCredential (PPubKeyCredential, PScriptCredential))
 import Plutarch.Api.V1.Value (PCurrencySymbol, PTokenName, PValue, padaSymbol,
                               pvalueOf)
-import Plutarch.Api.V2 (AmountGuarantees, KeyGuarantees,
-                        POutputDatum (POutputDatum), PTxInInfo, PTxOut,
-                        PTxOutRef)
+import Plutarch.Api.V2 (AmountGuarantees, KeyGuarantees, PMap,
+                        POutputDatum (POutputDatum), PScriptHash, PTxInInfo,
+                        PTxOut, PTxOutRef)
 import Plutarch.Extra.Map (pkeys)
 import Plutarch.List (pfoldl')
 import Plutarch.Unsafe (punsafeCoerce)
@@ -519,5 +521,35 @@ pemptyTokenName :: Term s PTokenName
 pemptyTokenName = pconstant ""
 
 -- | Convert a `ScriptHash` to a `CurrencySymbol`, which has the same representation
-pscriptHashToCurrencySymbol :: Term s (PScriptHash :--> PCurrencySymbol)
+pscriptHashToCurrencySymbol :: Term s PScriptHash -> Term s PCurrencySymbol
 pscriptHashToCurrencySymbol = punsafeCoerce
+
+
+{- | Extract the datum from a 'POutputDatum', expecting it to be an inline datum.
+-}
+punsafeFromInlineDatum ::
+  forall (keys :: KeyGuarantees) (s :: S) (a :: S -> Type).
+  Term
+    s
+    ( POutputDatum
+        :--> a
+    )
+punsafeFromInlineDatum = phoistAcyclic $
+  plam $ \od -> pmatch od $ \case
+    POutputDatum (pfromData . (pfield @"outputDatum" #) -> datum) ->
+      -- FIXME: Not sure if using `punsafeCoerce` is the best call here
+      ptrace "inline datum" $ punsafeCoerce $ pto datum
+    _ -> ptraceError "Invalid datum type, inline datum expected"
+
+pmember :: (PIsData k, PIsData v) => Term s (k :--> PMap any k v :--> PBool)
+pmember = phoistAcyclic $
+  plam $ \key m ->
+    precList
+      ( \self x xs ->
+          pif
+            (pfstBuiltin # x #== pdata key)
+            (pconstant True)
+            (self # xs)
+      )
+      (const $ pconstant False)
+      # pto m

@@ -19,7 +19,7 @@ import Plutarch.Api.V2 (PScriptContext, PStakingCredential (PStakingHash),
                         scriptHash)
 import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (Credential (ScriptCredential))
-import Utils (pscriptHashToCurrencySymbol)
+import Utils (pmember, pscriptHashToCurrencySymbol)
 
 --------------------------------------------------------------------------------
 -- Yielding Validator Script
@@ -107,19 +107,9 @@ mkYieldingValidator ylstcs = plam $ \_datum redeemer ctx -> unTermCont $ do
         PYieldedToMP ((pfield @"scriptHash" #) -> hash') ->
           let txInfoMints = pfromData $ pfield @"mint" # txInfo
               currencySymbol = pscriptHashToCurrencySymbol hash'
-           in -- FIXME: This could literally be a `plookup`, but because of the standard of avoiding
-              -- optional types, I have to do this. So the question is, how much extra cost is there
-              -- using optional types, and is it worth it making the code arguably less readable for
-              -- the sake of reducing the script size and/or ex-units?
-              precList
-                ( \self x xs ->
-                    pif
-                      (pfromData (pfstBuiltin # x) #== currencySymbol)
-                      (pconstant True)
-                      (self # xs)
-                )
-                (const $ ptraceError "No minting policy found")
-                # (pto $ pto txInfoMints)
+           in ptraceIfFalse "No minting policy found" $
+                pmember # currencySymbol # (pto txInfoMints)
+
         PYieldedToSV ((pfield @"scriptHash" #) -> hash') ->
           let txInfoWithdrawls = pfromData $ pfield @"wdrl" # txInfo
            in precList
