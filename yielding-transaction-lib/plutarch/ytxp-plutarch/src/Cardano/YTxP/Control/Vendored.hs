@@ -16,7 +16,7 @@ module Cardano.YTxP.Control.Vendored (
   PlutusTypeDataList,
   applyScript,
   psymbolValueOf,
-  ptryFromOutputDatum,
+  punsafeFromInlineDatum,
 ) where
 
 import Data.Coerce (coerce)
@@ -434,33 +434,19 @@ instance
 
 ---------------------------
 
-{- | Extract the datum from a 'POutputDatum'.
-
-     @since 3.0.3
+{- | Extract the datum from a 'POutputDatum', expecting it to be an inline datum.
 -}
-ptryFromOutputDatum ::
+punsafeFromInlineDatum ::
   forall (keys :: KeyGuarantees) (s :: S) (a :: S -> Type).
-  (PTryFrom PData a) =>
   Term
     s
     ( POutputDatum
         :--> PMap keys PDatumHash PDatum
         :--> a
     )
-ptryFromOutputDatum = phoistAcyclic $
+punsafeFromInlineDatum = phoistAcyclic $
   plam $ \od m -> pmatch od $ \case
-    PNoOutputDatum _ ->
-      ptraceError "no datum"
     POutputDatum (pfromData . (pfield @"outputDatum" #) -> datum) ->
-      ptrace "inline datum" $ flip ptryFrom fst $ pto datum
-    POutputDatumHash ((pfield @"datumHash" #) -> hash) ->
-      ptrace "datum hash" $
-        precList
-          ( \self x xs ->
-              pif
-                (pfstBuiltin # x #== hash)
-                (flip ptryFrom fst $ pto $ pfromData $ psndBuiltin # x)
-                (self # xs)
-          )
-          (const $ ptraceError "datum hash not found")
-          # pto m
+      -- FIXME: Not sure if using `punsafeCoerce` is the best call here
+      ptrace "inline datum" $ punsafeCoerce $ pto datum
+    _ -> ptraceError "Invalid datum type, inline datum expected"

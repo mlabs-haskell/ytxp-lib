@@ -8,7 +8,7 @@ module Cardano.YTxP.Control.Yielding (
 )
 where
 
-import Cardano.YTxP.Control.Vendored (ptryFromOutputDatum)
+import Cardano.YTxP.Control.Vendored (punsafeFromInlineDatum)
 import Cardano.YTxP.Control.YieldList (PYieldListDatum (PYieldListDatum),
                                        PYieldedToHash)
 import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS,
@@ -111,7 +111,7 @@ getYieldedToHash yieldListSTCS = phoistAcyclic $
           (pcontainsYieldListSTT yieldListSTCS # value)
           ( unTermCont $ do
               let datum = pfromData $ pfield @"datum" # output
-              let yieldListDatum = ptryFromOutputDatum # datum # datums
+              let yieldListDatum = punsafeFromInlineDatum # datum # datums
 
               PYieldListDatum ((pfield @"yieldedToScripts" #) -> yieldList) <-
                 pmatchC (pfromData yieldListDatum)
