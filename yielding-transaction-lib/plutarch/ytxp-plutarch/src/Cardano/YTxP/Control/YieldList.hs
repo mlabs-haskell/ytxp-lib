@@ -7,9 +7,9 @@ Description: Defines shared data types and utilities for YieldList scripts
 -}
 module Cardano.YTxP.Control.YieldList (
   YieldListDatum,
-  PYieldListDatum,
+  PYieldListDatum (PYieldListDatum),
   YieldedToHash,
-  PYieldedToHash(PYieldedToValidator,PYieldedToMP,PYieldedToSV),
+  PYieldedToHash (PYieldedToValidator, PYieldedToMP, PYieldedToSV),
   YieldListMPWrapperRedeemer,
   PYieldListMPWrapperRedeemer (PMint, PBurn),
   getYieldedToHashByIndex,
@@ -21,39 +21,71 @@ module Cardano.YTxP.Control.YieldList (
   multiSigMintingPolicyWrapper,
 ) where
 
--- PDataFields,
-
 import Cardano.YTxP.Control.Vendored (DerivePConstantViaDataList (DerivePConstantViaDataList),
                                       DerivePConstantViaEnum (DerivePConstantEnum),
                                       EnumIsData (EnumIsData),
                                       PlutusTypeDataList, PlutusTypeEnumData,
                                       ProductIsData (ProductIsData))
--- PLiftData,
--- PlutusTypeNewtype,
--- PShow,
-
--- PConstantData,
-
--- PBuiltinList,
-
+import Control.Monad (guard)
 import Generics.SOP qualified as SOP
 import Plutarch.Api.V2 (PScriptHash)
 import Plutarch.DataRepr (DerivePConstantViaData (DerivePConstantViaData),
                           PDataFields)
 import Plutarch.Lift (PConstantDecl, PLifted, PUnsafeLiftDecl)
-import PlutusLedgerApi.V1.Scripts (ScriptHash)
 import PlutusTx qualified
+import PlutusTx.Builtins qualified as Builtins
+import PlutusTx.Builtins.Internal qualified as BI
+import PlutusTx.Prelude (traceError)
 
 --------------------------------------------------------------------------------
 -- Types
+
+-- | We use this `CustomScriptHash` instead of `ScriptHash` in
+-- order to ensure that the hash is of length 28.
+newtype CustomScriptHash = CustomScriptHash {getCustomScriptHash :: Builtins.BuiltinByteString}
+  deriving stock
+    ( Show
+    , Generic
+    , Eq
+    )
+
+instance PlutusTx.UnsafeFromData CustomScriptHash where
+  {-# INLINEABLE unsafeFromBuiltinData #-}
+  unsafeFromBuiltinData b =
+    let !args = BI.snd $ BI.unsafeDataAsConstr b
+        scriptHash = BI.unsafeDataAsB (BI.head args)
+     in if Builtins.lengthOfByteString scriptHash == 28
+          then CustomScriptHash scriptHash
+          else traceError "ScriptHash must be of length 28"
+
+instance PlutusTx.ToData CustomScriptHash where
+  {-# INLINEABLE toBuiltinData #-}
+  toBuiltinData (CustomScriptHash scriptHash) =
+    if Builtins.lengthOfByteString scriptHash == 28
+      then PlutusTx.toBuiltinData scriptHash
+      else traceError "ScriptHash must be of length 28"
+
+instance PlutusTx.FromData CustomScriptHash where
+  {-# INLINEABLE fromBuiltinData #-}
+  fromBuiltinData b = do
+    CustomScriptHash scriptHash <- PlutusTx.fromBuiltinData b
+    guard (Builtins.lengthOfByteString scriptHash == 28)
+    pure $ unsafeCustomScriptHash scriptHash
+
+{-# INLINEABLE unsafeCustomScriptHash #-}
+unsafeCustomScriptHash :: Builtins.BuiltinByteString -> CustomScriptHash
+unsafeCustomScriptHash scriptHash
+  | (Builtins.lengthOfByteString scriptHash == 28) =
+      traceError "unsafeCustomScriptHash: ScriptHash must have length 28"
+  | otherwise = CustomScriptHash scriptHash
 
 {- | A single hash that a yielding script can yield to
 A yielded to script can be a validator, minting policy or a stake validator
 -}
 data YieldedToHash -- FIXME
-  = YieldedToValidator ScriptHash
-  | YieldedToMP ScriptHash
-  | YieldedToSV ScriptHash
+  = YieldedToValidator CustomScriptHash
+  | YieldedToMP CustomScriptHash
+  | YieldedToSV CustomScriptHash
   deriving stock
     ( Show
     , Generic
@@ -95,7 +127,6 @@ deriving via
 {- | The `YieldListDatum` holds a collection of hashes that YieldingScripts can yield to.
 The length of the datum is checked upon creation in `mkYieldListSTMPWrapper` to ensure
 that the length of the list does not exceed the max list length passed as a parameter to that script.
-TODO(Nigel): Get it working
 -}
 data YieldListDatum = YieldListDatum
   { yieldedToScripts :: [YieldedToHash]

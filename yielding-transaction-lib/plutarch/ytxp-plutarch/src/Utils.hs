@@ -16,6 +16,7 @@ module Utils (
 where
 
 import Cardano.YTxP.Control.Vendored (psymbolValueOf)
+import Cardano.YTxP.Control.YieldList (PYieldListDatum (PYieldListDatum))
 import Data.List.NonEmpty (nonEmpty)
 import Plutarch.Api.V1 (PCredential (PPubKeyCredential, PScriptCredential))
 import Plutarch.Api.V1.Value (PCurrencySymbol, PTokenName, PValue, padaSymbol,
@@ -268,18 +269,18 @@ Check that:
   - there is no wallet output that contains one of these tokens
   - if there is exactly one script output with exactly one of these tokens,
     we check that it contains no other tokens aside from Ada
-  - if there is exactly one script output with exactly one of these tokens,
-    and that output contains no other tokens aside from Ada,
-    then we check that the output also contains a valid (according to the spec) `POutputDatum`.
+  - finally check that the output also contains a valid (according to the spec) `POutputDatum`,
+    ensuring the length of the yield list does not exceed the provided `maxYieldListSize` parameter.
 -}
 phasOnlyOneValidScriptOutputWithToken ::
+  Integer ->
   Term s (PBuiltinList PTxOut) ->
   Term
     s
     ( PCurrencySymbol
         :--> PBool
     )
-phasOnlyOneValidScriptOutputWithToken outputs =
+phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
   plam $ \symbol ->
     pmatch
       ( pfilter
@@ -356,7 +357,7 @@ phasOnlyOneValidScriptOutputWithToken outputs =
                       $ \case
                         -- If it contains exactly one token with the given symbol
                         -- then check that it does not contain any other tokens
-                        -- aside from Ada and the YieldListSTT
+                        -- aside from Ada and the given token
                         PTrue -> pmatch
                           ( ( pfilter
                                 # ( plam $ \symbolInValue ->
@@ -372,7 +373,14 @@ phasOnlyOneValidScriptOutputWithToken outputs =
                           )
                           $ \case
                             -- Finally check that it holds a valid output datum
-                            PNil -> phasValidOutputDatum # txOut'
+                            -- With the length of the yield list not exceeding `maxYieldListSize` parameter
+                            PNil ->
+                              pmatch (pfromData $ pfield @"datum" # txOut') $ \case
+                                POutputDatum (pfromData . (pfield @"outputDatum" #) -> datum) -> unTermCont $ do
+                                  PYieldListDatum ((pfield @"yieldedToScripts" #) -> yieldedToList) <-
+                                    pmatchC $ pfromData $ flip ptryFrom fst $ pto datum
+                                  pure $ plength # (pfromData yieldedToList) #<= pconstant maxYieldListSize
+                                _ -> pconstant False
                             _ -> pconstant False
                         PFalse -> pconstant False
                   PPubKeyCredential _ -> pconstant False
@@ -484,16 +492,6 @@ phasOneScriptInputAtValidatorWithExactlyOneToken inputs =
             PFalse -> pconstant False
         _ -> pconstant False
 
--- | Check the output contains a valid datum (not finished)
-phasValidOutputDatum ::
-  forall (s :: S).
-  Term s (PTxOut :--> PBool)
-phasValidOutputDatum = phoistAcyclic $
-  plam $ \txOut ->
-    pmatch (pfromData $ pfield @"datum" # txOut) $ \case
-      POutputDatum _ -> pconstant True
-      _ -> pconstant False
-
 {- | Check that there is exactly one input,
 and that one input carries exactly one yield list token.
 -}
@@ -528,7 +526,7 @@ pscriptHashToCurrencySymbol = punsafeCoerce
 {- | Extract the datum from a 'POutputDatum', expecting it to be an inline datum.
 -}
 punsafeFromInlineDatum ::
-  forall (keys :: KeyGuarantees) (s :: S) (a :: S -> Type).
+  forall (s :: S) (a :: S -> Type).
   Term
     s
     ( POutputDatum
@@ -541,7 +539,7 @@ punsafeFromInlineDatum = phoistAcyclic $
       ptrace "inline datum" $ punsafeCoerce $ pto datum
     _ -> ptraceError "Invalid datum type, inline datum expected"
 
-pmember :: (PIsData k, PIsData v) => Term s (k :--> PMap any k v :--> PBool)
+pmember :: (PIsData k) => Term s (k :--> PMap any k v :--> PBool)
 pmember = phoistAcyclic $
   plam $ \key m ->
     precList
