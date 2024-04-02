@@ -2,20 +2,30 @@ module Test.Unit.Spec (unitSpec) where
 
 import Cardano.YTxP.Control.Vendored (psymbolValueOf)
 import Test.Tasty (TestTree)
+import Test.Tasty.ExpectedFailure (expectFailBecause)
 import Test.Tasty.HUnit (assertBool, testCase)
 import Test.Unit.Transaction (
-  dummyTxInInfoSingletonList,
-  dummyTxInInfoSingletonListTwo,
-  dummyTxInInfoTwoElementList,
+  pdummyTxInInfoSingletonList,
+  pdummyTxInInfoSingletonListTwo,
+  pdummyTxInInfoThreeElementList,
+  pdummyTxInInfoTwoElementList,
+  pdummyTxOutRefOne,
+  pdummyTxOutRefTwo,
+  pdummyTxOutSingletonList,
+  pdummyTxOutTwoElementList,
  )
 import Test.Unit.Values (
   dummySymbolOne,
+  dummySymbolThree,
   dummySymbolTwo,
   dummyValueOne,
  )
 import Utils (
   phasNoScriptInputWithToken,
+  phasOneScriptInputAtValidatorWithExactlyOneToken,
   phasOnlyOneInputWithExactlyOneTokenWithSymbol,
+  phasOnlyOneValidScriptOutputWithToken,
+  poutputsDoNotContainToken,
  )
 
 pexpectedResultFalse :: Term s PBool
@@ -37,14 +47,14 @@ psymbolValueOfShouldBeEqual =
 -- | Token is in list, so should be false
 phasNoScriptInputWithTokenTestOne :: Term s PBool
 phasNoScriptInputWithTokenTestOne =
-  phasNoScriptInputWithToken dummyTxInInfoSingletonList
+  phasNoScriptInputWithToken pdummyTxInInfoSingletonList
     # (pconstant dummySymbolOne)
     #== pexpectedResultFalse
 
 -- | Token is not in list, so this should be true
 phasNoScriptInputWithTokenTestTwo :: Term s PBool
 phasNoScriptInputWithTokenTestTwo =
-  phasNoScriptInputWithToken dummyTxInInfoSingletonList
+  phasNoScriptInputWithToken pdummyTxInInfoSingletonList
     # (pconstant dummySymbolTwo)
     #== pexpectedResultTrue
 
@@ -67,7 +77,7 @@ Should be true
 -}
 phasOnlyOneInputWithExactlyOneTokenWithSymbolTestTwo :: Term s PBool
 phasOnlyOneInputWithExactlyOneTokenWithSymbolTestTwo =
-  phasOnlyOneInputWithExactlyOneTokenWithSymbol dummyTxInInfoSingletonList
+  phasOnlyOneInputWithExactlyOneTokenWithSymbol pdummyTxInInfoSingletonList
     # (pconstant dummySymbolOne)
     #== pexpectedResultTrue
 
@@ -76,7 +86,7 @@ Should be false
 -}
 phasOnlyOneInputWithExactlyOneTokenWithSymbolTestThree :: Term s PBool
 phasOnlyOneInputWithExactlyOneTokenWithSymbolTestThree =
-  phasOnlyOneInputWithExactlyOneTokenWithSymbol dummyTxInInfoSingletonList
+  phasOnlyOneInputWithExactlyOneTokenWithSymbol pdummyTxInInfoSingletonList
     # (pconstant dummySymbolTwo)
     #== pexpectedResultFalse
 
@@ -85,7 +95,7 @@ but needs to be only one element in list, so should be false
 -}
 phasOnlyOneInputWithExactlyOneTokenWithSymbolTestFour :: Term s PBool
 phasOnlyOneInputWithExactlyOneTokenWithSymbolTestFour =
-  phasOnlyOneInputWithExactlyOneTokenWithSymbol dummyTxInInfoTwoElementList
+  phasOnlyOneInputWithExactlyOneTokenWithSymbol pdummyTxInInfoTwoElementList
     # (pconstant dummySymbolOne)
     #== pexpectedResultFalse
 
@@ -94,8 +104,123 @@ but the `Value` amount is 4 not 1, so should be false
 -}
 phasOnlyOneInputWithExactlyOneTokenWithSymbolTestFive :: Term s PBool
 phasOnlyOneInputWithExactlyOneTokenWithSymbolTestFive =
-  phasOnlyOneInputWithExactlyOneTokenWithSymbol dummyTxInInfoSingletonListTwo
+  phasOnlyOneInputWithExactlyOneTokenWithSymbol pdummyTxInInfoSingletonListTwo
     # (pconstant dummySymbolOne)
+    #== pexpectedResultFalse
+
+-- | Empty list, so token is not in list, so should be true
+poutputsDoNotContainTokenTestOne :: Term s PBool
+poutputsDoNotContainTokenTestOne =
+  poutputsDoNotContainToken (pconstant [])
+    # (pconstant dummySymbolOne)
+    #== pexpectedResultTrue
+
+{- | Singleton list, but contains token corresponding to the passed CurrencySymbol
+Should be false
+-}
+poutputsDoNotContainTokenTestTwo :: Term s PBool
+poutputsDoNotContainTokenTestTwo =
+  poutputsDoNotContainToken pdummyTxOutSingletonList
+    # (pconstant dummySymbolOne)
+    #== pexpectedResultFalse
+
+{- | Two element list, but one of the outputs contains token
+corresponding to the passed CurrencySymbol, should be false
+-}
+poutputsDoNotContainTokenTestThree :: Term s PBool
+poutputsDoNotContainTokenTestThree =
+  poutputsDoNotContainToken pdummyTxOutTwoElementList
+    # (pconstant dummySymbolTwo)
+    #== pexpectedResultFalse
+
+{- | Two element list, and none of the outputs contain token
+corresponding to the passed CurrencySymbol, should be true
+-}
+poutputsDoNotContainTokenTestFour :: Term s PBool
+poutputsDoNotContainTokenTestFour =
+  poutputsDoNotContainToken pdummyTxOutTwoElementList
+    # (pconstant dummySymbolThree)
+    #== pexpectedResultTrue
+
+-- | Empty list, so should be false
+phasOneScriptInputAtValidatorWithExactlyOneTokenTestOne :: Term s PBool
+phasOneScriptInputAtValidatorWithExactlyOneTokenTestOne =
+  phasOneScriptInputAtValidatorWithExactlyOneToken
+    (pconstant [])
+    # pconstant dummySymbolOne
+    # pdummyTxOutRefOne
+    #== pexpectedResultFalse
+
+{- | Singleton list, with single token corresponding to passed symbol
+and passed TxOutRef corresponding to TxOutRef in TxInInfo in list, so should be true
+-}
+phasOneScriptInputAtValidatorWithExactlyOneTokenTestTwo :: Term s PBool
+phasOneScriptInputAtValidatorWithExactlyOneTokenTestTwo =
+  phasOneScriptInputAtValidatorWithExactlyOneToken
+    pdummyTxInInfoSingletonList
+    # pconstant dummySymbolOne
+    # pdummyTxOutRefOne
+    #== pexpectedResultTrue
+
+{- | Singleton list, with single token corresponding to passed symbol
+but passed TxOutRef does not correspond to TxOutRef in TxInInfo in list, so should be false
+-}
+phasOneScriptInputAtValidatorWithExactlyOneTokenTestThree :: Term s PBool
+phasOneScriptInputAtValidatorWithExactlyOneTokenTestThree =
+  phasOneScriptInputAtValidatorWithExactlyOneToken
+    pdummyTxInInfoSingletonList
+    # pconstant dummySymbolOne
+    # pdummyTxOutRefTwo
+    #== pexpectedResultFalse
+
+-- | Two element list, that should be true
+phasOneScriptInputAtValidatorWithExactlyOneTokenTestFour :: Term s PBool
+phasOneScriptInputAtValidatorWithExactlyOneTokenTestFour =
+  phasOneScriptInputAtValidatorWithExactlyOneToken
+    pdummyTxInInfoTwoElementList
+    # pconstant dummySymbolTwo
+    # pdummyTxOutRefTwo
+    #== pexpectedResultTrue
+
+{- | Should be false, as a token with the given symbol appears at more
+than one of the inputs
+-}
+phasOneScriptInputAtValidatorWithExactlyOneTokenTestFive :: Term s PBool
+phasOneScriptInputAtValidatorWithExactlyOneTokenTestFive =
+  phasOneScriptInputAtValidatorWithExactlyOneToken
+    pdummyTxInInfoThreeElementList
+    # pconstant dummySymbolOne
+    # pdummyTxOutRefOne
+    #== pexpectedResultFalse
+
+{- | Same list as above but should be true as the token with the given
+symbol differs from above, and only one of them appears with amount 1
+at one if the inputs
+-}
+phasOneScriptInputAtValidatorWithExactlyOneTokenTestSix :: Term s PBool
+phasOneScriptInputAtValidatorWithExactlyOneTokenTestSix =
+  phasOneScriptInputAtValidatorWithExactlyOneToken
+    pdummyTxInInfoThreeElementList
+    # pconstant dummySymbolTwo
+    # pdummyTxOutRefTwo
+    #== pexpectedResultTrue
+
+-- | Empty list so should be false
+phasOnlyOneValidScriptOutputWithTokenTestOne :: Term s PBool
+phasOnlyOneValidScriptOutputWithTokenTestOne =
+  phasOnlyOneValidScriptOutputWithToken
+    3
+    (pconstant [])
+    # pconstant dummySymbolOne
+    #== pexpectedResultFalse
+
+-- | Should fail, won't decode datum
+phasOnlyOneValidScriptOutputWithTokenTestTwo :: Term s PBool
+phasOnlyOneValidScriptOutputWithTokenTestTwo =
+  phasOnlyOneValidScriptOutputWithToken
+    3
+    pdummyTxOutSingletonList
+    # pconstant dummySymbolOne
     #== pexpectedResultFalse
 
 unitSpec :: [TestTree]
@@ -130,4 +255,49 @@ unitSpec =
   , testCase "phasOnlyOneInputWithExactlyOneTokenWithSymbol - Utils" $
       assertBool "Should be false" $
         plift phasOnlyOneInputWithExactlyOneTokenWithSymbolTestFive
+  , -- Tests for `poutputsDoNotContainToken` helper
+    testCase "poutputsDoNotContainToken - Utils" $
+      assertBool "Should be true" $
+        plift poutputsDoNotContainTokenTestOne
+  , testCase "poutputsDoNotContainToken - Utils" $
+      assertBool "Should be false" $
+        plift poutputsDoNotContainTokenTestTwo
+  , testCase "poutputsDoNotContainToken - Utils" $
+      assertBool "Should be false" $
+        plift poutputsDoNotContainTokenTestThree
+  , testCase "poutputsDoNotContainToken - Utils" $
+      assertBool "Should be true" $
+        plift poutputsDoNotContainTokenTestFour
+  , -- Tests for `phasOneScriptInputAtValidatorWithExactlyOneTokenTestOne` helper
+    testCase "phasOneScriptInputAtValidatorWithExactlyOneToken - Utils" $
+      assertBool "Should be false" $
+        plift phasOneScriptInputAtValidatorWithExactlyOneTokenTestOne
+  , testCase "phasOneScriptInputAtValidatorWithExactlyOneToken - Utils" $
+      assertBool "Should be true" $
+        plift phasOneScriptInputAtValidatorWithExactlyOneTokenTestTwo
+  , testCase "phasOneScriptInputAtValidatorWithExactlyOneToken - Utils" $
+      assertBool "Should be false" $
+        plift phasOneScriptInputAtValidatorWithExactlyOneTokenTestThree
+  , testCase "phasOneScriptInputAtValidatorWithExactlyOneToken - Utils" $
+      assertBool "Should be true" $
+        plift phasOneScriptInputAtValidatorWithExactlyOneTokenTestFour
+  , testCase "phasOneScriptInputAtValidatorWithExactlyOneToken - Utils" $
+      assertBool "Should be false" $
+        plift phasOneScriptInputAtValidatorWithExactlyOneTokenTestFive
+  , testCase "phasOneScriptInputAtValidatorWithExactlyOneToken - Utils" $
+      assertBool "Should be true" $
+        plift phasOneScriptInputAtValidatorWithExactlyOneTokenTestSix
+  , -- Tests for `phasOnlyOneValidScriptOutputWithToken` helper
+    testCase "phasOnlyOneValidScriptOutputWithToken - Utils" $
+      assertBool "Should be false" $
+        plift phasOnlyOneValidScriptOutputWithTokenTestOne
+  , expectFailBecause
+      ( mconcat
+          [ "Will fail to decode datum with (UnListData (I 1)) error"
+          , " as the datum is just an Integer not the required YieldListDatum with a list"
+          ]
+      )
+      $ testCase "phasOnlyOneValidScriptOutputWithToken - Utils"
+      $ assertBool "Should be false"
+      $ plift phasOnlyOneValidScriptOutputWithTokenTestTwo
   ]

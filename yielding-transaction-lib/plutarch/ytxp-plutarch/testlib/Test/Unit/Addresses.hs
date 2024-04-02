@@ -1,6 +1,7 @@
 module Test.Unit.Addresses (
   dummyScriptAddressOne,
   dummyScriptAddressTwo,
+  dummyScriptAddressThree,
 ) where
 
 import PlutusLedgerApi.V1.Address (Address (Address))
@@ -16,6 +17,9 @@ dummyScriptAddressOne = Address dummyScriptCredentialOne Nothing
 dummyScriptAddressTwo :: Address
 dummyScriptAddressTwo = Address dummyScriptCredentialTwo Nothing
 
+dummyScriptAddressThree :: Address
+dummyScriptAddressThree = Address dummyScriptCredentialThree Nothing
+
 dummyScriptCredentialOne :: Credential
 dummyScriptCredentialOne =
   ScriptCredential $
@@ -27,3 +31,9 @@ dummyScriptCredentialTwo =
   ScriptCredential $
     ScriptHash $
       getLedgerBytes "22222222222222222222222222222222222222222222222222222222"
+
+dummyScriptCredentialThree :: Credential
+dummyScriptCredentialThree =
+  ScriptCredential $
+    ScriptHash $
+      getLedgerBytes "33333333333333333333333333333333333333333333333333333333"

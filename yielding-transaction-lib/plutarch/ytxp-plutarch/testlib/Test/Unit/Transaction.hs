@@ -1,10 +1,21 @@
 module Test.Unit.Transaction (
-  dummyTxInInfoSingletonList,
-  dummyTxInInfoTwoElementList,
-  dummyTxInInfoSingletonListTwo,
+  pdummyTxOutSingletonListWithTxOutWithEmptyYieldListDatum,
+  pdummyTxInInfoSingletonList,
+  pdummyTxInInfoTwoElementList,
+  pdummyTxInInfoSingletonListTwo,
+  pdummyTxInInfoThreeElementList,
+  pdummyTxOutSingletonList,
+  pdummyTxOutTwoElementList,
+  pdummyTxOutRefOne,
+  pdummyTxOutRefTwo,
+  dummyTxOutRefOne,
 ) where
 
-import Plutarch.Api.V2 (PTxInInfo)
+import Plutarch.Api.V2 (
+  PTxInInfo,
+  PTxOut,
+  PTxOutRef,
+ )
 import PlutusLedgerApi.V2 (
   TxId (TxId),
   TxInInfo (TxInInfo),
@@ -12,19 +23,49 @@ import PlutusLedgerApi.V2 (
   TxOutRef (TxOutRef),
   getLedgerBytes,
  )
-import Test.Unit.Addresses (dummyScriptAddressOne, dummyScriptAddressTwo)
-import Test.Unit.Datums (dummyOutputDatumOne, dummyOutputDatumTwo)
-import Test.Unit.Values (dummyValueOne, dummyValueThree, dummyValueTwo)
+import Test.Unit.Addresses (
+  dummyScriptAddressOne,
+  dummyScriptAddressThree,
+  dummyScriptAddressTwo,
+ )
+import Test.Unit.Datums (
+  dummyOutputDatumOne,
+  dummyOutputDatumThree,
+  dummyOutputDatumTwo,
+  dummyYieldListEmptyListOutputDatum,
+ )
+import Test.Unit.Values (
+  dummyValueOne,
+  dummyValueThree,
+  dummyValueTwo,
+ )
 
-dummyTxInInfoTwoElementList :: Term s (PBuiltinList PTxInInfo)
-dummyTxInInfoTwoElementList = pconstant [dummyTxInInfoOne, dummyTxInInfoTwo]
+-- * PTxOut lists
+pdummyTxOutSingletonList :: Term s (PBuiltinList PTxOut)
+pdummyTxOutSingletonList = pconstant [dummyTxOutOne]
 
-dummyTxInInfoSingletonList :: Term s (PBuiltinList PTxInInfo)
-dummyTxInInfoSingletonList = pconstant [dummyTxInInfoOne]
+pdummyTxOutTwoElementList :: Term s (PBuiltinList PTxOut)
+pdummyTxOutTwoElementList = pconstant [dummyTxOutOne, dummyTxOutTwo]
 
-dummyTxInInfoSingletonListTwo :: Term s (PBuiltinList PTxInInfo)
-dummyTxInInfoSingletonListTwo = pconstant [dummyTxInInfoThree]
+pdummyTxOutSingletonListWithTxOutWithEmptyYieldListDatum ::
+  Term s (PBuiltinList PTxOut)
+pdummyTxOutSingletonListWithTxOutWithEmptyYieldListDatum =
+  pconstant [dummyTxOutWithYieldListDatumEmptyList]
 
+-- * PTxInInfo lists
+pdummyTxInInfoThreeElementList :: Term s (PBuiltinList PTxInInfo)
+pdummyTxInInfoThreeElementList = pconstant [dummyTxInInfoOne, dummyTxInInfoTwo, dummyTxInInfoFour]
+
+pdummyTxInInfoTwoElementList :: Term s (PBuiltinList PTxInInfo)
+pdummyTxInInfoTwoElementList = pconstant [dummyTxInInfoOne, dummyTxInInfoTwo]
+
+pdummyTxInInfoSingletonList :: Term s (PBuiltinList PTxInInfo)
+pdummyTxInInfoSingletonList = pconstant [dummyTxInInfoOne]
+
+pdummyTxInInfoSingletonListTwo :: Term s (PBuiltinList PTxInInfo)
+pdummyTxInInfoSingletonListTwo = pconstant [dummyTxInInfoThree]
+
+-- * TxInInfo samples
 dummyTxInInfoOne :: TxInInfo
 dummyTxInInfoOne = TxInInfo dummyTxOutRefOne dummyTxOutOne
 
@@ -34,6 +75,10 @@ dummyTxInInfoTwo = TxInInfo dummyTxOutRefTwo dummyTxOutTwo
 dummyTxInInfoThree :: TxInInfo
 dummyTxInInfoThree = TxInInfo dummyTxOutRefThree dummyTxOutThree
 
+dummyTxInInfoFour :: TxInInfo
+dummyTxInInfoFour = TxInInfo dummyTxOutRefFour dummyTxOutFour
+
+-- * TxOut samples
 dummyTxOutOne :: TxOut
 dummyTxOutOne = TxOut dummyScriptAddressOne dummyValueOne dummyOutputDatumOne Nothing
 
@@ -45,15 +90,37 @@ dummyTxOutTwo = TxOut dummyScriptAddressTwo dummyValueTwo dummyOutputDatumTwo No
 dummyTxOutThree :: TxOut
 dummyTxOutThree = TxOut dummyScriptAddressOne dummyValueThree dummyOutputDatumOne Nothing
 
+dummyTxOutFour :: TxOut
+dummyTxOutFour = TxOut dummyScriptAddressThree dummyValueThree dummyOutputDatumThree Nothing
+
+dummyTxOutWithYieldListDatumEmptyList :: TxOut
+dummyTxOutWithYieldListDatumEmptyList =
+  TxOut
+    dummyScriptAddressOne
+    dummyValueOne
+    dummyYieldListEmptyListOutputDatum
+    Nothing
+
+-- * TxOutRef samples
 dummyTxOutRefOne :: TxOutRef
 dummyTxOutRefOne = TxOutRef dummyTxIdOne 0
+
+pdummyTxOutRefOne :: Term s PTxOutRef
+pdummyTxOutRefOne = pconstant dummyTxOutRefOne
 
 dummyTxOutRefTwo :: TxOutRef
 dummyTxOutRefTwo = TxOutRef dummyTxIdTwo 1
 
+pdummyTxOutRefTwo :: Term s PTxOutRef
+pdummyTxOutRefTwo = pconstant dummyTxOutRefTwo
+
 dummyTxOutRefThree :: TxOutRef
 dummyTxOutRefThree = TxOutRef dummyTxIdThree 2
 
+dummyTxOutRefFour :: TxOutRef
+dummyTxOutRefFour = TxOutRef dummyTxIdThree 3
+
+-- * TxId samples
 dummyTxIdOne :: TxId
 dummyTxIdOne =
   TxId $

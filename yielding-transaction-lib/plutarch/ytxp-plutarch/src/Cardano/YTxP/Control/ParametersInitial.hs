@@ -9,6 +9,7 @@ module Cardano.YTxP.Control.ParametersInitial (
 
 import Data.Aeson (FromJSON (parseJSON), ToJSON (toEncoding, toJSON), object,
                    pairs, withObject, (.:), (.=))
+import Numeric.Natural (Natural)
 import Plutarch (Config)
 import Plutarch.Api.V2 (PScriptContext)
 import Prettyprinter (Pretty (pretty), braces, punctuate, sep, (<+>))
@@ -28,7 +29,7 @@ data ControlParametersInitial (nonceType :: Type) =
   ControlParametersInitial {
     -- | If the yield list exceeds this size, blow up during STT minting
     -- @since 0.1.0
-    maxYieldListSize :: !Integer,
+    maxYieldListSize :: !Natural,
     -- | A list of nonces for the yielding staking validators. One staking
     -- validator is compiled for each nonce.
     -- @since 0.1.0

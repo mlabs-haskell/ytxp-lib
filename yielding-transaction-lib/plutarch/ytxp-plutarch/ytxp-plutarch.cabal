@@ -134,6 +134,7 @@ library testlib
     , tasty
     , tasty-hunit
     , tasty-quickcheck
+    , tasty-expected-failure
     , ytxp-plutarch
     , plutarch
 

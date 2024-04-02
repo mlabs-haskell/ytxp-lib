@@ -12,6 +12,7 @@ where
 
 import Cardano.YTxP.Control.YieldList (PYieldListDatum (PYieldListDatum))
 import Data.List.NonEmpty (nonEmpty)
+import Numeric.Natural (Natural)
 import Plutarch.Api.V1 (PCredential (PPubKeyCredential, PScriptCredential))
 import Plutarch.Api.V1.Value (
   PCurrencySymbol,
@@ -84,8 +85,7 @@ poutputsDoNotContainToken outputs =
           # outputs
       )
       $ \case
-        -- Check that the resulting filtered list has exactly one element
-        -- TODO: Is this the most efficient way to check for one element list?
+        -- Check that the filtered list is empty
         PNil -> pconstant True
         _ -> pconstant False
 
@@ -182,7 +182,7 @@ pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount = phoistAcyclic $
 Check that:
   - there is exactly one script output with exactly one token
     with the given `PCurrencySymbol` and `PTokenName`
-  - there is no other script output with more than one of these tokens
+  - there is no other script output with one or more of these tokens
     (We do this in order to use this helper to ensure that there are no other
      script outputs containing one ore more of this token)
   - there is no wallet output that contains one of these tokens
@@ -192,7 +192,7 @@ Check that:
     ensuring the length of the yield list does not exceed the provided `maxYieldListSize` parameter.
 -}
 phasOnlyOneValidScriptOutputWithToken ::
-  Integer ->
+  Natural ->
   Term s (PBuiltinList PTxOut) ->
   Term
     s
@@ -298,7 +298,8 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
                                 POutputDatum (pfromData . (pfield @"outputDatum" #) -> datum) -> unTermCont $ do
                                   PYieldListDatum ((pfield @"yieldedToScripts" #) -> yieldedToList) <-
                                     pmatchC $ pfromData $ flip ptryFrom fst $ pto datum
-                                  pure $ plength # (pfromData yieldedToList) #<= pconstant maxYieldListSize
+                                  pure $
+                                    plength # (pfromData yieldedToList) #<= pconstant (toInteger maxYieldListSize)
                                 _ -> pconstant False
                             _ -> pconstant False
                         PFalse -> pconstant False
@@ -307,7 +308,7 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
         PNil -> pconstant False
 
 -- Check that there is one input with exactly one token of given `PCurrencySymbol`,
--- this inputs sits at a script address matching the given `PTxOutRef`,
+-- this input sits at a script address matching the given `PTxOutRef`,
 -- and there are no other script inputs with one or more of the token with the given symbol.
 phasOneScriptInputAtValidatorWithExactlyOneToken ::
   Term s (PBuiltinList PTxInInfo) ->
