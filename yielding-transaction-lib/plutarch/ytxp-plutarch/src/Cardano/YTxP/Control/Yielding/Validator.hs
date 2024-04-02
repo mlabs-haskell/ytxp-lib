@@ -17,8 +17,8 @@ import Plutarch (Config, compile)
 import Plutarch.Api.V1.Address (PCredential (PScriptCredential))
 import Plutarch.Api.V2 (PScriptContext, PStakingCredential (PStakingHash),
                         scriptHash)
-import Plutarch.Internal (punsafeCoerce)
 import Plutarch.Script (Script)
+import Plutarch.Unsafe (punsafeCoerce)
 import PlutusLedgerApi.V2 (Credential (ScriptCredential))
 
 --------------------------------------------------------------------------------
@@ -85,9 +85,8 @@ mkYieldingValidator ::
 mkYieldingValidator ylstcs = plam $ \_datum redeemer ctx -> unTermCont $ do
   txInfo <- pletC $ pfromData $ pfield @"txInfo" # ctx
   let txInfoRefInputs = pfromData $ pfield @"referenceInputs" # txInfo
-  let datums = pfromData $ pfield @"datums" # txInfo
   yieldingRedeemer <- pfromData . fst <$> ptryFromC redeemer
-  let yieldToHash = getYieldedToHash ylstcs # txInfoRefInputs # datums # yieldingRedeemer
+  let yieldToHash = getYieldedToHash ylstcs # txInfoRefInputs # yieldingRedeemer
 
   pure $
     popaque $

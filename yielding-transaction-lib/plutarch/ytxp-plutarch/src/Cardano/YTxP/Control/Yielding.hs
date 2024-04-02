@@ -9,8 +9,8 @@ module Cardano.YTxP.Control.Yielding (
 where
 
 import Cardano.YTxP.Control.Vendored (punsafeFromInlineDatum)
-import Cardano.YTxP.Control.YieldList (PYieldListDatum (PYieldListDatum),
-                                       PYieldedToHash)
+import Cardano.YTxP.Control.YieldList (PYieldListDatum, PYieldedToHash,
+                                       getYieldedToHashByIndex)
 import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS,
                                                      pcontainsYieldListSTT)
 import Plutarch.Api.V2 (KeyGuarantees (Unsorted), PDatum, PDatumHash, PMap,
@@ -90,13 +90,12 @@ getYieldedToHash ::
   Term
     s
     ( PBuiltinList PTxInInfo
-        :--> PMap 'Unsorted PDatumHash PDatum
         :--> PYieldingRedeemer
         :--> PYieldedToHash
     )
 getYieldedToHash yieldListSTCS = phoistAcyclic $
   plam $
-    \txInfoRefInputs datums redeemer -> unTermCont $ do
+    \txInfoRefInputs redeemer -> unTermCont $ do
       yieldingRedeemer <-
         pletFieldsC @'["yieldListIndex", "yieldListRefInputIndex"] redeemer
 
@@ -109,15 +108,9 @@ getYieldedToHash yieldListSTCS = phoistAcyclic $
       pure $
         pif
           (pcontainsYieldListSTT yieldListSTCS # value)
-          ( unTermCont $ do
-              let datum = pfromData $ pfield @"datum" # output
-              let yieldListDatum = punsafeFromInlineDatum # datum # datums
-
-              PYieldListDatum ((pfield @"yieldedToScripts" #) -> yieldList) <-
-                pmatchC (pfromData yieldListDatum)
-
-              pure $
-                pfromData $
-                  yieldList #!! (pto $ pfromData $ getField @"yieldListIndex" yieldingRedeemer)
+          ( let datum = pfromData $ pfield @"datum" # output
+                ylDatum = punsafeFromInlineDatum # datum
+                ylIndex = pfromData $ getField @"yieldListIndex" yieldingRedeemer
+             in getYieldedToHashByIndex # ylDatum # pto ylIndex
           )
           (ptraceError "getYieldedToHash: Reference input does not contain YieldListSTCS")

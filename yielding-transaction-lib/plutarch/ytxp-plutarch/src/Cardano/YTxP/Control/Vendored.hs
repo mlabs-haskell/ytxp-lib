@@ -38,6 +38,7 @@ import Plutarch.Lift (PConstantDecl (PConstantRepr, PConstanted, pconstantFromRe
                       PLifted)
 import Plutarch.List (pfoldl')
 import Plutarch.Script (Script (Script))
+import Plutarch.Unsafe (punsafeCoerce)
 import PlutusLedgerApi.V1 (BuiltinData (BuiltinData))
 import PlutusTx (Data (List), FromData (fromBuiltinData),
                  ToData (toBuiltinData), UnsafeFromData (unsafeFromBuiltinData),
@@ -441,11 +442,10 @@ punsafeFromInlineDatum ::
   Term
     s
     ( POutputDatum
-        :--> PMap keys PDatumHash PDatum
         :--> a
     )
 punsafeFromInlineDatum = phoistAcyclic $
-  plam $ \od m -> pmatch od $ \case
+  plam $ \od -> pmatch od $ \case
     POutputDatum (pfromData . (pfield @"outputDatum" #) -> datum) ->
       -- FIXME: Not sure if using `punsafeCoerce` is the best call here
       ptrace "inline datum" $ punsafeCoerce $ pto datum

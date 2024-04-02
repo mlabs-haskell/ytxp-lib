@@ -7,11 +7,12 @@ Description: Defines shared data types and utilities for YieldList scripts
 -}
 module Cardano.YTxP.Control.YieldList (
   YieldListDatum,
-  PYieldListDatum (PYieldListDatum),
+  PYieldListDatum,
   YieldedToHash,
   PYieldedToHash(PYieldedToValidator,PYieldedToMP,PYieldedToSV),
   YieldListMPWrapperRedeemer,
   PYieldListMPWrapperRedeemer (PMint, PBurn),
+  getYieldedToHashByIndex,
   immutableValidatorWrapper,
   adminSigValidatorWrapper,
   multiSigValidatorWrapper,
@@ -173,6 +174,15 @@ deriving via
   (DerivePConstantViaEnum YieldListMPWrapperRedeemer PYieldListMPWrapperRedeemer)
   instance
     (PConstantDecl YieldListMPWrapperRedeemer)
+
+--------------------------------------------------------------------------------
+-- Helpers
+
+getYieldedToHashByIndex :: Term s (PYieldListDatum :--> PInteger :--> PYieldedToHash)
+getYieldedToHashByIndex = plam $ \datum n ->
+  pmatch datum $ \case
+    PYieldListDatum ((pfield @"yieldedToScripts" #) -> yieldList) ->
+      pfromData $ yieldList #!! n
 
 --------------------------------------------------------------------------------
 -- Validator Wrappers
