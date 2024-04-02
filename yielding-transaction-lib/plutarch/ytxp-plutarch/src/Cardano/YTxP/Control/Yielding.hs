@@ -4,7 +4,7 @@ module Cardano.YTxP.Control.Yielding (
   YieldListIndex,
   YieldListRefInputIndex,
   YieldingRedeemer (YieldingRedeemer),
-  getYieldList,
+  getYieldedToHash,
 )
 where
 
@@ -85,7 +85,7 @@ YieldList by:
 - Decoding its datum (unsafely; the presence of the YieldListSTCS ensure it is authentic and well-formed)
 - Looking in the datum at the index in the redeemer and returning the YieldedToHash
 -}
-getYieldList ::
+getYieldedToHash ::
   YieldListSTCS ->
   Term
     s
@@ -94,7 +94,7 @@ getYieldList ::
         :--> PYieldingRedeemer
         :--> PYieldedToHash
     )
-getYieldList yieldListSTCS = phoistAcyclic $
+getYieldedToHash yieldListSTCS = phoistAcyclic $
   plam $
     \txInfoRefInputs datums redeemer -> unTermCont $ do
       yieldingRedeemer <-
@@ -120,4 +120,4 @@ getYieldList yieldListSTCS = phoistAcyclic $
                 pfromData $
                   yieldList #!! (pto $ pfromData $ getField @"yieldListIndex" yieldingRedeemer)
           )
-          (ptraceError "getYieldList: Reference input does not contain YieldListSTCS")
+          (ptraceError "getYieldedToHash: Reference input does not contain YieldListSTCS")

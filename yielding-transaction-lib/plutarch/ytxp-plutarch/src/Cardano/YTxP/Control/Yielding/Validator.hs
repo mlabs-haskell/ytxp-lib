@@ -10,7 +10,7 @@ module Cardano.YTxP.Control.Yielding.Validator (
 
 import Cardano.YTxP.Control.YieldList (PYieldedToHash (PYieldedToMP, PYieldedToSV, PYieldedToValidator))
 import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
-import Cardano.YTxP.Control.Yielding (getYieldList)
+import Cardano.YTxP.Control.Yielding (getYieldedToHash)
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Plutarch (Config, compile)
@@ -69,7 +69,7 @@ mkYieldingValidatorCredential (YieldingValidatorScript script) =
 -- -   Look at the UTxO at the `n` th entry in the `txInfoReferenceInputs`, where `n` is equal to `yieldListInputIndex`.
 --     -   Call this UTxO `yieldListUTxO`.
 --     -   Check that this UTxO is carrying exactly one token with the `yieldListSTCS`. Blow up if not.
--- -   &ldquo;Unsafely&rdquo; deserialize the datum of the `yieldListUTxO` to a value `yieldList :: YieldList`
+-- -   "Unsafely" deserialize the datum of the `yieldListUTxO` to a value `yieldList :: YieldList`
 -- -   Grab the correct `YieldToHash` by looking at the `n` th entry of `yieldList`, where `n` is equal to
 --     `yieldListIndex`. Call this hash `yieldToHash`.
 -- -   Obtain evidence that the a script with `yieldToHash` was triggered via the `checkYieldList` function.
@@ -87,7 +87,7 @@ mkYieldingValidator ylstcs = plam $ \_datum redeemer ctx -> unTermCont $ do
   let txInfoRefInputs = pfromData $ pfield @"referenceInputs" # txInfo
   let datums = pfromData $ pfield @"datums" # txInfo
   yieldingRedeemer <- pfromData . fst <$> ptryFromC redeemer
-  let yieldToHash = getYieldList ylstcs # txInfoRefInputs # datums # yieldingRedeemer
+  let yieldToHash = getYieldedToHash ylstcs # txInfoRefInputs # datums # yieldingRedeemer
 
   pure $
     popaque $
