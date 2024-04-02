@@ -2,6 +2,8 @@ module Test.Unit.Values (
   dummySymbolOne,
   dummySymbolTwo,
   dummyValueOne,
+  dummyValueTwo,
+  dummyValueThree,
 ) where
 
 import PlutusLedgerApi.V1.Value (
@@ -26,13 +28,15 @@ dummySymbolTwo =
     getLedgerBytes "11111111111111111111111111111111111111111111111111111111"
 
 dummyValueOne :: Value
-dummyValueOne = mkSomeValue 1
+dummyValueOne = mkSomeValue dummySymbolOne 1
+
+dummyValueTwo :: Value
+dummyValueTwo = mkSomeValue dummySymbolTwo 1
+
+-- Same symbol as 'dummyValueOne' but with different amount
+dummyValueThree :: Value
+dummyValueThree = mkSomeValue dummySymbolOne 4
 
 -- | Make a sample `Value` for tests
-mkSomeValue :: Integer -> Value
-mkSomeValue =
-  singleton
-    ( CurrencySymbol $
-        getLedgerBytes "00000000000000000000000000000000000000000000000000000000"
-    )
-    "Some token"
+mkSomeValue :: CurrencySymbol -> Integer -> Value
+mkSomeValue symbol = singleton symbol "Some token"

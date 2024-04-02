@@ -2,17 +2,14 @@ module Utils (
   pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount,
   phasOneScriptInputAtValidatorWithExactlyOneToken,
   phasOnlyOneValidScriptOutputWithToken,
-  phasOnlyOnePubKeyOutputAndNoTokenWithSymbol,
   phasOnlyOneInputWithExactlyOneTokenWithSymbol,
   phasNoScriptInputWithToken,
-  phasOnlyOnePubKeyInput,
   poutputsDoNotContainToken,
   pemptyTokenName,
   pands,
 )
 where
 
-import Cardano.YTxP.Control.Vendored (psymbolValueOf)
 import Cardano.YTxP.Control.YieldList (PYieldListDatum (PYieldListDatum))
 import Data.List.NonEmpty (nonEmpty)
 import Plutarch.Api.V1 (PCredential (PPubKeyCredential, PScriptCredential))
@@ -180,90 +177,6 @@ pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount = phoistAcyclic $
       #== amount
       #&& (plength #$ pto $ pto $ pto value)
       #== 2
-
-{- | Check there is only one `PubKey` output and ensure that
-output does not contain token with the given `CurrencySymbol`
--}
-phasOnlyOnePubKeyOutputAndNoTokenWithSymbol ::
-  forall (s :: S).
-  Term s (PBuiltinList PTxOut) ->
-  Term s (PCurrencySymbol :--> PBool)
-phasOnlyOnePubKeyOutputAndNoTokenWithSymbol outputs =
-  plam $ \symbol ->
-    pmatch
-      ( pfilter
-          # ( plam $ \txOut ->
-                pmatch
-                  ( pfromData
-                      $ pfield @"credential"
-                        #$ pfromData
-                      $ pfield @"address" # txOut
-                  )
-                  $ \case
-                    -- Check that the output is a pub key output
-                    -- and that output does not contain a YieldList
-                    PPubKeyCredential _ ->
-                      ( -- We inline the `psymbolValue` function for efficiency reasons
-                        let valueMap = pto (pto $ pfromData $ pfield @"value" # txOut)
-                            go = pfix #$ plam $ \self valueMap' ->
-                              pelimList
-                                ( \symbolAndTokens rest ->
-                                    pif
-                                      (pfromData (pfstBuiltin # symbolAndTokens) #== symbol)
-                                      ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
-                                         in pfoldl'
-                                              ( \acc tokenAndAmount ->
-                                                  (pfromData $ psndBuiltin # tokenAndAmount) + acc
-                                              )
-                                              # 0
-                                              # tokens
-                                      )
-                                      (self # rest)
-                                )
-                                0
-                                valueMap'
-                         in go # valueMap
-                      )
-                        #== pconstant 0
-                    _ -> pconstant False
-            )
-          # outputs
-      )
-      $ \case
-        -- Check that the resulting filtered list has exactly one element
-        -- TODO: Is this the most efficient way to check for one element list?
-        PCons _txOut' tailOfList -> pnull # tailOfList
-        _ -> pconstant False
-
--- | Check there is only one `PubKey` input
-phasOnlyOnePubKeyInput ::
-  forall (s :: S).
-  Term s (PBuiltinList PTxInInfo) ->
-  Term s PBool
-phasOnlyOnePubKeyInput inputs =
-  pmatch
-    ( pfilter
-        # ( plam $ \txInInfo ->
-              pmatch
-                ( pfromData
-                    $ pfield @"credential"
-                      #$ pfromData
-                    $ pfield @"address"
-                      #$ pfromData
-                    $ pfield @"resolved" # txInInfo
-                )
-                $ \case
-                  -- If the output is a pub key output we keep it
-                  PPubKeyCredential _ -> pconstant True
-                  _ -> pconstant False
-          )
-        # inputs
-    )
-    $ \case
-      -- Check that the resulting filtered list has exactly one element
-      -- TODO: Is this the most efficient way to check for one element list?
-      PCons _input tailOfList -> pnull # tailOfList
-      _ -> pconstant False
 
 {- |
 Check that:
@@ -511,12 +424,36 @@ phasOnlyOneInputWithExactlyOneTokenWithSymbol inputs =
         PCons txInInfo tailOfList ->
           pmatch (pnull # tailOfList) $ \case
             PTrue ->
-              ( -- TODO: Inline this
-                psymbolValueOf
-                  # symbol
-                  # (pfromData $ pfield @"value" #$ pfromData $ pfield @"resolved" # txInInfo)
+              ( ( -- We inline the `psymbolValue` function for efficiency reasons
+                  let valueMap =
+                        pto
+                          $ pto
+                          $ pfromData
+                          $ pfield @"value"
+                            #$ pfromData
+                          $ pfield @"resolved"
+                            # txInInfo
+                      go = pfix #$ plam $ \self valueMap' ->
+                        pelimList
+                          ( \symbolAndTokens rest ->
+                              pif
+                                (pfromData (pfstBuiltin # symbolAndTokens) #== symbol)
+                                ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
+                                   in pfoldl'
+                                        ( \acc tokenAndAmount ->
+                                            (pfromData $ psndBuiltin # tokenAndAmount) + acc
+                                        )
+                                        # 0
+                                        # tokens
+                                )
+                                (self # rest)
+                          )
+                          0
+                          valueMap'
+                   in go # valueMap
+                )
+                  #== pconstant 1
               )
-                #== pconstant 1
             _ -> pconstant False
         _ -> pconstant False
 
