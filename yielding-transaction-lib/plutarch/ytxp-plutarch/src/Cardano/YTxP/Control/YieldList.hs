@@ -6,9 +6,10 @@
 Description: Defines shared data types and utilities for YieldList scripts
 -}
 module Cardano.YTxP.Control.YieldList (
-  YieldListDatum,
+  YieldListDatum(YieldListDatum),
   PYieldListDatum (PYieldListDatum),
-  YieldedToHash,
+  YieldedToHash(YieldedToValidator, YieldedToMP, YieldedToSV),
+  CustomScriptHash(CustomScriptHash),
   PYieldedToHash (PYieldedToValidator, PYieldedToMP, PYieldedToSV),
   YieldListMPWrapperRedeemer,
   PYieldListMPWrapperRedeemer (PMint, PBurn),

@@ -2,10 +2,8 @@ module Utils (
   pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount,
   phasOneScriptInputAtValidatorWithExactlyOneToken,
   phasOnlyOneValidScriptOutputWithToken,
-  phasOnlyOnePubKeyOutputAndNoTokenWithSymbol,
   phasOnlyOneInputWithExactlyOneTokenWithSymbol,
   phasNoScriptInputWithToken,
-  phasOnlyOnePubKeyInput,
   poutputsDoNotContainToken,
   pemptyTokenName,
   pands,
@@ -15,9 +13,9 @@ module Utils (
 )
 where
 
-import Cardano.YTxP.Control.Vendored (psymbolValueOf)
 import Cardano.YTxP.Control.YieldList (PYieldListDatum (PYieldListDatum))
 import Data.List.NonEmpty (nonEmpty)
+import Numeric.Natural (Natural)
 import Plutarch.Api.V1 (PCredential (PPubKeyCredential, PScriptCredential))
 import Plutarch.Api.V1.Value (PCurrencySymbol, PTokenName, PValue, padaSymbol,
                               pvalueOf)
@@ -81,8 +79,7 @@ poutputsDoNotContainToken outputs =
           # outputs
       )
       $ \case
-        -- Check that the resulting filtered list has exactly one element
-        -- TODO: Is this the most efficient way to check for one element list?
+        -- Check that the filtered list is empty
         PNil -> pconstant True
         _ -> pconstant False
 
@@ -175,95 +172,11 @@ pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount = phoistAcyclic $
       #&& (plength #$ pto $ pto $ pto value)
       #== 2
 
-{- | Check there is only one `PubKey` output and ensure that
-output does not contain token with the given `CurrencySymbol`
--}
-phasOnlyOnePubKeyOutputAndNoTokenWithSymbol ::
-  forall (s :: S).
-  Term s (PBuiltinList PTxOut) ->
-  Term s (PCurrencySymbol :--> PBool)
-phasOnlyOnePubKeyOutputAndNoTokenWithSymbol outputs =
-  plam $ \symbol ->
-    pmatch
-      ( pfilter
-          # ( plam $ \txOut ->
-                pmatch
-                  ( pfromData
-                      $ pfield @"credential"
-                        #$ pfromData
-                      $ pfield @"address" # txOut
-                  )
-                  $ \case
-                    -- Check that the output is a pub key output
-                    -- and that output does not contain a YieldList
-                    PPubKeyCredential _ ->
-                      ( -- We inline the `psymbolValue` function for efficiency reasons
-                        let valueMap = pto (pto $ pfromData $ pfield @"value" # txOut)
-                            go = pfix #$ plam $ \self valueMap' ->
-                              pelimList
-                                ( \symbolAndTokens rest ->
-                                    pif
-                                      (pfromData (pfstBuiltin # symbolAndTokens) #== symbol)
-                                      ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
-                                         in pfoldl'
-                                              ( \acc tokenAndAmount ->
-                                                  (pfromData $ psndBuiltin # tokenAndAmount) + acc
-                                              )
-                                              # 0
-                                              # tokens
-                                      )
-                                      (self # rest)
-                                )
-                                0
-                                valueMap'
-                         in go # valueMap
-                      )
-                        #== pconstant 0
-                    _ -> pconstant False
-            )
-          # outputs
-      )
-      $ \case
-        -- Check that the resulting filtered list has exactly one element
-        -- TODO: Is this the most efficient way to check for one element list?
-        PCons _txOut' tailOfList -> pnull # tailOfList
-        _ -> pconstant False
-
--- | Check there is only one `PubKey` input
-phasOnlyOnePubKeyInput ::
-  forall (s :: S).
-  Term s (PBuiltinList PTxInInfo) ->
-  Term s PBool
-phasOnlyOnePubKeyInput inputs =
-  pmatch
-    ( pfilter
-        # ( plam $ \txInInfo ->
-              pmatch
-                ( pfromData
-                    $ pfield @"credential"
-                      #$ pfromData
-                    $ pfield @"address"
-                      #$ pfromData
-                    $ pfield @"resolved" # txInInfo
-                )
-                $ \case
-                  -- If the output is a pub key output we keep it
-                  PPubKeyCredential _ -> pconstant True
-                  _ -> pconstant False
-          )
-        # inputs
-    )
-    $ \case
-      -- Check that the resulting filtered list has exactly one element
-      -- TODO: Is this the most efficient way to check for one element list?
-      PCons _input tailOfList -> pnull # tailOfList
-      _ -> pconstant False
-
 {- |
 Check that:
   - there is exactly one script output with exactly one token
     with the given `PCurrencySymbol` and `PTokenName`
-  - there is no other script output with more than one of these tokens
+  - there is no other script output with one or more of these tokens
     (We do this in order to use this helper to ensure that there are no other
      script outputs containing one ore more of this token)
   - there is no wallet output that contains one of these tokens
@@ -273,7 +186,7 @@ Check that:
     ensuring the length of the yield list does not exceed the provided `maxYieldListSize` parameter.
 -}
 phasOnlyOneValidScriptOutputWithToken ::
-  Integer ->
+  Natural ->
   Term s (PBuiltinList PTxOut) ->
   Term
     s
@@ -379,7 +292,8 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
                                 POutputDatum (pfromData . (pfield @"outputDatum" #) -> datum) -> unTermCont $ do
                                   PYieldListDatum ((pfield @"yieldedToScripts" #) -> yieldedToList) <-
                                     pmatchC $ pfromData $ flip ptryFrom fst $ pto datum
-                                  pure $ plength # (pfromData yieldedToList) #<= pconstant maxYieldListSize
+                                  pure $
+                                    plength # (pfromData yieldedToList) #<= pconstant (toInteger maxYieldListSize)
                                 _ -> pconstant False
                             _ -> pconstant False
                         PFalse -> pconstant False
@@ -388,7 +302,7 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
         PNil -> pconstant False
 
 -- Check that there is one input with exactly one token of given `PCurrencySymbol`,
--- this inputs sits at a script address matching the given `PTxOutRef`,
+-- this input sits at a script address matching the given `PTxOutRef`,
 -- and there are no other script inputs with one or more of the token with the given symbol.
 phasOneScriptInputAtValidatorWithExactlyOneToken ::
   Term s (PBuiltinList PTxInInfo) ->
@@ -505,12 +419,36 @@ phasOnlyOneInputWithExactlyOneTokenWithSymbol inputs =
         PCons txInInfo tailOfList ->
           pmatch (pnull # tailOfList) $ \case
             PTrue ->
-              ( -- TODO: Inline this
-                psymbolValueOf
-                  # symbol
-                  # (pfromData $ pfield @"value" #$ pfromData $ pfield @"resolved" # txInInfo)
+              ( ( -- We inline the `psymbolValue` function for efficiency reasons
+                  let valueMap =
+                        pto
+                          $ pto
+                          $ pfromData
+                          $ pfield @"value"
+                            #$ pfromData
+                          $ pfield @"resolved"
+                            # txInInfo
+                      go = pfix #$ plam $ \self valueMap' ->
+                        pelimList
+                          ( \symbolAndTokens rest ->
+                              pif
+                                (pfromData (pfstBuiltin # symbolAndTokens) #== symbol)
+                                ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
+                                   in pfoldl'
+                                        ( \acc tokenAndAmount ->
+                                            (pfromData $ psndBuiltin # tokenAndAmount) + acc
+                                        )
+                                        # 0
+                                        # tokens
+                                )
+                                (self # rest)
+                          )
+                          0
+                          valueMap'
+                   in go # valueMap
+                )
+                  #== pconstant 1
               )
-                #== pconstant 1
             _ -> pconstant False
         _ -> pconstant False
 
