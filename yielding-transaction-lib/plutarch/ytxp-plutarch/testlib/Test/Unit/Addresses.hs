@@ -6,10 +6,7 @@ module Test.Unit.Addresses (
 
 import PlutusLedgerApi.V1.Address (Address (Address))
 import PlutusLedgerApi.V1.Scripts (ScriptHash (ScriptHash))
-import PlutusLedgerApi.V2 (
-  Credential (ScriptCredential),
-  getLedgerBytes,
- )
+import PlutusLedgerApi.V2 (Credential (ScriptCredential), getLedgerBytes)
 
 dummyScriptAddressOne :: Address
 dummyScriptAddressOne = Address dummyScriptCredentialOne Nothing

@@ -146,7 +146,7 @@ newtype PYieldListDatum (s :: S)
       ( Term
           s
           ( PDataRecord
-              '[ "yieldedToScripts" ':= PBuiltinList (PAsData PYieldedToHash)
+              '[ "yieldedToScripts" ' := PBuiltinList (PAsData PYieldedToHash)
                ]
           )
       )

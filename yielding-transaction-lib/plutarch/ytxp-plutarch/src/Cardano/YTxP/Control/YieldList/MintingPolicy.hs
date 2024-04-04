@@ -24,6 +24,7 @@ import Prettyprinter (Pretty)
 import Utils (pands, pemptyTokenName, phasNoScriptInputWithToken,
               phasOnlyOneInputWithExactlyOneTokenWithSymbol,
               phasOnlyOneValidScriptOutputWithToken, pmember,
+              phasOnlyOneValidScriptOutputWithToken,
               pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount)
 
 --------------------------------------------------------------------------------
@@ -150,7 +151,8 @@ mkYieldListSTMPWrapper
         PMint -> unTermCont $ do
           pure
             $ popaque
-            $ pmatch
+            $ ptraceIfFalse
+              "mkYieldListSTMPWrapper failed"
               ( pands
                   [ ptraceIfFalse
                       "Must mint exactly one YieldList token with an empty token name"
@@ -180,13 +182,11 @@ mkYieldListSTMPWrapper
                         # yieldListSymbol
                   ]
               )
-            $ \case
-              PTrue -> pconstant ()
-              PFalse -> perror
         PBurn -> unTermCont $ do
           pure
             $ popaque
-            $ pmatch
+            $ ptraceIfFalse
+              "mkYieldListSTMPWrapper failed"
               ( pands
                   [ ptraceIfFalse
                       "Must burn exactly one yield list token"
@@ -202,9 +202,6 @@ mkYieldListSTMPWrapper
                         # yieldListSymbol
                   ]
               )
-            $ \case
-              PTrue -> pconstant ()
-              PFalse -> perror
 
 -- | Checks that the given 'PValue' contains the YieldListSTT
 -- TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead

@@ -63,8 +63,8 @@ newtype PYieldingRedeemer (s :: S)
       ( Term
           s
           ( PDataRecord
-              '[ "yieldListIndex" ':= PYieldListIndex
-               , "yieldListRefInputIndex" ':= PYieldListRefInputIndex
+              '[ "yieldListIndex" ' := PYieldListIndex
+               , "yieldListRefInputIndex" ' := PYieldListRefInputIndex
                ]
           )
       )

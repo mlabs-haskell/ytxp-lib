@@ -18,11 +18,8 @@ import Plutarch.Api.V2 (PScriptContext, PScriptPurpose (PSpending), scriptHash)
 import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (Credential (ScriptCredential))
 import Prettyprinter (Pretty)
-import Utils (
-  pands,
-  phasOneScriptInputAtValidatorWithExactlyOneToken,
-  poutputsDoNotContainToken,
- )
+import Utils (pands, phasOneScriptInputAtValidatorWithExactlyOneToken,
+              poutputsDoNotContainToken)
 
 --------------------------------------------------------------------------------
 -- YieldListValidatorScript
@@ -115,7 +112,8 @@ mkYieldListValidatorWrapper = plam $ \_scriptToWrap yieldListSymbol _datum _rede
 
   pure
     $ popaque
-    $ pmatch
+    $ ptraceIfFalse
+      "mkYieldListValidatorWrapper failed"
       ( pands
           [ -- For efficiency reasons we use this helper to make a couple of checks,
             -- Namely, it ensures that there is one input at the yield list validator
@@ -137,6 +135,3 @@ mkYieldListValidatorWrapper = plam $ \_scriptToWrap yieldListSymbol _datum _rede
               $ poutputsDoNotContainToken outputs # yieldListSymbol
           ]
       )
-    $ \case
-      PTrue -> pconstant ()
-      PFalse -> perror
