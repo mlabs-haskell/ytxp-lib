@@ -207,6 +207,7 @@ mkYieldListSTMPWrapper
               PFalse -> perror
 
 -- | Checks that the given 'PValue' contains the YieldListSTT
+-- TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead
 pcontainsYieldListSTT :: YieldListSTCS -> Term s (PValue anyKey anyAmount :--> PBool)
 pcontainsYieldListSTT (YieldListSTCS symbol) =
   plam $ \value ->
