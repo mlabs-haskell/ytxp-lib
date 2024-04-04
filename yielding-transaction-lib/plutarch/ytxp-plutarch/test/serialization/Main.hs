@@ -11,6 +11,7 @@ import Test.QuickCheck (Gen, arbitrary, elements)
 import Test.Tasty (adjustOption, defaultMain, testGroup)
 import Test.Tasty.Golden (goldenVsString)
 import Test.Tasty.QuickCheck (QuickCheckTests)
+import Test.Unit.Spec (unitSpec)
 import Test.Utils (noShrink)
 
 main :: IO ()
@@ -19,7 +20,7 @@ main = defaultMain . adjustOption go . testGroup "serialization" $ [
   goldenVsString "ControlParametersInitial Integer"
                  "goldens/ControlParametersInitialInteger.golden"
                  (pure . encode $ sampleYLS)
-  ]
+  ] <> unitSpec
   where
     go :: QuickCheckTests -> QuickCheckTests
     go = max 10_000

@@ -10,21 +10,9 @@
         inherit (config.settings.haskell) index-state compiler-nix-name;
 
         dependencies = [
-          # LB base schema and runtimes libs
-          # Plutarch
-          "${inputs'.lbf.packages.lbf-prelude-plutarch}"
-          "${inputs'.lbf.packages.lbf-plutus-plutarch}"
-          "${inputs'.lbf.packages.lbr-plutarch-src}"
-          # Prelude
-          "${inputs'.lbf.packages.lbf-prelude-haskell}"
-          "${inputs'.lbf.packages.lbr-prelude-haskell-src}"
-
           # Plutarch itself
           "${inputs.plutarch}"
-
-          # Ytxp Plutarch API TODO (still stubbed from LBF)
-          #"${config.packages.lbf-demo-plutus-api-plutarch}"
-          #"${config.packages.lbf-demo-config-api-haskell}"
+          "${inputs.plutarch}/plutarch-extra"
         ];
 
         devShellTools = config.settings.shell.tools;

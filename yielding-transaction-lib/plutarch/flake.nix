@@ -33,10 +33,8 @@
   outputs = inputs@{ flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
-        ./pkgs.nix
-        ./settings.nix
-        #./pre-commit.nix
-        #./api/build.nix
+        ./nix/pkgs.nix
+        ./nix/settings.nix
         ./ytxp-plutarch/build.nix
       ];
       debug = true;
