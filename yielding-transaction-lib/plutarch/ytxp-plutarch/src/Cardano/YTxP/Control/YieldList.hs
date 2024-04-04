@@ -1,4 +1,4 @@
-{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE StandaloneDeriving   #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
@@ -21,21 +21,16 @@ module Cardano.YTxP.Control.YieldList (
   multiSigMintingPolicyWrapper,
 ) where
 
-import Cardano.YTxP.Control.Vendored (
-  DerivePConstantViaDataList (DerivePConstantViaDataList),
-  DerivePConstantViaEnum (DerivePConstantEnum),
-  EnumIsData (EnumIsData),
-  PlutusTypeDataList,
-  PlutusTypeEnumData,
-  ProductIsData (ProductIsData),
- )
+import Cardano.YTxP.Control.Vendored (DerivePConstantViaDataList (DerivePConstantViaDataList),
+                                      DerivePConstantViaEnum (DerivePConstantEnum),
+                                      EnumIsData (EnumIsData),
+                                      PlutusTypeDataList, PlutusTypeEnumData,
+                                      ProductIsData (ProductIsData))
 import Control.Monad (guard)
 import Generics.SOP qualified as SOP
 import Plutarch.Api.V2 (PScriptHash)
-import Plutarch.DataRepr (
-  DerivePConstantViaData (DerivePConstantViaData),
-  PDataFields,
- )
+import Plutarch.DataRepr (DerivePConstantViaData (DerivePConstantViaData),
+                          PDataFields)
 import Plutarch.Lift (PConstantDecl, PLifted, PUnsafeLiftDecl)
 import PlutusTx qualified
 import PlutusTx.Builtins qualified as Builtins

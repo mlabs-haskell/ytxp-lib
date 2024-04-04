@@ -4,29 +4,18 @@ import Cardano.YTxP.Control.Vendored (psymbolValueOf)
 import Test.Tasty (TestTree)
 import Test.Tasty.ExpectedFailure (expectFailBecause)
 import Test.Tasty.HUnit (assertBool, testCase)
-import Test.Unit.Transaction (
-  pdummyTxInInfoSingletonList,
-  pdummyTxInInfoSingletonListTwo,
-  pdummyTxInInfoThreeElementList,
-  pdummyTxInInfoTwoElementList,
-  pdummyTxOutRefOne,
-  pdummyTxOutRefTwo,
-  pdummyTxOutSingletonList,
-  pdummyTxOutTwoElementList,
- )
-import Test.Unit.Values (
-  dummySymbolOne,
-  dummySymbolThree,
-  dummySymbolTwo,
-  dummyValueOne,
- )
-import Utils (
-  phasNoScriptInputWithToken,
-  phasOneScriptInputAtValidatorWithExactlyOneToken,
-  phasOnlyOneInputWithExactlyOneTokenWithSymbol,
-  phasOnlyOneValidScriptOutputWithToken,
-  poutputsDoNotContainToken,
- )
+import Test.Unit.Transaction (pdummyTxInInfoSingletonList,
+                              pdummyTxInInfoSingletonListTwo,
+                              pdummyTxInInfoThreeElementList,
+                              pdummyTxInInfoTwoElementList, pdummyTxOutRefOne,
+                              pdummyTxOutRefTwo, pdummyTxOutSingletonList,
+                              pdummyTxOutTwoElementList)
+import Test.Unit.Values (dummySymbolOne, dummySymbolThree, dummySymbolTwo,
+                         dummyValueOne)
+import Utils (phasNoScriptInputWithToken,
+              phasOneScriptInputAtValidatorWithExactlyOneToken,
+              phasOnlyOneInputWithExactlyOneTokenWithSymbol,
+              phasOnlyOneValidScriptOutputWithToken, poutputsDoNotContainToken)
 
 pexpectedResultFalse :: Term s PBool
 pexpectedResultFalse = pconstant False

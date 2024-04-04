@@ -8,9 +8,7 @@ module Cardano.YTxP.Control.YieldList.MintingPolicy (
   mkYieldListSTCS,
 ) where
 
-import Cardano.YTxP.Control.YieldList (
-  PYieldListMPWrapperRedeemer (PBurn, PMint),
- )
+import Cardano.YTxP.Control.YieldList (PYieldListMPWrapperRedeemer (PBurn, PMint))
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Numeric.Natural (Natural)
@@ -19,14 +17,10 @@ import Plutarch.Api.V2 (PScriptContext, PScriptPurpose (PMinting), scriptHash)
 import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
 import Prettyprinter (Pretty)
-import Utils (
-  pands,
-  pemptyTokenName,
-  phasNoScriptInputWithToken,
-  phasOnlyOneInputWithExactlyOneTokenWithSymbol,
-  phasOnlyOneValidScriptOutputWithToken,
-  pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount,
- )
+import Utils (pands, pemptyTokenName, phasNoScriptInputWithToken,
+              phasOnlyOneInputWithExactlyOneTokenWithSymbol,
+              phasOnlyOneValidScriptOutputWithToken,
+              pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount)
 
 --------------------------------------------------------------------------------
 -- YieldListSTMPScript
@@ -152,7 +146,8 @@ mkYieldListSTMPWrapper
         PMint -> unTermCont $ do
           pure
             $ popaque
-            $ pmatch
+            $ ptraceIfFalse
+              "mkYieldListSTMPWrapper failed"
               ( pands
                   [ ptraceIfFalse
                       "Must mint exactly one YieldList token with an empty token name"
@@ -182,13 +177,11 @@ mkYieldListSTMPWrapper
                         # yieldListSymbol
                   ]
               )
-            $ \case
-              PTrue -> pconstant ()
-              PFalse -> perror
         PBurn -> unTermCont $ do
           pure
             $ popaque
-            $ pmatch
+            $ ptraceIfFalse
+              "mkYieldListSTMPWrapper failed"
               ( pands
                   [ ptraceIfFalse
                       "Must burn exactly one yield list token"
@@ -204,6 +197,3 @@ mkYieldListSTMPWrapper
                         # yieldListSymbol
                   ]
               )
-            $ \case
-              PTrue -> pconstant ()
-              PFalse -> perror

@@ -21,46 +21,21 @@ import Data.Kind (Constraint)
 import Data.Maybe (fromJust)
 import Data.Proxy (Proxy (Proxy))
 import GHC.TypeLits (ErrorMessage (ShowType, Text, (:$$:), (:<>:)), TypeError)
-import Generics.SOP (
-  hcmap,
-  hcollapse,
-  hctraverse,
-  mapIK,
-  mapKI,
-  productTypeFrom,
-  productTypeTo,
-  unI,
- )
+import Generics.SOP (hcmap, hcollapse, hctraverse, mapIK, mapKI,
+                     productTypeFrom, productTypeTo, unI)
 import Generics.SOP qualified as SOP
 import Plutarch.Api.V1.Value (PCurrencySymbol, PValue)
-import Plutarch.Api.V2 (
-  AmountGuarantees,
-  KeyGuarantees,
- )
+import Plutarch.Api.V2 (AmountGuarantees, KeyGuarantees)
 import Plutarch.Internal.Generic (PCode, PGeneric, gpfrom, gpto)
-import Plutarch.Internal.PlutusType (
-  PlutusTypeStrat (
-    DerivedPInner,
-    PlutusTypeStratConstraint,
-    derivedPCon,
-    derivedPMatch
-  ),
- )
-import Plutarch.Lift (
-  PConstantDecl (PConstantRepr, PConstanted, pconstantFromRepr, pconstantToRepr),
-  PLifted,
- )
+import Plutarch.Internal.PlutusType (PlutusTypeStrat (DerivedPInner, PlutusTypeStratConstraint, derivedPCon, derivedPMatch))
+import Plutarch.Lift (PConstantDecl (PConstantRepr, PConstanted, pconstantFromRepr, pconstantToRepr),
+                      PLifted)
 import Plutarch.List (pfoldl')
 import Plutarch.Script (Script (Script))
 import PlutusLedgerApi.V1 (BuiltinData (BuiltinData))
-import PlutusTx (
-  Data (List),
-  FromData (fromBuiltinData),
-  ToData (toBuiltinData),
-  UnsafeFromData (unsafeFromBuiltinData),
-  fromData,
-  toData,
- )
+import PlutusTx (Data (List), FromData (fromBuiltinData),
+                 ToData (toBuiltinData), UnsafeFromData (unsafeFromBuiltinData),
+                 fromData, toData)
 import UntypedPlutusCore (Program (Program, _progAnn, _progTerm, _progVer))
 import UntypedPlutusCore.Core.Type qualified as UplcType
 

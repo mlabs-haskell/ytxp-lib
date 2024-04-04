@@ -11,34 +11,15 @@ module Test.Unit.Transaction (
   dummyTxOutRefOne,
 ) where
 
-import Plutarch.Api.V2 (
-  PTxInInfo,
-  PTxOut,
-  PTxOutRef,
- )
-import PlutusLedgerApi.V2 (
-  TxId (TxId),
-  TxInInfo (TxInInfo),
-  TxOut (TxOut),
-  TxOutRef (TxOutRef),
-  getLedgerBytes,
- )
-import Test.Unit.Addresses (
-  dummyScriptAddressOne,
-  dummyScriptAddressThree,
-  dummyScriptAddressTwo,
- )
-import Test.Unit.Datums (
-  dummyOutputDatumOne,
-  dummyOutputDatumThree,
-  dummyOutputDatumTwo,
-  dummyYieldListEmptyListOutputDatum,
- )
-import Test.Unit.Values (
-  dummyValueOne,
-  dummyValueThree,
-  dummyValueTwo,
- )
+import Plutarch.Api.V2 (PTxInInfo, PTxOut, PTxOutRef)
+import PlutusLedgerApi.V2 (TxId (TxId), TxInInfo (TxInInfo), TxOut (TxOut),
+                           TxOutRef (TxOutRef), getLedgerBytes)
+import Test.Unit.Addresses (dummyScriptAddressOne, dummyScriptAddressThree,
+                            dummyScriptAddressTwo)
+import Test.Unit.Datums (dummyOutputDatumOne, dummyOutputDatumThree,
+                         dummyOutputDatumTwo,
+                         dummyYieldListEmptyListOutputDatum)
+import Test.Unit.Values (dummyValueOne, dummyValueThree, dummyValueTwo)
 
 -- * PTxOut lists
 pdummyTxOutSingletonList :: Term s (PBuiltinList PTxOut)

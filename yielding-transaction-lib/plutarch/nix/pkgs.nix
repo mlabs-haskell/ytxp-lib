@@ -16,11 +16,6 @@
         overlays = [
           inputs.haskell-nix.overlay
           inputs.iohk-nix.overlays.crypto
-
-          # TODO(Nigel): I guess we don't the CTL overlays here?
-          inputs.ctl.overlays.runtime
-          inputs.ctl.overlays.purescript
-          inputs.ctl.overlays.spago
         ];
       };
     };
