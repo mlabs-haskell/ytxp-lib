@@ -8,8 +8,6 @@ module Cardano.YTxP.Control.Yielding.MintingPolicy (
   mkYieldingMPCS,
 ) where
 
-import Cardano.YTxP.Control.Stubs (alwaysSucceedsTwoArgumentScript,
-                                   noncedTwoArgumentScriptWrapper)
 import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
 import Data.Aeson (FromJSON, ToJSON)

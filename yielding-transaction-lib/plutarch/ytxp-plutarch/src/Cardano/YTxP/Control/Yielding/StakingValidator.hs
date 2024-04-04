@@ -7,6 +7,7 @@ module Cardano.YTxP.Control.Yielding.StakingValidator (
 ) where
 
 import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
+import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
 import Data.Aeson (FromJSON (parseJSON), ToJSON (toEncoding, toJSON), object,
                    pairs, withObject, (.:), (.=))
 import Data.Text (Text)
@@ -68,28 +69,10 @@ compileYieldingStakingValidator config ylstcs nonce = do
     yieldingStakingValidator ::
        Term s (PData :--> PScriptContext :--> POpaque)
     yieldingStakingValidator =
-      mkYieldingStakingValidator ylstcs nonce
+      plet (pconstant nonce) (const $ yieldingHelper ylstcs)
 
   -- Pull the "Either" through the list
   script <- compile config yieldingStakingValidator
 
   pure $
     YieldingStakingValidatorScript nonce script
-
---------------------------------------------------------------------------------
--- Yielding Staking Validator Credential
-
---------------------------------------------------------------------------------
--- Helpers (unexported)
-
-mkYieldingStakingValidator ::
-  forall (nonceType :: Type).
-  ( PConstantDecl nonceType
-  , nonceType ~ PLifted (PConstanted nonceType)
-  ) =>
-  YieldListSTCS ->
-  nonceType ->
-  (forall (s :: S). Term s (PData :--> PScriptContext :--> POpaque))
-mkYieldingStakingValidator _ylstcs nonce =
-  plet (pconstant nonce) $
-    const (plam $ \_redeemer _ctx -> popaque (pconstant ()))
