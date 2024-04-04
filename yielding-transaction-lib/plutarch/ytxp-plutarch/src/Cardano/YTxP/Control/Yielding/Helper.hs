@@ -1,6 +1,5 @@
--- | This script is two argument yielding script that
--- we use to implement the logic for
-
+-- | This module export a helper funtion that produces a two argument yielding script that
+-- we use to implement the logic for yielding validator, minting policy and staking validator
 module Cardano.YTxP.Control.Yielding.Helper(yieldingHelper) where
 
 import Cardano.YTxP.Control.YieldList (PYieldedToHash (PYieldedToMP, PYieldedToSV, PYieldedToValidator))
