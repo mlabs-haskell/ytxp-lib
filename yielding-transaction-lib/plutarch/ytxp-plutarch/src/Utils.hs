@@ -460,7 +460,6 @@ pemptyTokenName = pconstant ""
 pscriptHashToCurrencySymbol :: Term s PScriptHash -> Term s PCurrencySymbol
 pscriptHashToCurrencySymbol = punsafeCoerce
 
-
 {- | Extract the datum from a 'POutputDatum', expecting it to be an inline datum.
 -}
 punsafeFromInlineDatum ::
