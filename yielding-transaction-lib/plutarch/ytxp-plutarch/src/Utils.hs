@@ -476,6 +476,7 @@ punsafeFromInlineDatum = phoistAcyclic $
       ptrace "inline datum" $ punsafeCoerce $ pto datum
     _ -> ptraceError "Invalid datum type, inline datum expected"
 
+-- TODO (OPTIMIZE): this can be turned into partial `phasMember` and `placksMember` variants
 pmember :: (PIsData k) => Term s (k :--> PMap any k v :--> PBool)
 pmember = phoistAcyclic $
   plam $ \key m ->
