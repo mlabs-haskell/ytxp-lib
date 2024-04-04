@@ -94,6 +94,7 @@ getYieldedToHash ::
 getYieldedToHash yieldListSTCS = phoistAcyclic $
   plam $
     \txInfoRefInputs redeemer -> unTermCont $ do
+      -- TODO (OPTIMIZE): these values only get used once, can be a `let`
       yieldingRedeemer <-
         pletFieldsC @'["yieldListIndex", "yieldListRefInputIndex"] redeemer
 
