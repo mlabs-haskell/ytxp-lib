@@ -172,6 +172,7 @@ library
     Cardano.YTxP.Control.Stubs
     Cardano.YTxP.Control.Vendored
     Cardano.YTxP.Control.Yielding
+    Cardano.YTxP.Control.Yielding.Helper
     Cardano.YTxP.Control.Yielding.MintingPolicy
     Cardano.YTxP.Control.Yielding.StakingValidator
     Cardano.YTxP.Control.Yielding.Validator
