@@ -8,9 +8,8 @@ module Cardano.YTxP.Control.Yielding.MintingPolicy (
   mkYieldingMPCS,
 ) where
 
-import Cardano.YTxP.Control.Stubs (alwaysSucceedsTwoArgumentScript,
-                                   noncedTwoArgumentScriptWrapper)
 import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
+import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Plutarch (Config, compile)
@@ -45,7 +44,7 @@ compileYieldingMP config ylstcs = do
       forall (s :: S).
       ( Term s (PData :--> PScriptContext :--> POpaque)
       )
-    yieldingMP = mkYieldingMP ylstcs
+    yieldingMP = yieldingHelper ylstcs
 
   script <- compile config yieldingMP
   pure $ YieldingMPScript script
@@ -60,14 +59,3 @@ mkYieldingMPCS :: YieldingMPScript -> YieldingMPCS
 mkYieldingMPCS (YieldingMPScript script) =
   YieldingMPCS $ CurrencySymbol (getScriptHash $ scriptHash script)
 
---------------------------------------------------------------------------------
--- Helpers (Unexported)
-
-mkYieldingMP ::
-  forall (s :: S).
-  YieldListSTCS ->
-  Term s (PData :--> PScriptContext :--> POpaque)
-mkYieldingMP _ylstcs =
-  noncedTwoArgumentScriptWrapper @PString
-    "YieldingMP"
-    alwaysSucceedsTwoArgumentScript
