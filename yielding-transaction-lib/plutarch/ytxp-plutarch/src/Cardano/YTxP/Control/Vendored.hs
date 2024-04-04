@@ -291,7 +291,7 @@ type family MatchTypesError (n :: [S -> Type]) (m :: [S -> Type]) (a :: Bool) ::
     , TypeError
         ( 'Text "Error when deriving 'PlutusTypeDataList':"
             -- Note(Nigel): Added space between tick and operator to avoid the error:
-            -- `The suffix use of a ‘:$$:’ might be repurposed as special syntax'
+            -- `The suffix use of a ':$$:' might be repurposed as special syntax'
             -- Not sure if there's a flag that can help here?
             ' :$$: 'Text "\tMismatch between constituent Haskell and Plutarch types"
             ' :$$: 'Text "Constituent Haskell Types: "
@@ -334,7 +334,8 @@ instance PlutusTypeStrat PlutusTypeDataList where
     SOP.SOP (SOP.S x') -> case x' of {}
   derivedPMatch x f = f (gpto $ SOP.SOP $ SOP.Z $ x SOP.:* SOP.Nil)
 
--- | @since 3.8.0
+-- | Vendored from LPE
+-- @since 3.8.0
 unProductIsData ::
   forall (a :: Type).
   ProductIsData a ->
@@ -343,6 +344,8 @@ unProductIsData = coerce
 
 {- |
   Generically convert a Product-Type to 'BuiltinData' with the 'List' repr.
+
+  Vendored from LPE
 
   @since 1.1.0
 -}
@@ -361,6 +364,8 @@ gProductToBuiltinData x =
 {- |
   Generically convert a Product-type from a 'BuiltinData' 'List' repr.
 
+  Vendored from LPE
+
   @since 1.1.0
 -}
 gProductFromBuiltinData ::
@@ -375,6 +380,8 @@ gProductFromBuiltinData _ = Nothing
 
 {- |
   Unsafe version of 'gProductFromBuiltinData'.
+
+  Vendored from LPE
 
   @since 1.1.0
 -}
@@ -393,7 +400,8 @@ gProductFromBuiltinDataUnsafe (BuiltinData (List xs)) =
             prod
 gProductFromBuiltinDataUnsafe _ = error "invalid representation"
 
--- | @since 1.1.0
+-- | Vendored from LPE
+-- @since 1.1.0
 instance
   forall (h :: Type) (p :: S -> Type).
   (PlutusTx.FromData h, PlutusTx.ToData h, PLift p) =>
@@ -406,7 +414,8 @@ instance
     _ -> error "ToData repr is not a List!"
   pconstantFromRepr = coerce (PlutusTx.fromData @h . PlutusTx.List)
 
--- | @since 1.1.0
+-- | Vendored from LPE
+-- @since 1.1.0
 instance
   forall (a :: Type) (repr :: [Type]).
   (SOP.IsProductType a repr, SOP.All ToData repr) =>
@@ -414,7 +423,8 @@ instance
   where
   toBuiltinData = coerce (gProductToBuiltinData @a)
 
--- | @since 1.1.0
+-- | Vendored from LPE
+-- @since 1.1.0
 instance
   forall (a :: Type) (repr :: [Type]).
   (SOP.IsProductType a repr, SOP.All UnsafeFromData repr) =>
@@ -422,7 +432,8 @@ instance
   where
   unsafeFromBuiltinData = coerce (gProductFromBuiltinDataUnsafe @a)
 
--- | @since 1.1.0
+-- | Vendored from LPE
+-- @since 1.1.0
 instance
   forall (a :: Type) (repr :: [Type]).
   (SOP.IsProductType a repr, SOP.All FromData repr) =>

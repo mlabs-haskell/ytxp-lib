@@ -6,6 +6,9 @@ module Cardano.YTxP.Control.YieldList.MintingPolicy (
   -- * Currency Symbol
   YieldListSTCS,
   mkYieldListSTCS,
+
+  -- * Helpers
+  pcontainsYieldListSTT,
 ) where
 
 import Cardano.YTxP.Control.YieldList (PYieldListMPWrapperRedeemer (PBurn, PMint))
@@ -13,12 +16,14 @@ import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
+import Plutarch.Api.V1.Value (PValue)
 import Plutarch.Api.V2 (PScriptContext, PScriptPurpose (PMinting), scriptHash)
 import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
 import Prettyprinter (Pretty)
 import Utils (pands, pemptyTokenName, phasNoScriptInputWithToken,
               phasOnlyOneInputWithExactlyOneTokenWithSymbol,
+              phasOnlyOneValidScriptOutputWithToken, pmember,
               phasOnlyOneValidScriptOutputWithToken,
               pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount)
 
@@ -66,7 +71,7 @@ compileYieldListSTMP config maxYieldListSize scriptToWrap = do
   pure $ YieldListSTMPScript script
 
 --------------------------------------------------------------------------------
--- YieldListCTCS
+-- YieldListSTCS
 
 -- | Opaque, semantic newtype for the YieldList state thread currency symbol
 newtype YieldListSTCS = YieldListSTCS CurrencySymbol
@@ -197,3 +202,10 @@ mkYieldListSTMPWrapper
                         # yieldListSymbol
                   ]
               )
+
+-- | Checks that the given 'PValue' contains the YieldListSTT
+-- TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead
+pcontainsYieldListSTT :: YieldListSTCS -> Term s (PValue anyKey anyAmount :--> PBool)
+pcontainsYieldListSTT (YieldListSTCS symbol) =
+  plam $ \value ->
+    pmember # pconstant symbol # pto value
