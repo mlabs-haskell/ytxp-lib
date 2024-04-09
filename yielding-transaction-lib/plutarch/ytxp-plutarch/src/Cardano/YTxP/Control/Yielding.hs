@@ -16,7 +16,7 @@ import Plutarch.DataRepr (PDataFields)
 import Utils (punsafeFromInlineDatum)
 
 -- | Represents an index into a YieldList
-newtype YieldListIndex = YieldListIndex Integer -- FIXME which Int/Integer/Positive
+newtype YieldListIndex = YieldListIndex Integer -- FIXME Int/Integer/Positive
 
 newtype PYieldListIndex (s :: S) = PYieldListIndex (Term s PInteger)
   deriving stock (Generic)
@@ -26,6 +26,23 @@ instance DerivePlutusType PYieldListIndex where
   type DPTStrat _ = PlutusTypeNewtype
 
 instance PTryFrom PData (PAsData PYieldListIndex)
+
+{- | Represents an index into a transaction.
+What is being indexed depends by the yielding script pointed by the YieldListIndex.
+  In case it a validator, this is an index into the transaction inputs for the input that triggers the yielded to validator
+  In case it a minting policy, this is an index into the transaction mint for the asset class minted by the yielded to minting policy
+  In case it a staking validator, this is an index into the transaction wdrl for the staking validator triggered by the yielded to staking validator
+-}
+newtype YieldListScriptToYieldIndex = YieldListScriptToYieldIndex Integer -- FIXME Int/Integer/Positive
+
+newtype PYieldListScriptToYieldIndex (s :: S) = PYieldListScriptToYieldIndex (Term s PInteger)
+  deriving stock (Generic)
+  deriving anyclass (PlutusType, PIsData)
+
+instance DerivePlutusType PYieldListScriptToYieldIndex where
+  type DPTStrat _ = PlutusTypeNewtype
+
+instance PTryFrom PData (PAsData PYieldListScriptToYieldIndex)
 
 {- | Represents an index into reference inputs of a transaction.
 The UTxO at this index must contain a YieldListSTT; otherwise, we blow up
@@ -49,14 +66,16 @@ data YieldingRedeemer = YieldingRedeemer
   -- ^ The index into the YieldList itself. Used to prevent yielding scripts from
   -- needing to inspect each entry for equality; we _only_ look at this index,
   -- check equality, and blow up if it doesn't match.
-  , yieldListRefInputindex :: YieldListRefInputIndex
+  , yieldListScriptToYieldIndex :: YieldListScriptToYieldIndex
+  -- ^ The index into the transaction for the script pointed to by the yieldListIndex.
+  -- This allows us to avoid having to loop through inputs/mints/withdrawls to find the
+  -- script we want to ensure is run.
+  , yieldListRefInputIndex :: YieldListRefInputIndex
   -- ^ The index into the reference inputs of the transaction where the correct
   -- YieldList UTxO will be found. We use this to prevent yielding scripts from
   -- needing to inspect each reference UTxO for equality; we only look at this
   -- index, and blow up if it doesn't contain the correct STT.
   }
-
--- FIXME: Int/Integer/Positive
 
 newtype PYieldingRedeemer (s :: S)
   = PYieldingRedeemer
@@ -64,6 +83,7 @@ newtype PYieldingRedeemer (s :: S)
           s
           ( PDataRecord
               '[ "yieldListIndex" ' := PYieldListIndex
+               , "yieldListScriptToYieldIndex" ' := PYieldListScriptToYieldIndex
                , "yieldListRefInputIndex" ' := PYieldListRefInputIndex
                ]
           )

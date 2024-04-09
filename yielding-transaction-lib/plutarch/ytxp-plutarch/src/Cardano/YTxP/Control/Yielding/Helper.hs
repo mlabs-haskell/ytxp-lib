@@ -5,15 +5,10 @@ module Cardano.YTxP.Control.Yielding.Helper(yieldingHelper) where
 import Cardano.YTxP.Control.YieldList (PYieldedToHash (PYieldedToMP, PYieldedToSV, PYieldedToValidator))
 import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
 import Cardano.YTxP.Control.Yielding (getYieldedToHash)
-import Data.Aeson (FromJSON, ToJSON)
-import Data.Text (Text)
-import Plutarch (Config, compile)
 import Plutarch.Api.V1.Address (PCredential (PPubKeyCredential, PScriptCredential))
-import Plutarch.Api.V2 (PScriptContext, PStakingCredential (PStakingHash),
-                        scriptHash)
-import Plutarch.Script (Script)
-import PlutusLedgerApi.V2 (Credential (ScriptCredential))
-import Utils (pmember, pscriptHashToCurrencySymbol)
+import Plutarch.Api.V2 (PScriptContext,
+                        PStakingCredential (PStakingHash, PStakingPtr))
+import Utils (pscriptHashToCurrencySymbol)
 
 
 -- -   Look at the UTxO at the `n` th entry in the `txInfoReferenceInputs`, where `n` is equal to `yieldListInputIndex`.
@@ -37,40 +32,41 @@ yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
   let txInfoRefInputs = pfromData $ pfield @"referenceInputs" # txInfo
   yieldingRedeemer <- pfromData . fst <$> ptryFromC redeemer
   let yieldToHash = getYieldedToHash ylstcs # txInfoRefInputs # yieldingRedeemer
+      yieldToIndex = pto $ pfromData $ pfield @"yieldListScriptToYieldIndex" # yieldingRedeemer
 
   pure $
     popaque $
       pmatch yieldToHash $ \case
         PYieldedToValidator ((pfield @"scriptHash" #) -> yieldToHash') ->
           let txInfoInputs = pfromData $ pfield @"inputs" # txInfo
-           in ptraceIfFalse "No input found" $
-                pany
-                  # ( plam $ \input ->
-                        let out = pfield @"resolved" # input
-                            address = pfield @"address" # pfromData out
-                            credential = pfield @"credential" # pfromData address
-                         in pmatch (pfromData credential) $ \case
-                              PScriptCredential ((pfield @"_0" #) -> hash) -> hash #== yieldToHash'
-                              PPubKeyCredential _ -> pconstant False
-                    )
-                  # txInfoInputs
+              yieldToInput = txInfoInputs #!! yieldToIndex
+              out = pfield @"resolved" # yieldToInput
+              address = pfield @"address" # pfromData out
+              credential = pfield @"credential" # pfromData address
+           in pmatch (pfromData credential) $ \case
+              PScriptCredential ((pfield @"_0" #) -> hash) ->
+                ptraceIfFalse "Input does not match expected yielded to validator" $ hash #== yieldToHash'
+              PPubKeyCredential _ ->
+                ptraceError "Input at specified index is not a script input"
+
         PYieldedToMP ((pfield @"scriptHash" #) -> yieldToHash') ->
           let txInfoMints = pfromData $ pfield @"mint" # txInfo
+              yieldToMint = (pto $ pto txInfoMints) #!! yieldToIndex
               currencySymbol = pscriptHashToCurrencySymbol yieldToHash'
-           in ptraceIfFalse "No minting policy found" $
-                pmember # currencySymbol # (pto txInfoMints)
+           in ptraceIfFalse "Minting policy does not match expected yielded to minting policy" $
+                pfromData (pfstBuiltin # yieldToMint) #== currencySymbol
 
         PYieldedToSV ((pfield @"scriptHash" #) -> yieldToHash') ->
           let txInfoWithdrawls = pfromData $ pfield @"wdrl" # txInfo
-           in precList
-                ( \self x xs ->
-                    pmatch (pfromData $ pfstBuiltin # x) $ \case
-                      PStakingHash ((pfield @"_0" #) -> credential) ->
-                        pmatch credential $ \case
-                          PScriptCredential ((pfield @"_0" #) -> hash) -> hash #== yieldToHash' #|| self # xs
-                          PPubKeyCredential _ -> self # xs
-                      _ -> self # xs
-                )
-                (const $ ptraceError "No staking validator found")
-                # (pto txInfoWithdrawls)
+              yieldToWithdrawl = (pto txInfoWithdrawls) #!! yieldToIndex
+           in
+            pmatch (pfromData $ pfstBuiltin # yieldToWithdrawl) $ \case
+              PStakingHash ((pfield @"_0" #) -> credential) ->
+                pmatch credential $ \case
+                  PScriptCredential ((pfield @"_0" #) -> hash) ->
+                    ptraceIfFalse "Withdrawl does not match expected yielded to staking validator" $ hash #== yieldToHash'
+                  PPubKeyCredential _ ->
+                    ptraceError "Staking credential at specified index is not a script credential"
+              PStakingPtr _ ->
+                ptraceError "No staking validator found"
 

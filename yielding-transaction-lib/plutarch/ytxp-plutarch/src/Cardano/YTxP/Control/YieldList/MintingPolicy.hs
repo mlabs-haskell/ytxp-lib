@@ -24,7 +24,6 @@ import Prettyprinter (Pretty)
 import Utils (pands, pemptyTokenName, phasNoScriptInputWithToken,
               phasOnlyOneInputWithExactlyOneTokenWithSymbol,
               phasOnlyOneValidScriptOutputWithToken, pmember,
-              phasOnlyOneValidScriptOutputWithToken,
               pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount)
 
 --------------------------------------------------------------------------------
