@@ -49,21 +49,27 @@ newtype CustomScriptHash = CustomScriptHash {getCustomScriptHash :: Builtins.Bui
     , Eq
     )
 
+-- | Note(Nigel): This will likely not compile under `plutus-tx`
+-- due to the use of `error` from the Haskell `Prelude`.
+-- We use `error` from Prelude here as using `traceError` doesn't give back the error message.
+-- See the following issue for more details: https://github.com/IntersectMBO/plutus/issues/3003
 instance PlutusTx.UnsafeFromData CustomScriptHash where
   {-# INLINEABLE unsafeFromBuiltinData #-}
   unsafeFromBuiltinData b =
     let !args = BI.snd $ BI.unsafeDataAsConstr b
         scriptHash = BI.unsafeDataAsB (BI.head args)
      in if Builtins.lengthOfByteString scriptHash == 28
-          then CustomScriptHash scriptHash
-          else traceError "ScriptHash must be of length 28"
+         then CustomScriptHash scriptHash
+         else error "ScriptHash must be of length 28"
 
+-- | Note(Nigel): This will likely not compile under `plutus-tx`
+-- see the comment on the `UnsafeFromData` instance above.
 instance PlutusTx.ToData CustomScriptHash where
   {-# INLINEABLE toBuiltinData #-}
   toBuiltinData (CustomScriptHash scriptHash) =
     if Builtins.lengthOfByteString scriptHash == 28
       then PlutusTx.toBuiltinData scriptHash
-      else traceError "ScriptHash must be of length 28"
+      else error "ScriptHash must be of length 28"
 
 instance PlutusTx.FromData CustomScriptHash where
   {-# INLINEABLE fromBuiltinData #-}
@@ -82,7 +88,7 @@ unsafeCustomScriptHash scriptHash
 {- | A single hash that a yielding script can yield to
 A yielded to script can be a validator, minting policy or a stake validator
 -}
-data YieldedToHash -- FIXME
+data YieldedToHash
   = YieldedToValidator CustomScriptHash
   | YieldedToMP CustomScriptHash
   | YieldedToSV CustomScriptHash
