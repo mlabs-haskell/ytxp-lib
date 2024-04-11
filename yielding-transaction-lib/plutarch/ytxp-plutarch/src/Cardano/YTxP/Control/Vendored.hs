@@ -81,7 +81,7 @@ psymbolValueOf = phoistAcyclic $
                   ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
                      in pfoldl'
                           ( \acc tokenAndAmount ->
-                              (pfromData $ psndBuiltin # tokenAndAmount) + acc
+                              pfromData (psndBuiltin # tokenAndAmount) + acc
                           )
                           # 0
                           # tokens

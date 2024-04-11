@@ -45,7 +45,7 @@ poutputsDoNotContainToken outputs =
   plam $ \symbol ->
     pmatch
       ( pfilter
-          # ( plam $ \txOut ->
+          # plam (\txOut ->
                 ( pconstant 0
                     #< (
                          -- We inline the `psymbolValue` function for efficiency reasons
@@ -74,8 +74,7 @@ poutputsDoNotContainToken outputs =
                                 valueMap'
                           in go # valueMap
                        )
-                )
-            )
+                ))
           # outputs
       )
       $ \case
@@ -92,7 +91,7 @@ phasNoScriptInputWithToken inputs =
   plam $ \symbol ->
     pmatch
       ( pfilter
-          # ( plam $ \txInInfo ->
+          # plam (\txInInfo ->
                 pmatch
                   ( pfromData
                       $ pfield @"credential"
@@ -136,8 +135,7 @@ phasNoScriptInputWithToken inputs =
                                 in go # valueMap
                              )
                       )
-                    _ -> pconstant False
-            )
+                    _ -> pconstant False)
           # inputs
       )
       $ \case
@@ -197,7 +195,7 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
   plam $ \symbol ->
     pmatch
       ( pfilter
-          # ( plam $ \txOut ->
+          # plam (\txOut ->
                 -- Check the output contains one or more YieldListSTT.
                 -- At this step, we want to find any output (wallet or script)
                 -- that contains one or more YieldListSTT.
@@ -226,8 +224,7 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
                                 valueMap'
                           in go # valueMap
                        )
-                )
-            )
+                ))
           # outputs
       )
       $ \case
@@ -254,7 +251,7 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
                                         ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
                                            in pfoldl'
                                                 ( \acc tokenAndAmount ->
-                                                    (pfromData $ psndBuiltin # tokenAndAmount) + acc
+                                                    pfromData (psndBuiltin # tokenAndAmount) + acc
                                                 )
                                                 # 0
                                                 # tokens
@@ -272,7 +269,7 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
                         -- then check that it does not contain any other tokens
                         -- aside from Ada and the given token
                         PTrue -> pmatch
-                          ( ( pfilter
+                          ( pfilter
                                 # ( plam $ \symbolInValue ->
                                       ( pnot
                                           #$ (pfromData symbolInValue)
@@ -282,7 +279,6 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
                                       )
                                   )
                                 # (pkeys #$ pto $ pfromData $ pfield @"value" # txOut')
-                            )
                           )
                           $ \case
                             -- Finally check that it holds a valid output datum
@@ -293,7 +289,7 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
                                   PYieldListDatum ((pfield @"yieldedToScripts" #) -> yieldedToList) <-
                                     pmatchC $ pfromData $ flip ptryFrom fst $ pto datum
                                   pure $
-                                    plength # (pfromData yieldedToList) #<= pconstant (toInteger maxYieldListSize)
+                                    plength # pfromData yieldedToList #<= pconstant (toInteger maxYieldListSize)
                                 _ -> pconstant False
                             _ -> pconstant False
                         PFalse -> pconstant False
@@ -311,7 +307,7 @@ phasOneScriptInputAtValidatorWithExactlyOneToken inputs =
   plam $ \symbol txOutRef ->
     pmatch
       ( pfilter
-          # ( plam $ \txInInfo ->
+          # plam (\txInInfo ->
                 pmatch
                   ( pfromData
                       $ pfield @"credential"
@@ -359,8 +355,7 @@ phasOneScriptInputAtValidatorWithExactlyOneToken inputs =
                                 in go # valueMap
                              )
                       )
-                    PPubKeyCredential _ -> pconstant False
-            )
+                    PPubKeyCredential _ -> pconstant False)
           # inputs
       )
       $ \case
@@ -369,7 +364,7 @@ phasOneScriptInputAtValidatorWithExactlyOneToken inputs =
           pmatch (pnull # tailOfList) $ \case
             PTrue ->
               -- Check that the given ref and the ref of this input match
-              pmatch (txOutRef #== (pfromData $ pfield @"outRef" # txInInfo')) $ \case
+              pmatch (txOutRef #== pfromData (pfield @"outRef" # txInInfo')) $ \case
                 PTrue ->
                   -- Check that the input contains exactly one token with the given symbol
                   ( ( -- We inline the `psymbolValue` function for efficiency reasons
@@ -389,7 +384,7 @@ phasOneScriptInputAtValidatorWithExactlyOneToken inputs =
                                     ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
                                        in pfoldl'
                                             ( \acc tokenAndAmount ->
-                                                (pfromData $ psndBuiltin # tokenAndAmount) + acc
+                                                pfromData (psndBuiltin # tokenAndAmount) + acc
                                             )
                                             # 0
                                             # tokens
@@ -436,7 +431,7 @@ phasOnlyOneInputWithExactlyOneTokenWithSymbol inputs =
                                 ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
                                    in pfoldl'
                                         ( \acc tokenAndAmount ->
-                                            (pfromData $ psndBuiltin # tokenAndAmount) + acc
+                                            pfromData (psndBuiltin # tokenAndAmount) + acc
                                         )
                                         # 0
                                         # tokens
