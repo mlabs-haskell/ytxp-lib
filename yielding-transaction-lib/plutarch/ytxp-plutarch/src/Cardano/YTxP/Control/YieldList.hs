@@ -79,14 +79,14 @@ instance PlutusTx.ToData CustomScriptHash where
 instance PlutusTx.FromData CustomScriptHash where
   {-# INLINEABLE fromBuiltinData #-}
   fromBuiltinData b = do
-    CustomScriptHash scriptHash <- PlutusTx.fromBuiltinData b
+    scriptHash <- PlutusTx.fromBuiltinData b
     guard (Builtins.lengthOfByteString scriptHash == 28)
     pure $ tryMkCustomScriptHash scriptHash
 
 {-# INLINEABLE tryMkCustomScriptHash #-}
 tryMkCustomScriptHash :: Builtins.BuiltinByteString -> CustomScriptHash
 tryMkCustomScriptHash scriptHash
-  | (Builtins.lengthOfByteString scriptHash == 28) =
+  | (Builtins.lengthOfByteString scriptHash /= 28) =
       error "tryMkCustomScriptHash: ScriptHash must have length 28"
   | otherwise = CustomScriptHash scriptHash
 
