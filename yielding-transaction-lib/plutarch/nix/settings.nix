@@ -53,7 +53,7 @@
                 pkgs.haskellPackages.fourmolu
                 pkgs.haskellPackages.hlint
                 pkgs.entr
-
+                pkgs.haskellPackages.ghcid
                 pkgs.nil
                 #inputs.pre-commit-hooks.outputs.packages.${system}.deadnix
                 #inputs.pre-commit-hooks.outputs.packages.${system}.nixpkgs-fmt
