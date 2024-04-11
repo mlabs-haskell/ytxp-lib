@@ -46,25 +46,21 @@ import PlutusTx.Prelude (traceError)
 newtype CustomScriptHash = CustomScriptHash {getCustomScriptHash :: Builtins.BuiltinByteString}
   deriving stock
     ( Show
-    , Generic
     , Eq
     )
 
--- | Note(Nigel): This will likely not compile under `plutus-tx`
--- due to the use of `error` from the Haskell `Prelude`.
--- We use `error` from Prelude here as using `traceError` doesn't give back the error message.
--- See the following issue for more details: https://github.com/IntersectMBO/plutus/issues/3003
+
 instance PlutusTx.UnsafeFromData CustomScriptHash where
   {-# INLINEABLE unsafeFromBuiltinData #-}
   unsafeFromBuiltinData b =
     let !args = BI.snd $ BI.unsafeDataAsConstr b
         scriptHash = BI.unsafeDataAsB (BI.head args)
-     in if Builtins.lengthOfByteString scriptHash == 28
-         then CustomScriptHash scriptHash
-         else error "ScriptHash must be of length 28"
+     in CustomScriptHash scriptHash
 
 -- | Note(Nigel): This will likely not compile under `plutus-tx`
--- see the comment on the `UnsafeFromData` instance above.
+-- due to the use of `error` from the Haskell `Prelude`.
+-- We use `error` from Prelude here as using `traceError` doesn't give back the error message.
+-- See the following issue for more details: https://github.com/IntersectMBO/plutus/issues/3003
 instance PlutusTx.ToData CustomScriptHash where
   {-# INLINEABLE toBuiltinData #-}
   toBuiltinData (CustomScriptHash scriptHash) =
