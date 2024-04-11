@@ -6,20 +6,22 @@
 Description: Defines shared data types and utilities for YieldList scripts
 -}
 module Cardano.YTxP.Control.YieldList (
-  YieldListDatum(YieldListDatum),
-  PYieldListDatum (PYieldListDatum),
+  -- * Hashes
   YieldedToHash(YieldedToValidator, YieldedToMP, YieldedToSV),
-  CustomScriptHash(CustomScriptHash),
+  CustomScriptHash,
+  tryMkCustomScriptHash,
   PYieldedToHash (PYieldedToValidator, PYieldedToMP, PYieldedToSV),
+
+  -- * Redeemers
   YieldListMPWrapperRedeemer,
   PYieldListMPWrapperRedeemer (PMint, PBurn),
+
+  -- * Datums
+  YieldListDatum(YieldListDatum),
+  PYieldListDatum (PYieldListDatum),
+
+  -- * Functions
   getYieldedToHashByIndex,
-  immutableValidatorWrapper,
-  adminSigValidatorWrapper,
-  multiSigValidatorWrapper,
-  immutableMintingPolicyWrapper,
-  adminSigMintingPolicyWrapper,
-  multiSigMintingPolicyWrapper,
 ) where
 
 import Cardano.YTxP.Control.Vendored (DerivePConstantViaDataList (DerivePConstantViaDataList),
@@ -36,10 +38,16 @@ import Plutarch.Lift (PConstantDecl, PLifted, PUnsafeLiftDecl)
 import PlutusTx qualified
 import PlutusTx.Builtins qualified as Builtins
 import PlutusTx.Builtins.Internal qualified as BI
-import PlutusTx.Prelude (traceError)
+
+
 
 --------------------------------------------------------------------------------
--- Types
+-- * Hashes
+
+------------------------------------------------------------
+-- ** CustomScriptHash
+-- We use this because the plutus-ledger-api ScriptHash isn't
+-- type safe.
 
 -- | We use this `CustomScriptHash` instead of `ScriptHash` in
 -- order to ensure that the hash is of length 28.
@@ -73,14 +81,19 @@ instance PlutusTx.FromData CustomScriptHash where
   fromBuiltinData b = do
     CustomScriptHash scriptHash <- PlutusTx.fromBuiltinData b
     guard (Builtins.lengthOfByteString scriptHash == 28)
-    pure $ unsafeCustomScriptHash scriptHash
+    pure $ tryMkCustomScriptHash scriptHash
 
-{-# INLINEABLE unsafeCustomScriptHash #-}
-unsafeCustomScriptHash :: Builtins.BuiltinByteString -> CustomScriptHash
-unsafeCustomScriptHash scriptHash
+{-# INLINEABLE tryMkCustomScriptHash #-}
+tryMkCustomScriptHash :: Builtins.BuiltinByteString -> CustomScriptHash
+tryMkCustomScriptHash scriptHash
   | (Builtins.lengthOfByteString scriptHash == 28) =
-      traceError "unsafeCustomScriptHash: ScriptHash must have length 28"
+      error "tryMkCustomScriptHash: ScriptHash must have length 28"
   | otherwise = CustomScriptHash scriptHash
+
+
+------------------------------------------------------------
+-- ** YieldToHash
+
 
 {- | A single hash that a yielding script can yield to
 A yielded to script can be a validator, minting policy or a stake validator
@@ -127,41 +140,12 @@ deriving via
   instance
     (PConstantDecl YieldedToHash)
 
-{- | The `YieldListDatum` holds a collection of hashes that YieldingScripts can yield to.
-The length of the datum is checked upon creation in `mkYieldListSTMPWrapper` to ensure
-that the length of the list does not exceed the max list length passed as a parameter to that script.
--}
-data YieldListDatum = YieldListDatum
-  { yieldedToScripts :: [YieldedToHash]
-  }
-  deriving stock (Show, Eq, Generic)
-  deriving anyclass (SOP.Generic)
-  deriving (PlutusTx.ToData, PlutusTx.FromData) via (ProductIsData YieldListDatum)
 
-deriving via
-  (DerivePConstantViaDataList YieldListDatum PYieldListDatum)
-  instance
-    (PConstantDecl YieldListDatum)
 
-newtype PYieldListDatum (s :: S)
-  = PYieldListDatum
-      ( Term
-          s
-          ( PDataRecord
-              '[ "yieldedToScripts" ' := PBuiltinList (PAsData PYieldedToHash)
-               ]
-          )
-      )
-  deriving stock (Generic)
-  deriving anyclass (PlutusType, PIsData, PEq, PDataFields)
+--------------------------------------------------------------------------------
+-- * Redeemers
 
-instance DerivePlutusType PYieldListDatum where
-  type DPTStrat _ = PlutusTypeDataList
 
-instance PUnsafeLiftDecl PYieldListDatum where
-  type PLifted _ = YieldListDatum
-
-instance PTryFrom PData (PAsData PYieldListDatum)
 
 -- | Redeemer for `mkYieldListMPWrapper`.
 data YieldListMPWrapperRedeemer
@@ -210,6 +194,47 @@ deriving via
     (PConstantDecl YieldListMPWrapperRedeemer)
 
 --------------------------------------------------------------------------------
+-- * Datums
+
+
+{- | The `YieldListDatum` holds a collection of hashes that YieldingScripts can yield to.
+The length of the datum is checked upon creation in `mkYieldListSTMPWrapper` to ensure
+that the length of the list does not exceed the max list length passed as a parameter to that script.
+-}
+data YieldListDatum = YieldListDatum
+  { yieldedToScripts :: [YieldedToHash]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass (SOP.Generic)
+  deriving (PlutusTx.ToData, PlutusTx.FromData) via (ProductIsData YieldListDatum)
+
+deriving via
+  (DerivePConstantViaDataList YieldListDatum PYieldListDatum)
+  instance
+    (PConstantDecl YieldListDatum)
+
+newtype PYieldListDatum (s :: S)
+  = PYieldListDatum
+      ( Term
+          s
+          ( PDataRecord
+              '[ "yieldedToScripts" ' := PBuiltinList (PAsData PYieldedToHash)
+               ]
+          )
+      )
+  deriving stock (Generic)
+  deriving anyclass (PlutusType, PIsData, PEq, PDataFields)
+
+instance DerivePlutusType PYieldListDatum where
+  type DPTStrat _ = PlutusTypeDataList
+
+instance PUnsafeLiftDecl PYieldListDatum where
+  type PLifted _ = YieldListDatum
+
+instance PTryFrom PData (PAsData PYieldListDatum)
+
+
+--------------------------------------------------------------------------------
 -- Helpers
 
 getYieldedToHashByIndex :: Term s (PYieldListDatum :--> PInteger :--> PYieldedToHash)
@@ -218,54 +243,3 @@ getYieldedToHashByIndex = plam $ \datum n ->
     PYieldListDatum ((pfield @"yieldedToScripts" #) -> yieldList) ->
       pfromData $ yieldList #!! n
 
---------------------------------------------------------------------------------
--- Validator Wrappers
-
--- FIXME:
--- immutableWrapper :: Validator -> Validator
-
-{- | A wrapper to ensure that validator can never succeed.
-Useful for making an "immutable yield list UTxO", where
-transaction families cannot be removed or modified once deployed
--}
-immutableValidatorWrapper :: () -> ()
-immutableValidatorWrapper = error "unimplemented"
-
--- FIXME:
--- adminSigWrapper :: PubKeyHash -> Validator -> Validator
-
-{- | A wrapper that imposes an additional constraint on the wrapped script
-such that the admin signature must be include in the signatories of a
-transaction in order for the wrapped script to succeed.
--}
-adminSigValidatorWrapper :: () -> () -> ()
-adminSigValidatorWrapper = error "unimplemented"
-
--- FIXME:
--- adminSigWrapper :: Integer -> [PubKeyHash] -> Validator -> Validator
-
-{- | A wrapper that imposes an additional constraint on the wrapped script
-such that at least `n` of the keys must be signatories of a
-transaction in order for the wrapped script to succeed.
--}
-multiSigValidatorWrapper :: () -> () -> ()
-multiSigValidatorWrapper = error "unimplemented"
-
---------------------------------------------------------------------------------
--- Minting Policy Wrappers
--- FIXME: update comments as well
-
--- FIXME:
--- immutableWrapper :: MintingPolicy -> MintingPolicy
-immutableMintingPolicyWrapper :: () -> ()
-immutableMintingPolicyWrapper = error "unimplemented"
-
--- FIXME:
--- adminSigWrapper :: PubKeyHash -> MintingPolicy -> MintingPolicy
-adminSigMintingPolicyWrapper :: () -> () -> ()
-adminSigMintingPolicyWrapper = error "unimplemented"
-
--- FIXME:
--- adminSigWrapper :: Integer -> [PubKeyHash] -> MintingPolicy -> MintingPolicy
-multiSigMintingPolicyWrapper :: () -> () -> ()
-multiSigMintingPolicyWrapper = error "unimplemented"
