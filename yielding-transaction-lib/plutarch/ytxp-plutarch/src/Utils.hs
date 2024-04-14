@@ -46,7 +46,7 @@ poutputsDoNotContainToken outputs =
     pmatch
       ( pfilter
           # plam (\txOut ->
-                ( pconstant 0
+                pconstant 0
                     #< (
                          -- We inline the `psymbolValue` function for efficiency reasons
                          let valueMap =
@@ -73,8 +73,7 @@ poutputsDoNotContainToken outputs =
                                 0
                                 valueMap'
                           in go # valueMap
-                       )
-                ))
+                       ))
           # outputs
       )
       $ \case
@@ -123,7 +122,7 @@ phasNoScriptInputWithToken inputs =
                                             ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
                                                in pfoldl'
                                                     ( \acc tokenAndAmount ->
-                                                        (pfromData $ psndBuiltin # tokenAndAmount) + acc
+                                                        pfromData (psndBuiltin # tokenAndAmount) + acc
                                                     )
                                                     # 0
                                                     # tokens
@@ -201,7 +200,7 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
                 -- that contains one or more YieldListSTT.
                 -- This is to avoid needing another helper to check that there are no script outputs or
                 -- wallet outputs containing one or more of these tokens.
-                ( pconstant 0
+                pconstant 0
                     #< (
                          -- We inline the `psymbolValue` function for efficiency reasons
                          let valueMap = pto (pto $ pfromData $ pfield @"value" # txOut)
@@ -223,8 +222,7 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
                                 0
                                 valueMap'
                           in go # valueMap
-                       )
-                ))
+                       ))
           # outputs
       )
       $ \case
@@ -270,14 +268,13 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
                         -- aside from Ada and the given token
                         PTrue -> pmatch
                           ( pfilter
-                                # ( plam $ \symbolInValue ->
+                                # plam (\symbolInValue ->
                                       ( pnot
                                           #$ (pfromData symbolInValue)
                                           #== symbol
                                           #|| (pfromData symbolInValue)
                                           #== padaSymbol
-                                      )
-                                  )
+                                      ))
                                 # (pkeys #$ pto $ pfromData $ pfield @"value" # txOut')
                           )
                           $ \case
@@ -343,7 +340,7 @@ phasOneScriptInputAtValidatorWithExactlyOneToken inputs =
                                             ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
                                                in pfoldl'
                                                     ( \acc tokenAndAmount ->
-                                                        (pfromData $ psndBuiltin # tokenAndAmount) + acc
+                                                        pfromData (psndBuiltin # tokenAndAmount) + acc
                                                     )
                                                     # 0
                                                     # tokens

@@ -86,7 +86,7 @@ instance PlutusTx.FromData CustomScriptHash where
 {-# INLINEABLE tryMkCustomScriptHash #-}
 tryMkCustomScriptHash :: Builtins.BuiltinByteString -> CustomScriptHash
 tryMkCustomScriptHash scriptHash
-  | (Builtins.lengthOfByteString scriptHash /= 28) =
+  | Builtins.lengthOfByteString scriptHash /= 28 =
       error "tryMkCustomScriptHash: ScriptHash must have length 28"
   | otherwise = CustomScriptHash scriptHash
 
