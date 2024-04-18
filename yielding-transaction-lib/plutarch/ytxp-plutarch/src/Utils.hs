@@ -270,9 +270,9 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
                           ( pfilter
                                 # plam (\symbolInValue ->
                                       pnot
-                                          #$ (pfromData symbolInValue)
+                                          #$ pfromData symbolInValue
                                           #== symbol
-                                          #|| (pfromData symbolInValue)
+                                          #|| pfromData symbolInValue
                                           #== padaSymbol)
                                 # (pkeys #$ pto $ pfromData $ pfield @"value" # txOut')
                           )
