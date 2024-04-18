@@ -63,7 +63,7 @@ poutputsDoNotContainToken outputs =
                                       ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
                                          in pfoldl'
                                               ( \acc tokenAndAmount ->
-                                                  (pfromData $ psndBuiltin # tokenAndAmount) + acc
+                                                  pfromData (psndBuiltin # tokenAndAmount) + acc
                                               )
                                               # 0
                                               # tokens
@@ -212,7 +212,7 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
                                       ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
                                          in pfoldl'
                                               ( \acc tokenAndAmount ->
-                                                  (pfromData $ psndBuiltin # tokenAndAmount) + acc
+                                                  pfromData (psndBuiltin # tokenAndAmount) + acc
                                               )
                                               # 0
                                               # tokens
@@ -269,12 +269,11 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
                         PTrue -> pmatch
                           ( pfilter
                                 # plam (\symbolInValue ->
-                                      ( pnot
+                                      pnot
                                           #$ (pfromData symbolInValue)
                                           #== symbol
                                           #|| (pfromData symbolInValue)
-                                          #== padaSymbol
-                                      ))
+                                          #== padaSymbol)
                                 # (pkeys #$ pto $ pfromData $ pfield @"value" # txOut')
                           )
                           $ \case
