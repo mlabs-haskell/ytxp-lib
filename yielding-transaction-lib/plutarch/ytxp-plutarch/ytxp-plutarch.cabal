@@ -151,7 +151,8 @@ library testlib
     Test.Utils
 
 library
-  import:          common-language
+  import:             common-language
+  build-tool-depends: alex:alex
   build-depends:
     , aeson
     , base               ^>=4.18.1.0
@@ -164,7 +165,7 @@ library
     , prettyprinter
     , text
 
-  hs-source-dirs:  src
+  hs-source-dirs:     src
   exposed-modules:
     Cardano.YTxP.Control.Parameters
     Cardano.YTxP.Control.ParametersInitial

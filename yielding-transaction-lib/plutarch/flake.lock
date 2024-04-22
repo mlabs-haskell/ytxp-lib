@@ -2118,7 +2118,7 @@
         "haskellNix": "haskellNix",
         "iohk-nix": "iohk-nix",
         "nixpkgs": [
-          "iohk-nix",
+          "haskellNix",
           "nixpkgs"
         ],
         "plutarch": "plutarch"
