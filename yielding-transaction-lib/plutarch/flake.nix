@@ -13,6 +13,7 @@
     CHaP = {
       url = "github:intersectmbo/cardano-haskell-packages?ref=repo";
     };
+    liqwid-plutarch-extra.url = "github:Liqwid-Labs/liqwid-plutarch-extra";
   };
 
   outputs = inputs@{ nixpkgs, haskellNix, flake-parts, iohk-nix, CHaP, plutarch, ... }:
