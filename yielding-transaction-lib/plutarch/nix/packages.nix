@@ -20,8 +20,8 @@
     {
       packages = {
         ytxp-plutarch-lib = flake.packages."ytxp-plutarch:lib:ytxp-plutarch";
-        ytxp-plutarch-cli = flake.packages."ytxp-plutarch:exe:ytxp-plutarch-cli";
-        # TODO
+        # TODO what are these?
+        # ytxp-plutarch-cli = flake.packages."ytxp-plutarch:exe:ytxp-plutarch-cli";
         # ytxp-plutarch-config = nixpkgs pkgs.stdenv.mkDerivation {
         #   name = "ytxp-plutarch-config";
         #   src = ./.;
