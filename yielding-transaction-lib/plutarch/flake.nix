@@ -7,11 +7,10 @@
     nixpkgs.follows = "haskellNix/nixpkgs";
     plutarch = {
       url = "github:Plutonomicon/plutarch-plutus";
-      flake = false;
     };
-
     CHaP = {
       url = "github:intersectmbo/cardano-haskell-packages?ref=repo";
+      flake = false;
     };
   };
 

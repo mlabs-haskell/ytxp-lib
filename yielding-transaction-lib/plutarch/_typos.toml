@@ -1,4 +1,4 @@
-[default.extend-words]
+[ default.extend-words ]
 substituters = "substituters"
 hask= "hask"
 lits="lits"

@@ -1,7 +1,9 @@
 { pkgs }:
 let
   inputShell = pkgs.mkShell {
-    packages = [
+    packages = with pkgs; [
+      nixpkgs-fmt
+      haskellPackages.apply-refact
     ];
   };
 in
