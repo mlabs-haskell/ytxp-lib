@@ -201,7 +201,7 @@ deriving via
 The length of the datum is checked upon creation in `mkYieldListSTMPWrapper` to ensure
 that the length of the list does not exceed the max list length passed as a parameter to that script.
 -}
-newtype YieldListDatum = YieldListDatum
+data YieldListDatum = YieldListDatum
   { yieldedToScripts :: [YieldedToHash]
   }
   deriving stock (Show, Eq, Generic)
