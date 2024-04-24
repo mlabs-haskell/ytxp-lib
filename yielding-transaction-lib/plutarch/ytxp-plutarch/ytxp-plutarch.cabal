@@ -102,8 +102,7 @@ common common-test
     , testlib
     , ytxp-plutarch
 
-  ghc-options:
-    -O2 -threaded -rtsopts -with-rtsopts=-N
+  ghc-options:   -O2 -threaded -rtsopts -with-rtsopts=-N
 
 -- Libraries
 
@@ -122,6 +121,7 @@ library pprelude
 
   exposed-modules:  PPrelude
   hs-source-dirs:   src
+
 library testlib
   import:          common-language
   build-depends:

@@ -5,7 +5,7 @@ usage:
 	@echo
 	@echo "Available commands:"
 	@echo ""
-	# Code
+	# Code format (works for both ytxp-plutarch and ytxp-convex)
 	@echo "    format                                                      -- Formats .hs, .cabal, .nix files"
 	@echo "    format_check                                                -- Check formatting of .hs, .cabal, .nix files"
 
@@ -17,6 +17,19 @@ usage:
 	@echo "    format_check_cabal                                          -- Check formatting of .cabal files"
 	@echo "    lint                                                        -- Auto-refactors code"
 	@echo "    lint_check                                                  -- Run code linting"
+	@echo ""
+	# Build
+	@echo "    build_all                                                   -- Build all"
+	@echo "    build_ytxp-plutarch                                         -- Build ytxp-plutarch"
+	@echo "    build_testlib                                               -- Build testlib"
+	@echo "    build_pprelude                                              -- Build pprelude"
+	@echo "    build_write-config                                          -- Build write-config"
+	@echo ""
+	# Run
+	@echo "    run_write-config                                            -- Run write-config"
+	# Test
+	@echo "    test_serialization                                          -- Test serialization"
+	@echo ""
 
 ################################################################################
 # Code
@@ -84,4 +97,36 @@ lint:
 lint_check:
 	$(call find_exec_all_fn, $(FIND_HASKELL_SOURCES), hlint -j --hint=hlint.yaml)
 
+################################################################################
+# Build
+.PHONY: build_all
+build_all:
+	cabal build -j all
 
+.PHONY: build_ytxp-plutarch
+build_ytxp-plutarch:
+	cabal build -j ytxp-plutarch
+
+.PHONY: build_testlib
+build_testlib:
+	cabal build -j testlib
+
+.PHONY: build_pprelude
+build_pprelude:
+	cabal build -j pprelude
+
+.PHONY: build_write-config
+build_write-config:
+	cabal build -j write-config
+
+################################################################################
+# Run
+.PHONY: run_write-config
+run_write-config:
+	cabal run -j write-config
+
+################################################################################
+# Test
+.PHONY: test_serialization
+test_serialization:
+	cabal test -j serialization
