@@ -1,12 +1,12 @@
 -- | Stubbed out tests. These can be relocated.
-
 module Stubs where
 
 ------------------------------------------------------------
 -- Instance Tests
 
--- | Checks that the Make, TryFromData, FromData, and UnsafeFromData behave as expected
--- (including large datum attacks on lists, extra constr fields, ill-formed script hashes, etc)
+{- | Checks that the Make, TryFromData, FromData, and UnsafeFromData behave as expected
+(including large datum attacks on lists, extra constr fields, ill-formed script hashes, etc)
+-}
 
 --------------------------------------------------------------------------------
 -- YLSTMP tests
@@ -17,15 +17,17 @@ module Stubs where
 
 -- | YLSTMP fails when the YieldListSTT token name is not empty
 
--- | YLSTMP fails when the receiving UTxO is not at a script
--- address
+{- | YLSTMP fails when the receiving UTxO is not at a script
+address
+-}
 
 -- | YLSTMP fails when the receiving UTxO has tokens besides ada and the YLSTMP
 
--- | YLSTMP fails when the receiving UTxO does not contain a valid yield list.
--- Checks:
---   - Well-formed hashes
---   - 0 < length yieldList <= maxYieldListSize
+{- | YLSTMP fails when the receiving UTxO does not contain a valid yield list.
+Checks:
+  - Well-formed hashes
+  - 0 < length yieldList <= maxYieldListSize
+-}
 
 -- | YLSTMP fails to burn when `n` UTxOs with YieldListSTTs appear at the input, where n /= 1
 
@@ -48,7 +50,6 @@ module Stubs where
 
 -- | YLV fails to unlock when additional UTxOs are present at output
 
-
 --------------------------------------------------------------------------------
 -- YMP Tests
 
@@ -64,7 +65,6 @@ module Stubs where
 
 -- | YMP fails if YieldedToHash not found; validator case
 
-
 --------------------------------------------------------------------------------
 -- YV Tests
 
@@ -79,7 +79,6 @@ module Stubs where
 -- | YV fails if YieldedToHash not found; staking validator case
 
 -- | YV fails if YieldedToHash not found; validator case
-
 
 --------------------------------------------------------------------------------
 -- YSV Tests

@@ -9,8 +9,10 @@ module Cardano.YTxP.Control.Yielding (
 where
 
 import Cardano.YTxP.Control.YieldList (PYieldedToHash, getYieldedToHashByIndex)
-import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS,
-                                                     pcontainsYieldListSTT)
+import Cardano.YTxP.Control.YieldList.MintingPolicy (
+  YieldListSTCS,
+  pcontainsYieldListSTT,
+ )
 import Plutarch.Api.V2 (PTxInInfo)
 import Plutarch.DataRepr (PDataFields)
 import Utils (punsafeFromInlineDatum)
@@ -35,7 +37,8 @@ What is being indexed depends by the yielding script pointed by the YieldListInd
 -}
 newtype YieldListScriptToYieldIndex = YieldListScriptToYieldIndex Integer -- FIXME Int/Integer/Positive
 
-newtype PYieldListScriptToYieldIndex (s :: S) = PYieldListScriptToYieldIndex (Term s PInteger)
+newtype PYieldListScriptToYieldIndex (s :: S)
+  = PYieldListScriptToYieldIndex (Term s PInteger)
   deriving stock (Generic)
   deriving anyclass (PlutusType, PIsData)
 
@@ -82,9 +85,9 @@ newtype PYieldingRedeemer (s :: S)
       ( Term
           s
           ( PDataRecord
-              '[ "yieldListIndex" ' := PYieldListIndex
-               , "yieldListScriptToYieldIndex" ' := PYieldListScriptToYieldIndex
-               , "yieldListRefInputIndex" ' := PYieldListRefInputIndex
+              '[ "yieldListIndex" ':= PYieldListIndex
+               , "yieldListScriptToYieldIndex" ':= PYieldListScriptToYieldIndex
+               , "yieldListRefInputIndex" ':= PYieldListRefInputIndex
                ]
           )
       )

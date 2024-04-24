@@ -6,19 +6,30 @@ import PlutusTx.AssocMap qualified as PlutusMap
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.ExpectedFailure (expectFailBecause)
 import Test.Tasty.HUnit (assertBool, testCase)
-import Test.Unit.Transaction (pdummyTxInInfoSingletonList,
-                              pdummyTxInInfoSingletonListTwo,
-                              pdummyTxInInfoThreeElementList,
-                              pdummyTxInInfoTwoElementList, pdummyTxOutRefOne,
-                              pdummyTxOutRefTwo, pdummyTxOutSingletonList,
-                              pdummyTxOutTwoElementList)
-import Test.Unit.Values (dummySymbolOne, dummySymbolThree, dummySymbolTwo,
-                         dummyValueOne)
-import Utils (phasNoScriptInputWithToken,
-              phasOneScriptInputAtValidatorWithExactlyOneToken,
-              phasOnlyOneInputWithExactlyOneTokenWithSymbol,
-              phasOnlyOneValidScriptOutputWithToken, pmember,
-              poutputsDoNotContainToken)
+import Test.Unit.Transaction (
+  pdummyTxInInfoSingletonList,
+  pdummyTxInInfoSingletonListTwo,
+  pdummyTxInInfoThreeElementList,
+  pdummyTxInInfoTwoElementList,
+  pdummyTxOutRefOne,
+  pdummyTxOutRefTwo,
+  pdummyTxOutSingletonList,
+  pdummyTxOutTwoElementList,
+ )
+import Test.Unit.Values (
+  dummySymbolOne,
+  dummySymbolThree,
+  dummySymbolTwo,
+  dummyValueOne,
+ )
+import Utils (
+  phasNoScriptInputWithToken,
+  phasOneScriptInputAtValidatorWithExactlyOneToken,
+  phasOnlyOneInputWithExactlyOneTokenWithSymbol,
+  phasOnlyOneValidScriptOutputWithToken,
+  pmember,
+  poutputsDoNotContainToken,
+ )
 
 pexpectedResultFalse :: Term s PBool
 pexpectedResultFalse = pconstant False
@@ -293,23 +304,24 @@ unitSpec =
       $ assertBool "Should be false"
       $ plift phasOnlyOneValidScriptOutputWithTokenTestTwo
   , -- Test for `pmember` helper
-    testGroup "pmember - Utils"
-    [ testCase "pmember # 1 # emptyMap #== False" $
-        assertBool "Should be false" $
-          plift pmemberTestOne
-    , testCase "pmember # 1 # [(1, 1)] #== True" $
-        assertBool "Should be true" $
-          plift pmemberTestTwo
-    , testCase "pmember # 2 # [(1, 1)] #== False" $
-        assertBool "Should be false" $
-          plift pmemberTestThree
-    , testCase "pmember # 1 # [(1, 1), (2, 2)] #== True" $
-        assertBool "Should be true" $
-          plift pmemberTestFour
-    , testCase "pmember # 2 # [(1, 1), (2, 2)] #== True" $
-        assertBool "Should be true" $
-          plift pmemberTestFive
-    ]
+    testGroup
+      "pmember - Utils"
+      [ testCase "pmember # 1 # emptyMap #== False" $
+          assertBool "Should be false" $
+            plift pmemberTestOne
+      , testCase "pmember # 1 # [(1, 1)] #== True" $
+          assertBool "Should be true" $
+            plift pmemberTestTwo
+      , testCase "pmember # 2 # [(1, 1)] #== False" $
+          assertBool "Should be false" $
+            plift pmemberTestThree
+      , testCase "pmember # 1 # [(1, 1), (2, 2)] #== True" $
+          assertBool "Should be true" $
+            plift pmemberTestFour
+      , testCase "pmember # 2 # [(1, 1), (2, 2)] #== True" $
+          assertBool "Should be true" $
+            plift pmemberTestFive
+      ]
   ]
 
 -----------------------------------------------
