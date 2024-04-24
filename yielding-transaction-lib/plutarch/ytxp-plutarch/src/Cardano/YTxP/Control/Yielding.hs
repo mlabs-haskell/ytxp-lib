@@ -120,7 +120,7 @@ getYieldedToHash yieldListSTCS = phoistAcyclic $
 
       let yieldListUTxO =
             txInfoRefInputs
-              #!! (pto $ pfromData $ getField @"yieldListRefInputIndex" yieldingRedeemer)
+              #!! pto (pfromData $ getField @"yieldListRefInputIndex" yieldingRedeemer)
           output = pfield @"resolved" # yieldListUTxO
           value = pfield @"value" # output
 

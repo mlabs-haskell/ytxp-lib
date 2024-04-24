@@ -51,14 +51,14 @@ yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
 
         PYieldedToMP ((pfield @"scriptHash" #) -> yieldToHash') ->
           let txInfoMints = pfromData $ pfield @"mint" # txInfo
-              yieldToMint = (pto $ pto txInfoMints) #!! yieldToIndex
+              yieldToMint = pto (pto txInfoMints) #!! yieldToIndex
               currencySymbol = pscriptHashToCurrencySymbol yieldToHash'
            in ptraceIfFalse "Minting policy does not match expected yielded to minting policy" $
                 pfromData (pfstBuiltin # yieldToMint) #== currencySymbol
 
         PYieldedToSV ((pfield @"scriptHash" #) -> yieldToHash') ->
           let txInfoWithdrawls = pfromData $ pfield @"wdrl" # txInfo
-              yieldToWithdrawl = (pto txInfoWithdrawls) #!! yieldToIndex
+              yieldToWithdrawl = pto txInfoWithdrawls #!! yieldToIndex
            in
             pmatch (pfromData $ pfstBuiltin # yieldToWithdrawl) $ \case
               PStakingHash ((pfield @"_0" #) -> credential) ->

@@ -50,7 +50,7 @@ compileYieldListValidator config scriptToWrap = do
   pure $ YieldListValidatorScript script
 
 --------------------------------------------------------------------------------
--- YieldListCTCS
+-- YieldListSTCS
 
 -- | Opaque, semantic newtype for the YieldList state thread currency symbol
 newtype YieldListValidatorCredential
