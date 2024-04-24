@@ -24,9 +24,11 @@ usage:
 # Leave the cabal build directory and the legacy code submodule alone
 FIND_EXCLUDE_PATH := -not -path '**/dist-*/*'
 
-FIND_HASKELL_SOURCES := find -name '*.hs' $(FIND_EXCLUDE_PATH)
-FIND_NIX_SOURCES := find -name '*.nix' $(FIND_EXCLUDE_PATH)
-FIND_CABAL_SOURCES := find -name '*.cabal' $(FIND_EXCLUDE_PATH)
+# NOTE: we want to apply the same style rule for both ytxp-plutarch and ytxp-convex even if the
+# GHC version is different)
+FIND_HASKELL_SOURCES := find .. -name '*.hs' $(FIND_EXCLUDE_PATH)
+FIND_NIX_SOURCES := find .. -name '*.nix' $(FIND_EXCLUDE_PATH)
+FIND_CABAL_SOURCES := find .. -name '*.cabal' $(FIND_EXCLUDE_PATH)
 
 # Runs as command on all results of the `find` call at one.
 # e.g.

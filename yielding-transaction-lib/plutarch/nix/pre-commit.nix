@@ -16,6 +16,7 @@
           hlint.enable = true;
           nixpkgs-fmt.enable = true;
           typos.enable = true;
+          actionlint.enable = true;
         };
       };
     };
