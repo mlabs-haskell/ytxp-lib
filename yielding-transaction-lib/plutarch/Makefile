@@ -69,7 +69,7 @@ format_cabal:
 
 .PHONY: format_check_cabal
 format_check_cabal:
-	$(call find_exec_all_fn, $(FIND_CABAL_SOURCES), cabal-fmt --chec)k
+	$(call find_exec_all_fn, $(FIND_CABAL_SOURCES), cabal-fmt --check)
 
 
 # Apply hlint suggestions

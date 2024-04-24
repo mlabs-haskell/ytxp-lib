@@ -8,13 +8,13 @@
     pre-commit.check.enable = true;
     checks = {
       pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
-        src = ./.;
+        src = ./..;
         hooks = {
-          nixpkgs-fmt.enable = true;
           cabal-fmt.enable = true;
+          deadnix.enable = true;
           fourmolu.enable = true;
           hlint.enable = true;
-          deadnix.enable = true;
+          nixpkgs-fmt.enable = true;
           typos.enable = true;
         };
       };

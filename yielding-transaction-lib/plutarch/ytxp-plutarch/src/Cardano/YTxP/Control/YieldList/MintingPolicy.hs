@@ -160,7 +160,7 @@ mkYieldListSTMPWrapper
                         # yieldListSymbol
                         # pemptyTokenName
                         # 1
-                  , -- We combine a few of the checks into one with this check for efficieny,
+                  , -- We combine a few of the checks into one with this check for efficiency,
                     -- this check ensures that there is exactly one valid script output with a YieldListSTT,
                     -- it also ensures that no other script output contains a YieldListSTT,
                     -- and that no wallet output contains a YieldListSTT.

@@ -1,4 +1,4 @@
--- | This module export a helper funtion that produces a two argument yielding script that
+-- | This module export a helper function that produces a two argument yielding script that
 -- we use to implement the logic for yielding validator, minting policy and staking validator
 module Cardano.YTxP.Control.Yielding.Helper(yieldingHelper) where
 
@@ -57,14 +57,14 @@ yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
                 pfromData (pfstBuiltin # yieldToMint) #== currencySymbol
 
         PYieldedToSV ((pfield @"scriptHash" #) -> yieldToHash') ->
-          let txInfoWithdrawls = pfromData $ pfield @"wdrl" # txInfo
-              yieldToWithdrawl = pto txInfoWithdrawls #!! yieldToIndex
+          let txInfoWithdrawals = pfromData $ pfield @"wdrl" # txInfo
+              yieldToWithdrawal = pto txInfoWithdrawals #!! yieldToIndex
            in
-            pmatch (pfromData $ pfstBuiltin # yieldToWithdrawl) $ \case
+            pmatch (pfromData $ pfstBuiltin # yieldToWithdrawal) $ \case
               PStakingHash ((pfield @"_0" #) -> credential) ->
                 pmatch credential $ \case
                   PScriptCredential ((pfield @"_0" #) -> hash) ->
-                    ptraceIfFalse "Withdrawl does not match expected yielded to staking validator" $ hash #== yieldToHash'
+                    ptraceIfFalse "Withdrawal does not match expected yielded to staking validator" $ hash #== yieldToHash'
                   PPubKeyCredential _ ->
                     ptraceError "Staking credential at specified index is not a script credential"
               PStakingPtr _ ->

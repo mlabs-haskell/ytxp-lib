@@ -40,7 +40,6 @@ import PlutusTx.Builtins qualified as Builtins
 import PlutusTx.Builtins.Internal qualified as BI
 
 
-
 --------------------------------------------------------------------------------
 -- * Hashes
 
@@ -196,7 +195,7 @@ deriving via
 --------------------------------------------------------------------------------
 -- * Datums
 
-
+{-# ANN module "HLint: ignore Use newtype instead of data" #-}
 {- | The `YieldListDatum` holds a collection of hashes that YieldingScripts can yield to.
 The length of the datum is checked upon creation in `mkYieldListSTMPWrapper` to ensure
 that the length of the list does not exceed the max list length passed as a parameter to that script.

@@ -17,14 +17,14 @@ module Stubs where
 
 -- | YLSTMP fails when the YieldListSTT token name is not empty
 
--- | YLSTMP fails when the recieving UTxO is not at a script
+-- | YLSTMP fails when the receiving UTxO is not at a script
 -- address
 
 -- | YLSTMP fails when the receiving UTxO has tokens besides ada and the YLSTMP
 
--- | YLSTMP fails when the recieving UTxO does not contain a valid yield list.
+-- | YLSTMP fails when the receiving UTxO does not contain a valid yield list.
 -- Checks:
---   - Well-formed hashses
+--   - Well-formed hashes
 --   - 0 < length yieldList <= maxYieldListSize
 
 -- | YLSTMP fails to burn when `n` UTxOs with YieldListSTTs appear at the input, where n /= 1
@@ -37,7 +37,7 @@ module Stubs where
 
 -- | YLSTMP fails when the input wallet UTxO has a YieldListSTT
 
--- | YLSTMP fails when hte output wallet UTxO has a YieldListSTT
+-- | YLSTMP fails when the output wallet UTxO has a YieldListSTT
 
 --------------------------------------------------------------------------------
 -- YLV Tests
