@@ -15,7 +15,12 @@
           # cabal-fmt.enable = true;
           deadnix.enable = true;
           fourmolu.enable = true;
-          hlint.enable = true;
+          hlint = {
+            enable = true;
+            # NOTE (alberto 2024-04-24): hlint from nix can't find hlint file and it must be explicitly provided
+            # the default would be .hlint.yaml but nix doesn't accept files starting with `.`
+            settings = { hintFile = ../ytxp-plutarch/hlint.yaml; };
+          };
           nixpkgs-fmt.enable = true;
           typos.enable = true;
           actionlint.enable = true;
