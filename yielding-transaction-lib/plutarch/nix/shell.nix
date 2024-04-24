@@ -16,7 +16,7 @@ in
     fourmolu = "latest";
   };
   inputsFrom = [ inputShell ];
-  # TODO (alberto 2024-04-23): this can't work in the current repository becase
+  # TODO (alberto 2024-04-23): this can't work in the current repository because
   # we already have other pre-commit hooks installed
   # shellHook = ''
   #   ${config.pre-commit.installationScript}

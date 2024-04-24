@@ -1,12 +1,12 @@
 { inputs, ... }:
 {
-  perSystem = { self', system, lib, config, pkgs, ... }:
+  perSystem = { system, lib, config, ... }:
     let
       overlays = [
         inputs.haskellNix.overlay
         inputs.iohk-nix.overlays.crypto
         inputs.iohk-nix.overlays.haskell-nix-crypto
-        (final: prev: {
+        (_final: _prev: {
           ytxp-plutarch = import ./project.nix {
             inherit pkgs lib inputs;
           };
