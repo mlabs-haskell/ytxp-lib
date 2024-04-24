@@ -122,9 +122,9 @@ PlutusTx.makeIsDataIndexed
   ]
 
 data PYieldedToHash (s :: S)
-  = PYieldedToValidator (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
-  | PYieldedToMP (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
-  | PYieldedToSV (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
+  = PYieldedToValidator (Term s (PDataRecord '["scriptHash" ' := PScriptHash]))
+  | PYieldedToMP (Term s (PDataRecord '["scriptHash" ' := PScriptHash]))
+  | PYieldedToSV (Term s (PDataRecord '["scriptHash" ' := PScriptHash]))
   deriving stock
     ( Generic
     )
@@ -200,8 +200,6 @@ deriving via
 
 -- * Datums
 
-{-# ANN module "HLint: ignore Use newtype instead of data" #-}
-
 {- | The `YieldListDatum` holds a collection of hashes that YieldingScripts can yield to.
 The length of the datum is checked upon creation in `mkYieldListSTMPWrapper` to ensure
 that the length of the list does not exceed the max list length passed as a parameter to that script.
@@ -223,7 +221,7 @@ newtype PYieldListDatum (s :: S)
       ( Term
           s
           ( PDataRecord
-              '[ "yieldedToScripts" ':= PBuiltinList (PAsData PYieldedToHash)
+              '[ "yieldedToScripts" ' := PBuiltinList (PAsData PYieldedToHash)
                ]
           )
       )

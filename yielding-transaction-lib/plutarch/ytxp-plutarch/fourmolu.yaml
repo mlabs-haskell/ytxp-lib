@@ -34,7 +34,7 @@ let-style: auto
 # How to align the 'in' keyword with respect to the 'let' keyword (choices: left-align, right-align, or no-space)
 in-style: right-align
 
-# Whether to put parentheses around a single constraint (choices: auto, always, or never)
+# Whether to put parentheses around a single constraint (choices: auto, always, or never)p
 single-constraint-parens: always
 
 # Whether to put parentheses around a single deriving class (choices: auto, always, or never)
