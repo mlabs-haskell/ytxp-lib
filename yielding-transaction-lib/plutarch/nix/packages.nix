@@ -20,6 +20,7 @@
     {
       packages = {
         ytxp-plutarch-lib = flake.packages."ytxp-plutarch:lib:ytxp-plutarch";
+        ytxp-plutarch-test-serialization = flake.packages."ytxp-plutarch:test:serialization";
         # TODO what are these?
         # ytxp-plutarch-cli = flake.packages."ytxp-plutarch:exe:ytxp-plutarch-cli";
         # ytxp-plutarch-config = nixpkgs pkgs.stdenv.mkDerivation {
