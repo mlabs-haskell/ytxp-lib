@@ -22,12 +22,13 @@ common common-language
     -fwarn-missing-import-lists -Weverything -Wno-unsafe
     -Wno-missing-safe-haskell-mode -Wno-implicit-prelude
     -Wno-missing-kind-signatures -Wno-all-missed-specializations
-    -Wno-unused-packages
+    -Wno-unused-packages -Wno-operator-whitespace
 
   if !flag(dev)
     ghc-options: -Werror
 
   default-extensions:
+    NoStarIsType
     BangPatterns
     BinaryLiterals
     ConstrainedClassMethods
@@ -64,7 +65,6 @@ common common-language
     MultiParamTypeClasses
     NamedFieldPuns
     NamedWildCards
-    NoStarIsType
     NumericUnderscores
     OverloadedLabels
     OverloadedStrings
@@ -102,7 +102,8 @@ common common-test
     , testlib
     , ytxp-plutarch
 
-  ghc-options:   -O2 -threaded -rtsopts -with-rtsopts=-N
+  ghc-options:
+    -O2 -threaded -rtsopts -with-rtsopts=-N
 
 -- Libraries
 
@@ -121,7 +122,6 @@ library pprelude
 
   exposed-modules:  PPrelude
   hs-source-dirs:   src
-
 library testlib
   import:          common-language
   build-depends:

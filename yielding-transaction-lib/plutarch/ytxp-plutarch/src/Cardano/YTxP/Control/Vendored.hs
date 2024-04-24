@@ -296,7 +296,7 @@ type family UD (p :: [S -> Type]) :: [S -> Type] where
   UD '[] = '[]
 
 type family PUnlabel (n :: [PLabeledType]) :: [S -> Type] where
-  PUnlabel ((_ ' := p) ': xs) = p ': PUnlabel xs
+  PUnlabel ((_ ':= p) ': xs) = p ': PUnlabel xs
   PUnlabel '[] = '[]
 
 type family MatchTypes' (n :: [S -> Type]) (m :: [S -> Type]) :: Bool where
@@ -312,16 +312,13 @@ type family MatchTypesError (n :: [S -> Type]) (m :: [S -> Type]) (a :: Bool) ::
     ( 'True ~ 'False
     , TypeError
         ( 'Text "Error when deriving 'PlutusTypeDataList':"
-            -- Note(Nigel): Added space between tick and operator to avoid the error:
-            -- `The suffix use of a ':$$:' might be repurposed as special syntax'
-            -- Not sure if there's a flag that can help here?
-            ' :$$: 'Text "\tMismatch between constituent Haskell and Plutarch types"
-            ' :$$: 'Text "Constituent Haskell Types: "
-            ' :$$: 'Text "\t"
-               ' :<>: 'ShowType n
-            ' :$$: 'Text "Constituent Plutarch Types: "
-            ' :$$: 'Text "\t"
-              ' :<>: 'ShowType m
+            ':$$: 'Text "\tMismatch between constituent Haskell and Plutarch types"
+            ':$$: 'Text "Constituent Haskell Types: "
+            ':$$: 'Text "\t"
+              ':<>: 'ShowType n
+            ':$$: 'Text "Constituent Plutarch Types: "
+            ':$$: 'Text "\t"
+              ':<>: 'ShowType m
         )
     )
 
