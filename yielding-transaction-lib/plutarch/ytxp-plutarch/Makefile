@@ -25,8 +25,6 @@ usage:
 	@echo "    build_pprelude                                              -- Build pprelude"
 	@echo "    build_write-config                                          -- Build write-config"
 	@echo ""
-	# Run
-	@echo "    run_write-config                                            -- Run write-config"
 	# Test
 	@echo "    test_serialization                                          -- Test serialization"
 	@echo ""
@@ -118,12 +116,6 @@ build_pprelude:
 .PHONY: build_write-config
 build_write-config:
 	cabal build -j write-config
-
-################################################################################
-# Run
-.PHONY: run_write-config
-run_write-config:
-	cabal run -j write-config
 
 ################################################################################
 # Test

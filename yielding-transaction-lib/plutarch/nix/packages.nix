@@ -21,14 +21,7 @@
       packages = {
         ytxp-plutarch-lib = flake.packages."ytxp-plutarch:lib:ytxp-plutarch";
         ytxp-plutarch-test-serialization = flake.packages."ytxp-plutarch:test:serialization";
-        # TODO what are these?
-        # ytxp-plutarch-cli = flake.packages."ytxp-plutarch:exe:ytxp-plutarch-cli";
-        # ytxp-plutarch-config = nixpkgs pkgs.stdenv.mkDerivation {
-        #   name = "ytxp-plutarch-config";
-        #   src = ./.;
-        #   buildPhase = ''${config.packages.ytxp-plutarch-cli}/bin/ytxp-plutarch-cli compile'';
-        #   installPhase = "cp ytxp-config.json $out";
-        # };
+        ytxp-plutarch-write-config = flake.packages."ytxp-plutarch:exe:write-config";
       };
       devShells = flake.devShells;
     };
