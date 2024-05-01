@@ -24,22 +24,16 @@ module Cardano.YTxP.Control.YieldList (
   getYieldedToHashByIndex,
 ) where
 
-import Cardano.YTxP.Control.Vendored (
-  DerivePConstantViaDataList (DerivePConstantViaDataList),
-  DerivePConstantViaEnum (DerivePConstantEnum),
-  EnumIsData (EnumIsData),
-  PlutusTypeDataList,
-  PlutusTypeEnumData,
-  ProductIsData (ProductIsData),
- )
+import Cardano.YTxP.Control.Vendored (DerivePConstantViaEnum (DerivePConstantEnum),
+                                      EnumIsData (EnumIsData),
+                                      PlutusTypeDataList, PlutusTypeEnumData)
 import Control.Monad (guard)
 import Generics.SOP qualified as SOP
 import Plutarch.Api.V2 (PScriptHash)
-import Plutarch.DataRepr (
-  DerivePConstantViaData (DerivePConstantViaData),
-  PDataFields,
- )
-import Plutarch.Lift (PConstantDecl, PLifted, PUnsafeLiftDecl)
+import Plutarch.DataRepr (DerivePConstantViaData (DerivePConstantViaData),
+                          PDataFields)
+import Plutarch.Lift (DerivePConstantViaNewtype (DerivePConstantViaNewtype),
+                      PConstantDecl, PLifted, PUnsafeLiftDecl)
 import PlutusTx qualified
 import PlutusTx.Builtins qualified as Builtins
 import PlutusTx.Builtins.Internal qualified as BI
@@ -71,17 +65,9 @@ instance PlutusTx.UnsafeFromData CustomScriptHash where
         scriptHash = BI.unsafeDataAsB (BI.head args)
      in CustomScriptHash scriptHash
 
-{- | Note(Nigel): This will likely not compile under `plutus-tx`
-due to the use of `error` from the Haskell `Prelude`.
-We use `error` from Prelude here as using `traceError` doesn't give back the error message.
-See the following issue for more details: https://github.com/IntersectMBO/plutus/issues/3003
--}
 instance PlutusTx.ToData CustomScriptHash where
   {-# INLINEABLE toBuiltinData #-}
-  toBuiltinData (CustomScriptHash scriptHash) =
-    if Builtins.lengthOfByteString scriptHash == 28
-      then PlutusTx.toBuiltinData scriptHash
-      else error "ScriptHash must be of length 28"
+  toBuiltinData (CustomScriptHash scriptHash) = PlutusTx.toBuiltinData scriptHash
 
 instance PlutusTx.FromData CustomScriptHash where
   {-# INLINEABLE fromBuiltinData #-}
@@ -90,6 +76,10 @@ instance PlutusTx.FromData CustomScriptHash where
     guard (Builtins.lengthOfByteString scriptHash == 28)
     pure $ tryMkCustomScriptHash scriptHash
 
+-- | Note(Nigel): This will likely not compile under `plutus-tx`
+-- due to the use of `error` from the Haskell `Prelude`.
+-- We use `error` from Prelude here as using `traceError` doesn't give back the error message.
+-- See the following issue for more details: https://github.com/IntersectMBO/plutus/issues/3003
 {-# INLINEABLE tryMkCustomScriptHash #-}
 tryMkCustomScriptHash :: Builtins.BuiltinByteString -> CustomScriptHash
 tryMkCustomScriptHash scriptHash
@@ -209,10 +199,10 @@ newtype YieldListDatum = YieldListDatum
   }
   deriving stock (Show, Eq, Generic)
   deriving anyclass (SOP.Generic)
-  deriving (PlutusTx.ToData, PlutusTx.FromData) via (ProductIsData YieldListDatum)
+  deriving newtype (PlutusTx.ToData, PlutusTx.FromData)
 
 deriving via
-  (DerivePConstantViaDataList YieldListDatum PYieldListDatum)
+  (DerivePConstantViaNewtype YieldListDatum PYieldListDatum (PBuiltinList PYieldedToHash))
   instance
     (PConstantDecl YieldListDatum)
 
