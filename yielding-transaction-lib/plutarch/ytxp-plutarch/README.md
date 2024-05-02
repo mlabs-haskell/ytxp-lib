@@ -5,7 +5,7 @@
 You can launch the dev shell with:
 
 ```
-nix develop .#dev-ytxp-plutarch
+nix develop
 ```
 
 
