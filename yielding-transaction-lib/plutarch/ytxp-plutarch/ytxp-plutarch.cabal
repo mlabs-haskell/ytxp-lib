@@ -22,7 +22,7 @@ common common-language
     -fwarn-missing-import-lists -Weverything -Wno-unsafe
     -Wno-missing-safe-haskell-mode -Wno-implicit-prelude
     -Wno-missing-kind-signatures -Wno-all-missed-specializations
-    -Wno-unused-packages
+    -Wno-unused-packages -Wno-operator-whitespace
 
   if !flag(dev)
     ghc-options: -Werror

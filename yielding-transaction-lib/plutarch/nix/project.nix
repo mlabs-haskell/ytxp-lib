@@ -1,7 +1,7 @@
 { pkgs, lib, inputs }:
 pkgs.haskell-nix.cabalProject'
 {
-  compiler-nix-name = "ghc963";
+  compiler-nix-name = "ghc96";
   src = lib.cleanSource ./../ytxp-plutarch;
   shell = import ./shell.nix { inherit pkgs; };
   inputMap = {

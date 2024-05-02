@@ -17,11 +17,23 @@ import Cardano.YTxP.Control.YieldList (PYieldListDatum (PYieldListDatum))
 import Data.List.NonEmpty (nonEmpty)
 import Numeric.Natural (Natural)
 import Plutarch.Api.V1 (PCredential (PPubKeyCredential, PScriptCredential))
-import Plutarch.Api.V1.Value (PCurrencySymbol, PTokenName, PValue, padaSymbol,
-                              pvalueOf)
-import Plutarch.Api.V2 (AmountGuarantees, KeyGuarantees, PMap,
-                        POutputDatum (POutputDatum), PScriptHash, PTxInInfo,
-                        PTxOut, PTxOutRef)
+import Plutarch.Api.V1.Value (
+  PCurrencySymbol,
+  PTokenName,
+  PValue,
+  padaSymbol,
+  pvalueOf,
+ )
+import Plutarch.Api.V2 (
+  AmountGuarantees,
+  KeyGuarantees,
+  PMap,
+  POutputDatum (POutputDatum),
+  PScriptHash,
+  PTxInInfo,
+  PTxOut,
+  PTxOutRef,
+ )
 import Plutarch.Extra.Map (pkeys)
 import Plutarch.List (pfoldl')
 import Plutarch.Unsafe (punsafeCoerce)
@@ -45,35 +57,37 @@ poutputsDoNotContainToken outputs =
   plam $ \symbol ->
     pmatch
       ( pfilter
-          # plam (\txOut ->
+          # plam
+            ( \txOut ->
                 pconstant 0
-                    #< (
-                         -- We inline the `psymbolValue` function for efficiency reasons
-                         let valueMap =
+                  #< (
+                       -- We inline the `psymbolValue` function for efficiency reasons
+                       let valueMap =
+                            pto $
                               pto $
-                                pto $
-                                  pfromData $
-                                    pfield @"value"
-                                      # txOut
-                             go = pfix #$ plam $ \self valueMap' ->
-                              pelimList
-                                ( \symbolAndTokens rest ->
-                                    pif
-                                      (pfromData (pfstBuiltin # symbolAndTokens) #== symbol)
-                                      ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
-                                         in pfoldl'
-                                              ( \acc tokenAndAmount ->
-                                                  pfromData (psndBuiltin # tokenAndAmount) + acc
-                                              )
-                                              # 0
-                                              # tokens
-                                      )
-                                      (self # rest)
-                                )
-                                0
-                                valueMap'
-                          in go # valueMap
-                       ))
+                                pfromData $
+                                  pfield @"value"
+                                    # txOut
+                           go = pfix #$ plam $ \self valueMap' ->
+                            pelimList
+                              ( \symbolAndTokens rest ->
+                                  pif
+                                    (pfromData (pfstBuiltin # symbolAndTokens) #== symbol)
+                                    ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
+                                       in pfoldl'
+                                            ( \acc tokenAndAmount ->
+                                                pfromData (psndBuiltin # tokenAndAmount) + acc
+                                            )
+                                            # 0
+                                            # tokens
+                                    )
+                                    (self # rest)
+                              )
+                              0
+                              valueMap'
+                        in go # valueMap
+                     )
+            )
           # outputs
       )
       $ \case
@@ -90,7 +104,8 @@ phasNoScriptInputWithToken inputs =
   plam $ \symbol ->
     pmatch
       ( pfilter
-          # plam (\txInInfo ->
+          # plam
+            ( \txInInfo ->
                 pmatch
                   ( pfromData
                       $ pfield @"credential"
@@ -134,7 +149,8 @@ phasNoScriptInputWithToken inputs =
                                 in go # valueMap
                              )
                       )
-                    _ -> pconstant False)
+                    _ -> pconstant False
+            )
           # inputs
       )
       $ \case
@@ -194,35 +210,37 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
   plam $ \symbol ->
     pmatch
       ( pfilter
-          # plam (\txOut ->
+          # plam
+            ( \txOut ->
                 -- Check the output contains one or more YieldListSTT.
                 -- At this step, we want to find any output (wallet or script)
                 -- that contains one or more YieldListSTT.
                 -- This is to avoid needing another helper to check that there are no script outputs or
                 -- wallet outputs containing one or more of these tokens.
                 pconstant 0
-                    #< (
-                         -- We inline the `psymbolValue` function for efficiency reasons
-                         let valueMap = pto (pto $ pfromData $ pfield @"value" # txOut)
-                             go = pfix #$ plam $ \self valueMap' ->
-                              pelimList
-                                ( \symbolAndTokens rest ->
-                                    pif
-                                      (pfromData (pfstBuiltin # symbolAndTokens) #== symbol)
-                                      ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
-                                         in pfoldl'
-                                              ( \acc tokenAndAmount ->
-                                                  pfromData (psndBuiltin # tokenAndAmount) + acc
-                                              )
-                                              # 0
-                                              # tokens
-                                      )
-                                      (self # rest)
-                                )
-                                0
-                                valueMap'
-                          in go # valueMap
-                       ))
+                  #< (
+                       -- We inline the `psymbolValue` function for efficiency reasons
+                       let valueMap = pto (pto $ pfromData $ pfield @"value" # txOut)
+                           go = pfix #$ plam $ \self valueMap' ->
+                            pelimList
+                              ( \symbolAndTokens rest ->
+                                  pif
+                                    (pfromData (pfstBuiltin # symbolAndTokens) #== symbol)
+                                    ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
+                                       in pfoldl'
+                                            ( \acc tokenAndAmount ->
+                                                pfromData (psndBuiltin # tokenAndAmount) + acc
+                                            )
+                                            # 0
+                                            # tokens
+                                    )
+                                    (self # rest)
+                              )
+                              0
+                              valueMap'
+                        in go # valueMap
+                     )
+            )
           # outputs
       )
       $ \case
@@ -268,13 +286,15 @@ phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
                         -- aside from Ada and the given token
                         PTrue -> pmatch
                           ( pfilter
-                                # plam (\symbolInValue ->
-                                      pnot
-                                          #$ pfromData symbolInValue
-                                          #== symbol
-                                          #|| pfromData symbolInValue
-                                          #== padaSymbol)
-                                # (pkeys #$ pto $ pfromData $ pfield @"value" # txOut')
+                              # plam
+                                ( \symbolInValue ->
+                                    pnot
+                                      #$ pfromData symbolInValue
+                                      #== symbol
+                                      #|| pfromData symbolInValue
+                                      #== padaSymbol
+                                )
+                              # (pkeys #$ pto $ pfromData $ pfield @"value" # txOut')
                           )
                           $ \case
                             -- Finally check that it holds a valid output datum
@@ -303,7 +323,8 @@ phasOneScriptInputAtValidatorWithExactlyOneToken inputs =
   plam $ \symbol txOutRef ->
     pmatch
       ( pfilter
-          # plam (\txInInfo ->
+          # plam
+            ( \txInInfo ->
                 pmatch
                   ( pfromData
                       $ pfield @"credential"
@@ -351,7 +372,8 @@ phasOneScriptInputAtValidatorWithExactlyOneToken inputs =
                                 in go # valueMap
                              )
                       )
-                    PPubKeyCredential _ -> pconstant False)
+                    PPubKeyCredential _ -> pconstant False
+            )
           # inputs
       )
       $ \case
@@ -451,8 +473,7 @@ pemptyTokenName = pconstant ""
 pscriptHashToCurrencySymbol :: Term s PScriptHash -> Term s PCurrencySymbol
 pscriptHashToCurrencySymbol = punsafeCoerce
 
-{- | Extract the datum from a 'POutputDatum', expecting it to be an inline datum.
--}
+-- | Extract the datum from a 'POutputDatum', expecting it to be an inline datum.
 punsafeFromInlineDatum ::
   forall (s :: S) (a :: S -> Type).
   Term

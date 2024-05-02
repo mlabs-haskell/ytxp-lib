@@ -7,18 +7,20 @@
     nixpkgs.follows = "haskellNix/nixpkgs";
     plutarch = {
       url = "github:Plutonomicon/plutarch-plutus";
-      flake = false;
     };
-
     CHaP = {
       url = "github:intersectmbo/cardano-haskell-packages?ref=repo";
+      flake = false;
     };
+    pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
   };
 
-  outputs = inputs@{ nixpkgs, haskellNix, flake-parts, iohk-nix, CHaP, plutarch, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; } {
+  outputs = inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" "x86_64-darwin" ];
       imports = [
+        inputs.pre-commit-hooks.flakeModule
+        ./nix/pre-commit.nix
         ./nix/packages.nix
       ];
     };
