@@ -88,12 +88,12 @@ format_check_cabal:
 # Apply hlint suggestions
 .PHONY: lint
 lint:
-	$(call find_exec_one_by_one_fn, $(FIND_HASKELL_SOURCES), hlint -j --refactor --refactor-options="-i" --hint=hlint.yaml)
+	$(call find_exec_one_by_one_fn, $(FIND_HASKELL_SOURCES), hlint -j --refactor --refactor-options="-i")
 
 # Check hlint suggestions
 .PHONY: lint_check
 lint_check:
-	$(call find_exec_all_fn, $(FIND_HASKELL_SOURCES), hlint -j --hint=hlint.yaml)
+	$(call find_exec_all_fn, $(FIND_HASKELL_SOURCES), hlint -j)
 
 ################################################################################
 # Build
