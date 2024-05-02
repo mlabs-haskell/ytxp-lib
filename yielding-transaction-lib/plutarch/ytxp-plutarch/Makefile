@@ -33,6 +33,10 @@ usage:
 	@echo "    typos_check                                                 -- Check typos"
 	@echo "    typos_fix                                                   -- Fix typos"
 	@echo ""
+	# Doc
+	@echo "    build_doc                                                   -- Build haddock documentation"
+	@echo ""
+
 
 ################################################################################
 # Code
@@ -141,3 +145,9 @@ typos_check :
 .PHONY: typos_fix
 typos_fix:
 	typos -w -c ../../.typos.toml ../../
+
+################################################################################
+# Doc
+.PHONY: build_doc
+build_doc:
+	cabal haddock --haddock-all --haddock-quickjump
