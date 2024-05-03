@@ -3,11 +3,21 @@
 module Test.Laws (aesonLaws, aesonLawsWith) where
 
 import Data.Aeson (FromJSON, ToJSON (toJSON), decode, encode)
-import Prettyprinter (Pretty (pretty), defaultLayoutOptions, layoutSmart,
-                      viaShow, (<+>))
+import Prettyprinter (
+  Pretty (pretty),
+  defaultLayoutOptions,
+  layoutSmart,
+  viaShow,
+  (<+>),
+ )
 import Prettyprinter.Render.String (renderString)
-import Test.QuickCheck (Arbitrary (arbitrary, shrink), Gen, Property,
-                        counterexample, forAllShrinkShow)
+import Test.QuickCheck (
+  Arbitrary (arbitrary, shrink),
+  Gen,
+  Property,
+  counterexample,
+  forAllShrinkShow,
+ )
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.QuickCheck (testProperty)
 import Type.Reflection (Typeable, tyConName, typeRep, typeRepTyCon)

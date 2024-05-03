@@ -6,19 +6,30 @@ import PlutusTx.AssocMap qualified as PlutusMap
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.ExpectedFailure (expectFailBecause)
 import Test.Tasty.HUnit (assertBool, testCase)
-import Test.Unit.Transaction (pdummyTxInInfoSingletonList,
-                              pdummyTxInInfoSingletonListTwo,
-                              pdummyTxInInfoThreeElementList,
-                              pdummyTxInInfoTwoElementList, pdummyTxOutRefOne,
-                              pdummyTxOutRefTwo, pdummyTxOutSingletonList,
-                              pdummyTxOutTwoElementList)
-import Test.Unit.Values (dummySymbolOne, dummySymbolThree, dummySymbolTwo,
-                         dummyValueOne)
-import Utils (phasNoScriptInputWithToken,
-              phasOneScriptInputAtValidatorWithExactlyOneToken,
-              phasOnlyOneInputWithExactlyOneTokenWithSymbol,
-              phasOnlyOneValidScriptOutputWithToken, pmember,
-              poutputsDoNotContainToken)
+import Test.Unit.Transaction (
+  pdummyTxInInfoSingletonList,
+  pdummyTxInInfoSingletonListTwo,
+  pdummyTxInInfoThreeElementList,
+  pdummyTxInInfoTwoElementList,
+  pdummyTxOutRefOne,
+  pdummyTxOutRefTwo,
+  pdummyTxOutSingletonList,
+  pdummyTxOutTwoElementList,
+ )
+import Test.Unit.Values (
+  dummySymbolOne,
+  dummySymbolThree,
+  dummySymbolTwo,
+  dummyValueOne,
+ )
+import Utils (
+  phasNoScriptInputWithToken,
+  phasOneScriptInputAtValidatorWithExactlyOneToken,
+  phasOnlyOneInputWithExactlyOneTokenWithSymbol,
+  phasOnlyOneValidScriptOutputWithToken,
+  pmember,
+  poutputsDoNotContainToken,
+ )
 
 pexpectedResultFalse :: Term s PBool
 pexpectedResultFalse = pconstant False

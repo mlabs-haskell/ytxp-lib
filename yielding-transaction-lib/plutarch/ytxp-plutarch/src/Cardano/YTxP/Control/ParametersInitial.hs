@@ -7,8 +7,15 @@ module Cardano.YTxP.Control.ParametersInitial (
   ControlParametersInitial (..),
 ) where
 
-import Data.Aeson (FromJSON (parseJSON), ToJSON (toEncoding, toJSON), object,
-                   pairs, withObject, (.:), (.=))
+import Data.Aeson (
+  FromJSON (parseJSON),
+  ToJSON (toEncoding, toJSON),
+  object,
+  pairs,
+  withObject,
+  (.:),
+  (.=),
+ )
 import Numeric.Natural (Natural)
 import Plutarch (Config)
 import Plutarch.Api.V2 (PScriptContext)

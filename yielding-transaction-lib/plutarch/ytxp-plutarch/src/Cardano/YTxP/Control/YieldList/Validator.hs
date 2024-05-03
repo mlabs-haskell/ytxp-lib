@@ -18,8 +18,11 @@ import Plutarch.Api.V2 (PScriptContext, PScriptPurpose (PSpending), scriptHash)
 import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (Credential (ScriptCredential))
 import Prettyprinter (Pretty)
-import Utils (pands, phasOneScriptInputAtValidatorWithExactlyOneToken,
-              poutputsDoNotContainToken)
+import Utils (
+  pands,
+  phasOneScriptInputAtValidatorWithExactlyOneToken,
+  poutputsDoNotContainToken,
+ )
 
 --------------------------------------------------------------------------------
 -- YieldListValidatorScript

@@ -8,8 +8,15 @@ module Cardano.YTxP.Control.Yielding.StakingValidator (
 
 import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
-import Data.Aeson (FromJSON (parseJSON), ToJSON (toEncoding, toJSON), object,
-                   pairs, withObject, (.:), (.=))
+import Data.Aeson (
+  FromJSON (parseJSON),
+  ToJSON (toEncoding, toJSON),
+  object,
+  pairs,
+  withObject,
+  (.:),
+  (.=),
+ )
 import Data.Text (Text)
 import Plutarch (Config, compile)
 import Plutarch.Api.V2 (PScriptContext)

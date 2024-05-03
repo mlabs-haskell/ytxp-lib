@@ -11,7 +11,9 @@ module Cardano.YTxP.Control.YieldList.MintingPolicy (
   pcontainsYieldListSTT,
 ) where
 
-import Cardano.YTxP.Control.YieldList (PYieldListMPWrapperRedeemer (PBurn, PMint))
+import Cardano.YTxP.Control.YieldList (
+  PYieldListMPWrapperRedeemer (PBurn, PMint),
+ )
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Numeric.Natural (Natural)
@@ -21,10 +23,15 @@ import Plutarch.Api.V2 (PScriptContext, PScriptPurpose (PMinting), scriptHash)
 import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
 import Prettyprinter (Pretty)
-import Utils (pands, pemptyTokenName, phasNoScriptInputWithToken,
-              phasOnlyOneInputWithExactlyOneTokenWithSymbol,
-              phasOnlyOneValidScriptOutputWithToken, pmember,
-              pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount)
+import Utils (
+  pands,
+  pemptyTokenName,
+  phasNoScriptInputWithToken,
+  phasOnlyOneInputWithExactlyOneTokenWithSymbol,
+  phasOnlyOneValidScriptOutputWithToken,
+  pmember,
+  pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount,
+ )
 
 --------------------------------------------------------------------------------
 -- YieldListSTMPScript

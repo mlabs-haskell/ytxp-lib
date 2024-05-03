@@ -9,8 +9,10 @@ module Cardano.YTxP.Control.Yielding (
 where
 
 import Cardano.YTxP.Control.YieldList (PYieldedToHash, getYieldedToHashByIndex)
-import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS,
-                                                     pcontainsYieldListSTT)
+import Cardano.YTxP.Control.YieldList.MintingPolicy (
+  YieldListSTCS,
+  pcontainsYieldListSTT,
+ )
 import Plutarch.Api.V2 (PTxInInfo)
 import Plutarch.DataRepr (PDataFields)
 import Utils (punsafeFromInlineDatum)

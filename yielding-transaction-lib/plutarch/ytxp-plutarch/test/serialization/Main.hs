@@ -1,11 +1,17 @@
 module Main (main) where
 
-import Cardano.YTxP.Control.ParametersInitial (ControlParametersInitial (ControlParametersInitial))
-import Cardano.YTxP.Control.Stubs (alwaysSucceedsTwoArgumentScript,
-                                   alwaysSucceedsValidator)
+import Cardano.YTxP.Control.ParametersInitial (
+  ControlParametersInitial (ControlParametersInitial),
+ )
+import Cardano.YTxP.Control.Stubs (
+  alwaysSucceedsTwoArgumentScript,
+  alwaysSucceedsValidator,
+ )
 import Data.Aeson (encode)
-import Plutarch.Internal (Config (Config),
-                          TracingMode (DetTracing, DoTracing, DoTracingAndBinds, NoTracing))
+import Plutarch.Internal (
+  Config (Config),
+  TracingMode (DetTracing, DoTracing, DoTracingAndBinds, NoTracing),
+ )
 import Test.Laws (aesonLawsWith)
 import Test.QuickCheck (Gen, arbitrary, elements)
 import Test.Tasty (adjustOption, defaultMain, testGroup)
