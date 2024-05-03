@@ -22,15 +22,16 @@ import PlutusLedgerApi.V2 (Credential (ScriptCredential))
 
 -- | @since 0.1.0
 newtype YieldingValidatorScript = YieldingValidatorScript
-  { -- | @since 0.1.0
-    getYieldingValidatorScript :: Script
+  { getYieldingValidatorScript :: Script
+  -- ^ @since 0.1.0
   }
-  deriving (
-    -- | @since 0.1.0
-    ToJSON,
-    -- | @since 0.1.0
-    FromJSON
-    ) via (HexStringScript "YieldingValidatorScript")
+  deriving
+    ( -- | @since 0.1.0
+      ToJSON
+    , -- | @since 0.1.0
+      FromJSON
+    )
+    via (HexStringScript "YieldingValidatorScript")
 
 compileYieldingValidator ::
   Config ->
@@ -60,4 +61,3 @@ mkYieldingValidatorCredential ::
   YieldingValidatorScript -> YieldingValidatorCredential
 mkYieldingValidatorCredential (YieldingValidatorScript script) =
   YieldingValidatorCredential $ ScriptCredential (scriptHash script)
-

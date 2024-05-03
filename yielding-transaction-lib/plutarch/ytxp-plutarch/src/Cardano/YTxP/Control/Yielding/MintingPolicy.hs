@@ -21,16 +21,17 @@ import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
 -- Yielding Minting Policy Script
 
 -- | @since 0.1.0
-newtype YieldingMPScript = YieldingMPScript {
-  -- | @since 0.1.0
-  getYieldingMPScript :: Script
+newtype YieldingMPScript = YieldingMPScript
+  { getYieldingMPScript :: Script
+  -- ^ @since 0.1.0
   }
-  deriving (
-    -- | @since 0.1.0
-    ToJSON,
-    -- | @since 0.1.0
-    FromJSON
-    ) via (HexStringScript "YieldingMPScript")
+  deriving
+    ( -- | @since 0.1.0
+      ToJSON
+    , -- | @since 0.1.0
+      FromJSON
+    )
+    via (HexStringScript "YieldingMPScript")
 
 compileYieldingMP ::
   Config ->
@@ -58,4 +59,3 @@ newtype YieldingMPCS = YieldingMPCS CurrencySymbol
 mkYieldingMPCS :: YieldingMPScript -> YieldingMPCS
 mkYieldingMPCS (YieldingMPScript script) =
   YieldingMPCS $ CurrencySymbol (getScriptHash $ scriptHash script)
-
