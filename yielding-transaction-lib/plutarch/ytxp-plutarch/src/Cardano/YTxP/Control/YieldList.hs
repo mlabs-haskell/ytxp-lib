@@ -24,25 +24,16 @@ module Cardano.YTxP.Control.YieldList (
   getYieldedToHashByIndex,
 ) where
 
-import Cardano.YTxP.Control.Vendored (
-  DerivePConstantViaEnum (DerivePConstantEnum),
-  EnumIsData (EnumIsData),
-  PlutusTypeDataList,
-  PlutusTypeEnumData,
- )
+import Cardano.YTxP.Control.Vendored (DerivePConstantViaEnum (DerivePConstantEnum),
+                                      EnumIsData (EnumIsData),
+                                      PlutusTypeDataList, PlutusTypeEnumData)
 import Control.Monad (guard)
 import Generics.SOP qualified as SOP
 import Plutarch.Api.V2 (PScriptHash)
-import Plutarch.DataRepr (
-  DerivePConstantViaData (DerivePConstantViaData),
-  PDataFields,
- )
-import Plutarch.Lift (
-  DerivePConstantViaNewtype (DerivePConstantViaNewtype),
-  PConstantDecl,
-  PLifted,
-  PUnsafeLiftDecl,
- )
+import Plutarch.DataRepr (DerivePConstantViaData (DerivePConstantViaData),
+                          PDataFields)
+import Plutarch.Lift (DerivePConstantViaNewtype (DerivePConstantViaNewtype),
+                      PConstantDecl, PLifted, PUnsafeLiftDecl)
 import PlutusTx qualified
 import PlutusTx.Builtins qualified as Builtins
 import PlutusTx.Builtins.Internal qualified as BI
@@ -85,11 +76,10 @@ instance PlutusTx.FromData CustomScriptHash where
     guard (Builtins.lengthOfByteString scriptHash == 28)
     pure $ tryMkCustomScriptHash scriptHash
 
-{- | Note(Nigel): This will likely not compile under `plutus-tx`
-due to the use of `error` from the Haskell `Prelude`.
-We use `error` from Prelude here as using `traceError` doesn't give back the error message.
-See the following issue for more details: https://github.com/IntersectMBO/plutus/issues/3003
--}
+-- | Note(Nigel): This will likely not compile under `plutus-tx`
+-- due to the use of `error` from the Haskell `Prelude`.
+-- We use `error` from Prelude here as using `traceError` doesn't give back the error message.
+-- See the following issue for more details: https://github.com/IntersectMBO/plutus/issues/3003
 {-# INLINEABLE tryMkCustomScriptHash #-}
 tryMkCustomScriptHash :: Builtins.BuiltinByteString -> CustomScriptHash
 tryMkCustomScriptHash scriptHash
