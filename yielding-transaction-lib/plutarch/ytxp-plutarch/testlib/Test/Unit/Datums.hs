@@ -8,8 +8,11 @@ module Test.Unit.Datums (
 ) where
 
 import Cardano.YTxP.Control.YieldList (YieldListDatum (YieldListDatum))
-import PlutusLedgerApi.V2 (Datum (Datum), OutputDatum (OutputDatum),
-                           toBuiltinData)
+import PlutusLedgerApi.V2 (
+  Datum (Datum),
+  OutputDatum (OutputDatum),
+  toBuiltinData,
+ )
 
 dummyYieldListEmptyListOutputDatum :: OutputDatum
 dummyYieldListEmptyListOutputDatum = OutputDatum dummyYieldListEmptyListDatum

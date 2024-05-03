@@ -1,12 +1,12 @@
-{-# LANGUAGE DataKinds           #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ImportQualifiedPost #-}
-{-# LANGUAGE ImpredicativeTypes  #-}
-{-# LANGUAGE KindSignatures      #-}
-{-# LANGUAGE LambdaCase          #-}
-{-# LANGUAGE OverloadedStrings   #-}
+{-# LANGUAGE ImpredicativeTypes #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications    #-}
-{-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 
 module PPrelude (
   module Prelude,
@@ -27,8 +27,13 @@ module PPrelude (
 ) where
 
 import Control.Monad ((<=<), (>=>))
-import Data.Aeson (Encoding, FromJSON (parseJSON), ToJSON (toEncoding, toJSON),
-                   Value, withText)
+import Data.Aeson (
+  Encoding,
+  FromJSON (parseJSON),
+  ToJSON (toEncoding, toJSON),
+  Value,
+  withText,
+ )
 import Data.Aeson.Types (Parser)
 import Data.ByteString.Short (ShortByteString)
 import Data.ByteString.Short qualified as SBS
@@ -40,16 +45,21 @@ import Data.Word (Word8)
 import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
 import Numeric (readHex, showHex)
 import Plutarch.Api.V2 (PScriptContext)
-import Plutarch.Internal (Config (Config), RawTerm (RCompiled), Term (Term),
-                          TermResult (TermResult),
-                          TracingMode (DetTracing, DoTracing, DoTracingAndBinds, NoTracing),
-                          compile, tracingMode)
+import Plutarch.Internal (
+  Config (Config),
+  RawTerm (RCompiled),
+  Term (Term),
+  TermResult (TermResult),
+  TracingMode (DetTracing, DoTracing, DoTracingAndBinds, NoTracing),
+  compile,
+  tracingMode,
+ )
 import Plutarch.Prelude
 import Plutarch.Script (Script (Script), deserialiseScript, serialiseScript)
-import Prelude
 import Prettyprinter (Doc, Pretty (pretty), braces, punctuate, sep, (<+>))
 import Text.Builder qualified as TBuilder
 import UntypedPlutusCore.Core.Type qualified as UPLC
+import Prelude
 
 {- | Avoids an orphan 'Eq' instance for 'Config'.
 

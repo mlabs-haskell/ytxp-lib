@@ -3,12 +3,18 @@ we use to implement the logic for yielding validator, minting policy and staking
 -}
 module Cardano.YTxP.Control.Yielding.Helper (yieldingHelper) where
 
-import Cardano.YTxP.Control.YieldList (PYieldedToHash (PYieldedToMP, PYieldedToSV, PYieldedToValidator))
+import Cardano.YTxP.Control.YieldList (
+  PYieldedToHash (PYieldedToMP, PYieldedToSV, PYieldedToValidator),
+ )
 import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
 import Cardano.YTxP.Control.Yielding (getYieldedToHash)
-import Plutarch.Api.V1.Address (PCredential (PPubKeyCredential, PScriptCredential))
-import Plutarch.Api.V2 (PScriptContext,
-                        PStakingCredential (PStakingHash, PStakingPtr))
+import Plutarch.Api.V1.Address (
+  PCredential (PPubKeyCredential, PScriptCredential),
+ )
+import Plutarch.Api.V2 (
+  PScriptContext,
+  PStakingCredential (PStakingHash, PStakingPtr),
+ )
 import Utils (pscriptHashToCurrencySymbol)
 
 -- -   Look at the UTxO at the `n` th entry in the `txInfoReferenceInputs`, where `n` is equal to `yieldListInputIndex`.

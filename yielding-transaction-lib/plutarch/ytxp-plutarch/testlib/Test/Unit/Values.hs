@@ -7,8 +7,11 @@ module Test.Unit.Values (
   dummyValueThree,
 ) where
 
-import PlutusLedgerApi.V1.Value (CurrencySymbol (CurrencySymbol), Value,
-                                 singleton)
+import PlutusLedgerApi.V1.Value (
+  CurrencySymbol (CurrencySymbol),
+  Value,
+  singleton,
+ )
 import PlutusLedgerApi.V2 (getLedgerBytes)
 
 -- | Sample symbol for tests

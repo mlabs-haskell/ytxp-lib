@@ -12,13 +12,24 @@ module Test.Unit.Transaction (
 ) where
 
 import Plutarch.Api.V2 (PTxInInfo, PTxOut, PTxOutRef)
-import PlutusLedgerApi.V2 (TxId (TxId), TxInInfo (TxInInfo), TxOut (TxOut),
-                           TxOutRef (TxOutRef), getLedgerBytes)
-import Test.Unit.Addresses (dummyScriptAddressOne, dummyScriptAddressThree,
-                            dummyScriptAddressTwo)
-import Test.Unit.Datums (dummyOutputDatumOne, dummyOutputDatumThree,
-                         dummyOutputDatumTwo,
-                         dummyYieldListEmptyListOutputDatum)
+import PlutusLedgerApi.V2 (
+  TxId (TxId),
+  TxInInfo (TxInInfo),
+  TxOut (TxOut),
+  TxOutRef (TxOutRef),
+  getLedgerBytes,
+ )
+import Test.Unit.Addresses (
+  dummyScriptAddressOne,
+  dummyScriptAddressThree,
+  dummyScriptAddressTwo,
+ )
+import Test.Unit.Datums (
+  dummyOutputDatumOne,
+  dummyOutputDatumThree,
+  dummyOutputDatumTwo,
+  dummyYieldListEmptyListOutputDatum,
+ )
 import Test.Unit.Values (dummyValueOne, dummyValueThree, dummyValueTwo)
 
 -- * PTxOut lists

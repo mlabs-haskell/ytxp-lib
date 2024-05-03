@@ -17,11 +17,23 @@ import Cardano.YTxP.Control.YieldList (PYieldListDatum (PYieldListDatum))
 import Data.List.NonEmpty (nonEmpty)
 import Numeric.Natural (Natural)
 import Plutarch.Api.V1 (PCredential (PPubKeyCredential, PScriptCredential))
-import Plutarch.Api.V1.Value (PCurrencySymbol, PTokenName, PValue, padaSymbol,
-                              pvalueOf)
-import Plutarch.Api.V2 (AmountGuarantees, KeyGuarantees, PMap,
-                        POutputDatum (POutputDatum), PScriptHash, PTxInInfo,
-                        PTxOut, PTxOutRef)
+import Plutarch.Api.V1.Value (
+  PCurrencySymbol,
+  PTokenName,
+  PValue,
+  padaSymbol,
+  pvalueOf,
+ )
+import Plutarch.Api.V2 (
+  AmountGuarantees,
+  KeyGuarantees,
+  PMap,
+  POutputDatum (POutputDatum),
+  PScriptHash,
+  PTxInInfo,
+  PTxOut,
+  PTxOutRef,
+ )
 import Plutarch.Extra.Map (pkeys)
 import Plutarch.List (pfoldl')
 import Plutarch.Unsafe (punsafeCoerce)
