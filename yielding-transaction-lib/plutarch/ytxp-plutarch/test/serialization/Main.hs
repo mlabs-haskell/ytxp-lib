@@ -15,12 +15,15 @@ import Test.Unit.Spec (unitSpec)
 import Test.Utils (noShrink)
 
 main :: IO ()
-main = defaultMain . adjustOption go . testGroup "serialization" $ [
-  aesonLawsWith @(ControlParametersInitial Integer) genCPI noShrink,
-  goldenVsString "ControlParametersInitial Integer"
-                 "goldens/ControlParametersInitialInteger.golden"
-                 (pure . encode $ sampleYLS)
-  ] <> unitSpec
+main =
+  defaultMain . adjustOption go . testGroup "serialization" $
+    [ aesonLawsWith @(ControlParametersInitial Integer) genCPI noShrink
+    , goldenVsString
+        "ControlParametersInitial Integer"
+        "goldens/ControlParametersInitialInteger.golden"
+        (pure . encode $ sampleYLS)
+    ]
+      <> unitSpec
   where
     go :: QuickCheckTests -> QuickCheckTests
     go = max 10_000
@@ -28,11 +31,13 @@ main = defaultMain . adjustOption go . testGroup "serialization" $ [
 -- Golden data
 
 sampleYLS :: ControlParametersInitial Integer
-sampleYLS = ControlParametersInitial 1
-                                     [1, 2]
-                                     alwaysSucceedsTwoArgumentScript
-                                     alwaysSucceedsValidator
-                                     (Config NoTracing)
+sampleYLS =
+  ControlParametersInitial
+    1
+    [1, 2]
+    alwaysSucceedsTwoArgumentScript
+    alwaysSucceedsValidator
+    (Config NoTracing)
 
 -- TODO: This definitely needs more thought.
 genCPI :: Gen (ControlParametersInitial Integer)
@@ -40,8 +45,10 @@ genCPI = do
   myls <- arbitrary
   nl <- arbitrary
   tm <- elements [NoTracing, DetTracing, DoTracing, DoTracingAndBinds]
-  pure $ ControlParametersInitial myls
-                                  nl
-                                  alwaysSucceedsTwoArgumentScript
-                                  alwaysSucceedsValidator
-                                  (Config tm)
+  pure $
+    ControlParametersInitial
+      myls
+      nl
+      alwaysSucceedsTwoArgumentScript
+      alwaysSucceedsValidator
+      (Config tm)

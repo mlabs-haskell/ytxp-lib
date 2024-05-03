@@ -28,8 +28,10 @@ noncedValidatorWrapper ::
   Term s nonceType ->
   Term s (PData :--> PData :--> PScriptContext :--> POpaque) ->
   Term s (PData :--> PData :--> PScriptContext :--> POpaque)
-noncedValidatorWrapper nonce wrappedScript = plet nonce $ const
-  (plam $ \datum redeemer ctx -> wrappedScript # datum # redeemer # ctx)
+noncedValidatorWrapper nonce wrappedScript =
+  plet nonce $
+    const
+      (plam $ \datum redeemer ctx -> wrappedScript # datum # redeemer # ctx)
 
 --------------------------------------------------------------------------------
 -- Two argument script (minting policies and staking validator) stubs
@@ -48,5 +50,7 @@ noncedTwoArgumentScriptWrapper ::
   Term s nonceType ->
   Term s (PData :--> PScriptContext :--> POpaque) ->
   Term s (PData :--> PScriptContext :--> POpaque)
-noncedTwoArgumentScriptWrapper nonce wrappedScript = plet nonce $ const
-  (plam $ \redeemer ctx -> wrappedScript # redeemer # ctx)
+noncedTwoArgumentScriptWrapper nonce wrappedScript =
+  plet nonce $
+    const
+      (plam $ \redeemer ctx -> wrappedScript # redeemer # ctx)

@@ -19,33 +19,40 @@ import Plutarch.Script (Script)
 --------------------------------------------------------------------------------
 -- Yielding Staking Validator
 
--- | A yielding staking validator together with its nonce.
---
--- @since 0.1.0
+{- | A yielding staking validator together with its nonce.
+
+@since 0.1.0
+-}
 data YieldingStakingValidatorScript (nonceType :: Type) = YieldingStakingValidatorScript
-  { -- | @since 0.1.0
-    nonce :: nonceType
-  , -- | @since 0.10
-    stakingValidator :: Script
+  { nonce :: nonceType
+  -- ^ @since 0.1.0
+  , stakingValidator :: Script
+  -- ^ @since 0.10
   }
 
 -- | @since 0.1.0
 instance (ToJSON nonceType) => ToJSON (YieldingStakingValidatorScript nonceType) where
   {-# INLINEABLE toJSON #-}
-  toJSON ysvs = object ["nonce" .= nonce ysvs,
-                        "stakingValidator" .= (HexStringScript @"StakingValidator" . stakingValidator $ ysvs)
-                       ]
+  toJSON ysvs =
+    object
+      [ "nonce" .= nonce ysvs
+      , "stakingValidator"
+          .= (HexStringScript @"StakingValidator" . stakingValidator $ ysvs)
+      ]
   {-# INLINEABLE toEncoding #-}
-  toEncoding ysvs = pairs $
-    "nonce" .= nonce ysvs <>
-    "stakingValidator" .= (HexStringScript @"StakingValidator" . stakingValidator $ ysvs)
+  toEncoding ysvs =
+    pairs $
+      "nonce" .= nonce ysvs
+        <> "stakingValidator"
+          .= (HexStringScript @"StakingValidator" . stakingValidator $ ysvs)
 
 -- | @since 0.1.0
 instance (FromJSON nonceType) => FromJSON (YieldingStakingValidatorScript nonceType) where
   {-# INLINEABLE parseJSON #-}
   parseJSON = withObject "YieldingStakingValidatorScript" $ \obj -> do
     ysvsNonce :: nonceType <- obj .: "nonce"
-    (HexStringScript ysvsStakingValidator) :: HexStringScript "StakingValidator" <- obj .: "stakingValidator"
+    (HexStringScript ysvsStakingValidator) :: HexStringScript "StakingValidator" <-
+      obj .: "stakingValidator"
     pure $ YieldingStakingValidatorScript ysvsNonce ysvsStakingValidator
 
 {- | Compile a yielding staking validator that has been nonced.
@@ -67,7 +74,7 @@ compileYieldingStakingValidator ::
 compileYieldingStakingValidator config ylstcs nonce = do
   let
     yieldingStakingValidator ::
-       Term s (PData :--> PScriptContext :--> POpaque)
+      Term s (PData :--> PScriptContext :--> POpaque)
     yieldingStakingValidator =
       plet (pconstant nonce) (const $ yieldingHelper ylstcs)
 

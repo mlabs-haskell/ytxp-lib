@@ -82,7 +82,7 @@ phasOnlyOneInputWithExactlyOneTokenWithSymbolTestThree =
     # pconstant dummySymbolTwo
     #== pexpectedResultFalse
 
-{- | Two element list, contains one token with symbol passed as arugment
+{- | Two element list, contains one token with symbol passed as argument
 but needs to be only one element in list, so should be false
 -}
 phasOnlyOneInputWithExactlyOneTokenWithSymbolTestFour :: Term s PBool
@@ -91,7 +91,7 @@ phasOnlyOneInputWithExactlyOneTokenWithSymbolTestFour =
     # pconstant dummySymbolOne
     #== pexpectedResultFalse
 
-{- | Singleton list, and token corresponds to the symbol passed as arugment,
+{- | Singleton list, and token corresponds to the symbol passed as argument
 but the `Value` amount is 4 not 1, so should be false
 -}
 phasOnlyOneInputWithExactlyOneTokenWithSymbolTestFive :: Term s PBool
@@ -293,23 +293,24 @@ unitSpec =
       $ assertBool "Should be false"
       $ plift phasOnlyOneValidScriptOutputWithTokenTestTwo
   , -- Test for `pmember` helper
-    testGroup "pmember - Utils"
-    [ testCase "pmember # 1 # emptyMap #== False" $
-        assertBool "Should be false" $
-          plift pmemberTestOne
-    , testCase "pmember # 1 # [(1, 1)] #== True" $
-        assertBool "Should be true" $
-          plift pmemberTestTwo
-    , testCase "pmember # 2 # [(1, 1)] #== False" $
-        assertBool "Should be false" $
-          plift pmemberTestThree
-    , testCase "pmember # 1 # [(1, 1), (2, 2)] #== True" $
-        assertBool "Should be true" $
-          plift pmemberTestFour
-    , testCase "pmember # 2 # [(1, 1), (2, 2)] #== True" $
-        assertBool "Should be true" $
-          plift pmemberTestFive
-    ]
+    testGroup
+      "pmember - Utils"
+      [ testCase "pmember # 1 # emptyMap #== False" $
+          assertBool "Should be false" $
+            plift pmemberTestOne
+      , testCase "pmember # 1 # [(1, 1)] #== True" $
+          assertBool "Should be true" $
+            plift pmemberTestTwo
+      , testCase "pmember # 2 # [(1, 1)] #== False" $
+          assertBool "Should be false" $
+            plift pmemberTestThree
+      , testCase "pmember # 1 # [(1, 1), (2, 2)] #== True" $
+          assertBool "Should be true" $
+            plift pmemberTestFour
+      , testCase "pmember # 2 # [(1, 1), (2, 2)] #== True" $
+          assertBool "Should be true" $
+            plift pmemberTestFive
+      ]
   ]
 
 -----------------------------------------------
