@@ -18,8 +18,11 @@ import Plutarch.Api.V2 (PScriptContext, PScriptPurpose (PSpending), scriptHash)
 import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (Credential (ScriptCredential))
 import Prettyprinter (Pretty)
-import Utils (pands, phasOneScriptInputAtValidatorWithExactlyOneToken,
-              poutputsDoNotContainToken)
+import Utils (
+  pands,
+  phasOneScriptInputAtValidatorWithExactlyOneToken,
+  poutputsDoNotContainToken,
+ )
 
 --------------------------------------------------------------------------------
 -- YieldListValidatorScript
@@ -110,28 +113,28 @@ mkYieldListValidatorWrapper = plam $ \_scriptToWrap yieldListSymbol _datum _rede
 
   PSpending ((pfield @"_0" #) -> yieldListInputRef) <- pmatchC purpose
 
-  pure
-    $ popaque
-    $ ptraceIfFalse
-      "mkYieldListValidatorWrapper failed"
-      ( pands
-          [ -- For efficiency reasons we use this helper to make a couple of checks,
-            -- Namely, it ensures that there is one input at the yield list validator
-            -- with exactly one YieldListSTT.
-            -- It also checks that there are no other script inputs with a YieldListSTT.
-            -- (There is no need to check the wallet inputs as a YieldListSTT is never
-            --  sent to one in the first place.)
-            ptraceIfFalse
-              ( mconcat
-                  [ "Must have one input at the yield list validator with exactly one YieldListSTT,"
-                  , " and no other inputs containing a YieldListSTT"
-                  ]
-              )
-              $ phasOneScriptInputAtValidatorWithExactlyOneToken inputs
-                # yieldListSymbol
-                # yieldListInputRef
-          , ptraceIfFalse
-              "Must be no YieldListSTT at any of the outputs"
-              $ poutputsDoNotContainToken outputs # yieldListSymbol
-          ]
-      )
+  pure $
+    popaque $
+      ptraceIfFalse
+        "mkYieldListValidatorWrapper failed"
+        ( pands
+            [ -- For efficiency reasons we use this helper to make a couple of checks,
+              -- Namely, it ensures that there is one input at the yield list validator
+              -- with exactly one YieldListSTT.
+              -- It also checks that there are no other script inputs with a YieldListSTT.
+              -- (There is no need to check the wallet inputs as a YieldListSTT is never
+              --  sent to one in the first place.)
+              ptraceIfFalse
+                ( mconcat
+                    [ "Must have one input at the yield list validator with exactly one YieldListSTT,"
+                    , " and no other inputs containing a YieldListSTT"
+                    ]
+                )
+                $ phasOneScriptInputAtValidatorWithExactlyOneToken inputs
+                  # yieldListSymbol
+                  # yieldListInputRef
+            , ptraceIfFalse
+                "Must be no YieldListSTT at any of the outputs"
+                $ poutputsDoNotContainToken outputs # yieldListSymbol
+            ]
+        )

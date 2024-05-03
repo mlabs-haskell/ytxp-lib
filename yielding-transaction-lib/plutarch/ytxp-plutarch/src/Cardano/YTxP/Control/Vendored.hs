@@ -21,21 +21,43 @@ import Data.Kind (Constraint)
 import Data.Maybe (fromJust)
 import Data.Proxy (Proxy (Proxy))
 import GHC.TypeLits (ErrorMessage (ShowType, Text, (:$$:), (:<>:)), TypeError)
-import Generics.SOP (hcmap, hcollapse, hctraverse, mapIK, mapKI,
-                     productTypeFrom, productTypeTo, unI)
+import Generics.SOP (
+  hcmap,
+  hcollapse,
+  hctraverse,
+  mapIK,
+  mapKI,
+  productTypeFrom,
+  productTypeTo,
+  unI,
+ )
 import Generics.SOP qualified as SOP
 import Plutarch.Api.V1.Value (PCurrencySymbol, PValue)
 import Plutarch.Api.V2 (AmountGuarantees, KeyGuarantees)
 import Plutarch.Internal.Generic (PCode, PGeneric, gpfrom, gpto)
-import Plutarch.Internal.PlutusType (PlutusTypeStrat (DerivedPInner, PlutusTypeStratConstraint, derivedPCon, derivedPMatch))
-import Plutarch.Lift (PConstantDecl (PConstantRepr, PConstanted, pconstantFromRepr, pconstantToRepr),
-                      PLifted)
+import Plutarch.Internal.PlutusType (
+  PlutusTypeStrat (
+    DerivedPInner,
+    PlutusTypeStratConstraint,
+    derivedPCon,
+    derivedPMatch
+  ),
+ )
+import Plutarch.Lift (
+  PConstantDecl (PConstantRepr, PConstanted, pconstantFromRepr, pconstantToRepr),
+  PLifted,
+ )
 import Plutarch.List (pfoldl')
 import Plutarch.Script (Script (Script))
 import PlutusLedgerApi.V1 (BuiltinData (BuiltinData))
-import PlutusTx (Data (List), FromData (fromBuiltinData),
-                 ToData (toBuiltinData), UnsafeFromData (unsafeFromBuiltinData),
-                 fromData, toData)
+import PlutusTx (
+  Data (List),
+  FromData (fromBuiltinData),
+  ToData (toBuiltinData),
+  UnsafeFromData (unsafeFromBuiltinData),
+  fromData,
+  toData,
+ )
 import UntypedPlutusCore (Program (Program, _progAnn, _progTerm, _progVer))
 import UntypedPlutusCore.Core.Type qualified as UplcType
 
@@ -274,7 +296,7 @@ type family UD (p :: [S -> Type]) :: [S -> Type] where
   UD '[] = '[]
 
 type family PUnlabel (n :: [PLabeledType]) :: [S -> Type] where
-  PUnlabel ((_ ' := p) ': xs) = p ': PUnlabel xs
+  PUnlabel ((_ ':= p) ': xs) = p ': PUnlabel xs
   PUnlabel '[] = '[]
 
 type family MatchTypes' (n :: [S -> Type]) (m :: [S -> Type]) :: Bool where
@@ -290,16 +312,13 @@ type family MatchTypesError (n :: [S -> Type]) (m :: [S -> Type]) (a :: Bool) ::
     ( 'True ~ 'False
     , TypeError
         ( 'Text "Error when deriving 'PlutusTypeDataList':"
-            -- Note(Nigel): Added space between tick and operator to avoid the error:
-            -- `The suffix use of a ':$$:' might be repurposed as special syntax'
-            -- Not sure if there's a flag that can help here?
-            ' :$$: 'Text "\tMismatch between constituent Haskell and Plutarch types"
-            ' :$$: 'Text "Constituent Haskell Types: "
-            ' :$$: 'Text "\t"
-               ' :<>: 'ShowType n
-            ' :$$: 'Text "Constituent Plutarch Types: "
-            ' :$$: 'Text "\t"
-              ' :<>: 'ShowType m
+            ':$$: 'Text "\tMismatch between constituent Haskell and Plutarch types"
+            ':$$: 'Text "Constituent Haskell Types: "
+            ':$$: 'Text "\t"
+              ':<>: 'ShowType n
+            ':$$: 'Text "Constituent Plutarch Types: "
+            ':$$: 'Text "\t"
+              ':<>: 'ShowType m
         )
     )
 
@@ -334,8 +353,9 @@ instance PlutusTypeStrat PlutusTypeDataList where
     SOP.SOP (SOP.S x') -> case x' of {}
   derivedPMatch x f = f (gpto $ SOP.SOP $ SOP.Z $ x SOP.:* SOP.Nil)
 
--- | Vendored from LPE
--- @since 3.8.0
+{- | Vendored from LPE
+@since 3.8.0
+-}
 unProductIsData ::
   forall (a :: Type).
   ProductIsData a ->
@@ -400,8 +420,9 @@ gProductFromBuiltinDataUnsafe (BuiltinData (List xs)) =
             prod
 gProductFromBuiltinDataUnsafe _ = error "invalid representation"
 
--- | Vendored from LPE
--- @since 1.1.0
+{- | Vendored from LPE
+@since 1.1.0
+-}
 instance
   forall (h :: Type) (p :: S -> Type).
   (PlutusTx.FromData h, PlutusTx.ToData h, PLift p) =>
@@ -414,8 +435,9 @@ instance
     _ -> error "ToData repr is not a List!"
   pconstantFromRepr = coerce (PlutusTx.fromData @h . PlutusTx.List)
 
--- | Vendored from LPE
--- @since 1.1.0
+{- | Vendored from LPE
+@since 1.1.0
+-}
 instance
   forall (a :: Type) (repr :: [Type]).
   (SOP.IsProductType a repr, SOP.All ToData repr) =>
@@ -423,8 +445,9 @@ instance
   where
   toBuiltinData = coerce (gProductToBuiltinData @a)
 
--- | Vendored from LPE
--- @since 1.1.0
+{- | Vendored from LPE
+@since 1.1.0
+-}
 instance
   forall (a :: Type) (repr :: [Type]).
   (SOP.IsProductType a repr, SOP.All UnsafeFromData repr) =>
@@ -432,8 +455,9 @@ instance
   where
   unsafeFromBuiltinData = coerce (gProductFromBuiltinDataUnsafe @a)
 
--- | Vendored from LPE
--- @since 1.1.0
+{- | Vendored from LPE
+@since 1.1.0
+-}
 instance
   forall (a :: Type) (repr :: [Type]).
   (SOP.IsProductType a repr, SOP.All FromData repr) =>
