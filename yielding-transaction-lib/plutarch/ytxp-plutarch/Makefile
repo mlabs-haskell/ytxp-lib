@@ -6,6 +6,7 @@ usage:
 	@echo "Available commands:"
 	@echo ""
 	# Code format (works for both ytxp-plutarch and ytxp-convex)
+	@echo "    format_lint                                                 -- Formats .hs, .cabal, .nix files and auto-refactors code"
 	@echo "    format                                                      -- Formats .hs, .cabal, .nix files"
 	@echo "    format_check                                                -- Check formatting of .hs, .cabal, .nix files"
 
@@ -94,6 +95,10 @@ lint:
 .PHONY: lint_check
 lint_check:
 	$(call find_exec_all_fn, $(FIND_HASKELL_SOURCES), hlint -j)
+
+# Apply format and hlint
+.PHONY: format_lint
+format_lint: format lint
 
 ################################################################################
 # Build
