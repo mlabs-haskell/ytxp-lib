@@ -29,6 +29,9 @@ usage:
 	# Test
 	@echo "    test_serialization                                          -- Test serialization"
 	@echo ""
+	# Check Typos
+	@echo "    typos_check                                                 -- Check typos"
+	@echo ""
 
 ################################################################################
 # Code
@@ -127,3 +130,9 @@ build_write-config:
 .PHONY: test_serialization
 test_serialization:
 	cabal test -j serialization
+
+################################################################################
+# Test
+.PHONY: typos_check
+typos_check :
+	typos -c ../../.typos.toml ../../
