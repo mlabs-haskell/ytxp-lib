@@ -1,17 +1,17 @@
 module Test.Unit.Datums (
-    dummyYieldListEmptyListOutputDatum,
-    dummyDatumOne,
-    dummyDatumTwo,
-    dummyOutputDatumOne,
-    dummyOutputDatumTwo,
-    dummyOutputDatumThree,
+  dummyYieldListEmptyListOutputDatum,
+  dummyDatumOne,
+  dummyDatumTwo,
+  dummyOutputDatumOne,
+  dummyOutputDatumTwo,
+  dummyOutputDatumThree,
 ) where
 
 import Cardano.YTxP.Control.YieldList (YieldListDatum (YieldListDatum))
 import PlutusLedgerApi.V2 (
-    Datum (Datum),
-    OutputDatum (OutputDatum),
-    toBuiltinData,
+  Datum (Datum),
+  OutputDatum (OutputDatum),
+  toBuiltinData,
  )
 
 dummyYieldListEmptyListOutputDatum :: OutputDatum

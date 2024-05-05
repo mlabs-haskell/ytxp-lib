@@ -1,11 +1,11 @@
 module Cardano.YTxP.Control.Yielding.Validator (
-    -- * Validator
-    YieldingValidatorScript (getYieldingValidatorScript),
-    compileYieldingValidator,
+  -- * Validator
+  YieldingValidatorScript (getYieldingValidatorScript),
+  compileYieldingValidator,
 
-    -- * Script Credential
-    YieldingValidatorCredential,
-    mkYieldingValidatorCredential,
+  -- * Script Credential
+  YieldingValidatorCredential,
+  mkYieldingValidatorCredential,
 ) where
 
 import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
@@ -22,34 +22,34 @@ import PlutusLedgerApi.V2 (Credential (ScriptCredential))
 
 -- | @since 0.1.0
 newtype YieldingValidatorScript = YieldingValidatorScript
-    { getYieldingValidatorScript :: Script
-    -- ^ @since 0.1.0
-    }
-    deriving
-        ( -- | @since 0.1.0
-          ToJSON
-        , -- | @since 0.1.0
-          FromJSON
-        )
-        via (HexStringScript "YieldingValidatorScript")
+  { getYieldingValidatorScript :: Script
+  -- ^ @since 0.1.0
+  }
+  deriving
+    ( -- | @since 0.1.0
+      ToJSON
+    , -- | @since 0.1.0
+      FromJSON
+    )
+    via (HexStringScript "YieldingValidatorScript")
 
 compileYieldingValidator ::
-    Config ->
-    YieldListSTCS ->
-    (Either Text)
-        YieldingValidatorScript
+  Config ->
+  YieldListSTCS ->
+  (Either Text)
+    YieldingValidatorScript
 compileYieldingValidator config ylstcs = do
-    let
-        yieldingValidator ::
-            forall (s :: S).
-            ( Term s (PData :--> PData :--> PScriptContext :--> POpaque)
-            )
-        -- Takes the @yieldingHelper@ and turn it into a 3 argument script
-        yieldingValidator = plam $ \_datum redeemer ctx ->
-            yieldingHelper ylstcs # redeemer # ctx
+  let
+    yieldingValidator ::
+      forall (s :: S).
+      ( Term s (PData :--> PData :--> PScriptContext :--> POpaque)
+      )
+    -- Takes the @yieldingHelper@ and turn it into a 3 argument script
+    yieldingValidator = plam $ \_datum redeemer ctx ->
+      yieldingHelper ylstcs # redeemer # ctx
 
-    script <- compile config yieldingValidator
-    pure $ YieldingValidatorScript script
+  script <- compile config yieldingValidator
+  pure $ YieldingValidatorScript script
 
 -------------------------------------------------------------------------------
 -- Yielding Validator Credential
@@ -58,6 +58,6 @@ compileYieldingValidator config ylstcs = do
 newtype YieldingValidatorCredential = YieldingValidatorCredential Credential
 
 mkYieldingValidatorCredential ::
-    YieldingValidatorScript -> YieldingValidatorCredential
+  YieldingValidatorScript -> YieldingValidatorCredential
 mkYieldingValidatorCredential (YieldingValidatorScript script) =
-    YieldingValidatorCredential $ ScriptCredential (scriptHash script)
+  YieldingValidatorCredential $ ScriptCredential (scriptHash script)

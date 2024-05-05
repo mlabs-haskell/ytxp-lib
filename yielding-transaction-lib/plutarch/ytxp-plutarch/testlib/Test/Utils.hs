@@ -5,7 +5,7 @@ module Test.Utils (noShrink) where
 @since 0.1.0
 -}
 noShrink ::
-    forall (a :: Type).
-    a ->
-    [a]
+  forall (a :: Type).
+  a ->
+  [a]
 noShrink = const []
