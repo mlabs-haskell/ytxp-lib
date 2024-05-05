@@ -59,9 +59,9 @@ aesonLawsWith gen shr =
             (ViaShow <$> (decode . encode $ x))
             (ViaShow <$> (Just . toJSON $ x))
     ]
-  where
-    groupName :: String
-    groupName = "Aeson laws for " <> typeName @a
+ where
+  groupName :: String
+  groupName = "Aeson laws for " <> typeName @a
 
 -- Helpers
 
@@ -81,12 +81,12 @@ equiv ::
   a ->
   Property
 equiv x y = counterexample go $ x == y
-  where
-    go :: String
-    go =
-      let operator = if x == y then "==" else "/="
-       in renderString . layoutSmart defaultLayoutOptions $
-            pretty x <+> operator <+> pretty y
+ where
+  go :: String
+  go =
+    let operator = if x == y then "==" else "/="
+     in renderString . layoutSmart defaultLayoutOptions $
+          pretty x <+> operator <+> pretty y
 
 -- Helper for turning the name of an arbitrary Typeable into a String
 typeName ::

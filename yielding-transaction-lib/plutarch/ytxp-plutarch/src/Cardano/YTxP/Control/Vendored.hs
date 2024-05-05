@@ -20,7 +20,7 @@ import Data.Functor.Identity (Identity (Identity, runIdentity))
 import Data.Kind (Constraint)
 import Data.Maybe (fromJust)
 import Data.Proxy (Proxy (Proxy))
-import GHC.TypeLits (ErrorMessage (ShowType, Text, (:$$:), (:<>:)), TypeError)
+import GHC.TypeList (ErrorMessage (ShowType, Text, (:$$:), (:<>:)), TypeError)
 import Generics.SOP (
   hcmap,
   hcollapse,
@@ -79,9 +79,9 @@ applyScript f a =
           , _progVer = fVer
           , _progAnn = ()
           }
-  where
-    (Script Program {_progTerm = fTerm, _progVer = fVer}) = f
-    (Script Program {_progTerm = aTerm, _progVer = aVer}) = a
+ where
+  (Script Program {_progTerm = fTerm, _progVer = fVer}) = f
+  (Script Program {_progTerm = aTerm, _progVer = aVer}) = a
 
 {- | Get the sum of all values belonging to a particular CurrencySymbol.
 Modified version of LPE function with same purpose.
@@ -315,10 +315,10 @@ type family MatchTypesError (n :: [S -> Type]) (m :: [S -> Type]) (a :: Bool) ::
             ':$$: 'Text "\tMismatch between constituent Haskell and Plutarch types"
             ':$$: 'Text "Constituent Haskell Types: "
             ':$$: 'Text "\t"
-              ':<>: 'ShowType n
+            ':<>: 'ShowType n
             ':$$: 'Text "Constituent Plutarch Types: "
             ':$$: 'Text "\t"
-              ':<>: 'ShowType m
+            ':<>: 'ShowType m
         )
     )
 

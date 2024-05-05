@@ -45,7 +45,7 @@ import Data.Proxy (Proxy (Proxy))
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Word (Word8)
-import GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
+import GHC.TypeList (KnownSymbol, Symbol, symbolVal)
 import Numeric (readHex, showHex)
 import Plutarch.Api.V2 (PScriptContext)
 import Plutarch.Internal (
@@ -313,27 +313,27 @@ parseJSONPValidator ::
   Parser
     (forall (s :: S). Term s (PData :--> PData :--> PScriptContext :--> POpaque))
 parseJSONPValidator val = withText "PValidator" go val
-  where
-    go ::
-      Text ->
-      Parser
-        (forall (s :: S). Term s (PData :--> PData :--> PScriptContext :--> POpaque))
-    go t = case Text.stripPrefix "1x" t of
-      -- Note from Koz (08/03/24): We can't use 'do'-notation here, because we
-      -- have to return impredicatively. While ImpredicativeTypes permit this in
-      -- principle, this extension is broken in conjunction with 'do'-notation
-      -- since approximately its introduction in its modern form with QuickLook.
-      -- Weirdly, manually writing '>>='s works.
-      --
-      -- See https://gitlab.haskell.org/ghc/ghc/-/issues/18126#note_423208.
-      Nothing ->
-        parseJSON val >>= \((HexStringScript script) :: HexStringScript "PValidator") ->
-          pure $ unsafeTermFromScript script
-      Just errMsg ->
-        fail $
-          "Attempted to deserialize a non-compiling Plutarch closed term.\n"
-            <> "Error: "
-            <> Text.unpack errMsg
+ where
+  go ::
+    Text ->
+    Parser
+      (forall (s :: S). Term s (PData :--> PData :--> PScriptContext :--> POpaque))
+  go t = case Text.stripPrefix "1x" t of
+    -- Note from Koz (08/03/24): We can't use 'do'-notation here, because we
+    -- have to return impredicatively. While ImpredicativeTypes permit this in
+    -- principle, this extension is broken in conjunction with 'do'-notation
+    -- since approximately its introduction in its modern form with QuickLook.
+    -- Weirdly, manually writing '>>='s works.
+    --
+    -- See https://gitlab.haskell.org/ghc/ghc/-/issues/18126#note_423208.
+    Nothing ->
+      parseJSON val >>= \((HexStringScript script) :: HexStringScript "PValidator") ->
+        pure $ unsafeTermFromScript script
+    Just errMsg ->
+      fail $
+        "Attempted to deserialize a non-compiling Plutarch closed term.\n"
+          <> "Error: "
+          <> Text.unpack errMsg
 
 {- | Helper for deserializing minting policies represented as Plutarch closed terms.
 
@@ -345,19 +345,19 @@ parseJSONPMintingPolicy ::
   Value ->
   Parser (forall (s :: S). Term s (PData :--> PScriptContext :--> POpaque))
 parseJSONPMintingPolicy val = withText "PValidator" go val
-  where
-    go ::
-      Text ->
-      Parser (forall (s :: S). Term s (PData :--> PScriptContext :--> POpaque))
-    go t = case Text.stripPrefix "1x" t of
-      Nothing ->
-        parseJSON val >>= \((HexStringScript script) :: HexStringScript "PMintingPolicy") ->
-          pure $ unsafeTermFromScript script
-      Just errMsg ->
-        fail $
-          "Attempted to deserialize a non-compiling Plutarch closed term.\n"
-            <> "Error: "
-            <> Text.unpack errMsg
+ where
+  go ::
+    Text ->
+    Parser (forall (s :: S). Term s (PData :--> PScriptContext :--> POpaque))
+  go t = case Text.stripPrefix "1x" t of
+    Nothing ->
+      parseJSON val >>= \((HexStringScript script) :: HexStringScript "PMintingPolicy") ->
+        pure $ unsafeTermFromScript script
+    Just errMsg ->
+      fail $
+        "Attempted to deserialize a non-compiling Plutarch closed term.\n"
+          <> "Error: "
+          <> Text.unpack errMsg
 
 {- | A helper newtype to ensure that any 'Script's we use are serialized (and
 deserialized), consistently. We also have a \'tag\' for a more specific type
