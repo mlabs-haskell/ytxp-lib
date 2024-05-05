@@ -1,3 +1,16 @@
+# ytxp-plutarch
+
+## Dev Shell
+
+You can launch the dev shell with:
+
+```
+nix develop
+```
+
+
+## Notes
+
 Some vendored utility functions require the following license
 
 

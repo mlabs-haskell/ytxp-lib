@@ -1,35 +1,52 @@
 module Main (main) where
 
-import Cardano.YTxP.Control.ParametersInitial (ControlParametersInitial (ControlParametersInitial))
-import Cardano.YTxP.Control.Stubs (alwaysSucceedsTwoArgumentScript,
-                                   alwaysSucceedsValidator)
+import Cardano.YTxP.Control.ParametersInitial (
+  ControlParametersInitial (ControlParametersInitial),
+ )
+import Cardano.YTxP.Control.Stubs (
+  alwaysSucceedsTwoArgumentScript,
+  alwaysSucceedsValidator,
+ )
 import Control.Monad (guard)
 import Data.Aeson (encode)
 import Data.ByteString.Short (ShortByteString)
 import Data.Text (unpack)
 import GHC.Exts (fromList, toList)
-import Plutarch.Internal (Config (Config),
-                          TracingMode (DetTracing, DoTracing, DoTracingAndBinds, NoTracing))
+import Plutarch.Internal (
+  Config (Config),
+  TracingMode (DetTracing, DoTracing, DoTracingAndBinds, NoTracing),
+ )
 import Test.Laws (aesonLawsWith)
-import Test.QuickCheck (Gen, NonNegative (NonNegative), arbitrary,
-                        counterexample, elements, forAllShrinkShow, shrink,
-                        (===))
+import Test.QuickCheck (
+  Gen,
+  NonNegative (NonNegative),
+  arbitrary,
+  counterexample,
+  elements,
+  forAllShrinkShow,
+  shrink,
+  (===),
+ )
 import Test.Tasty (adjustOption, defaultMain, testGroup)
 import Test.Tasty.Golden (goldenVsString)
 import Test.Tasty.QuickCheck (QuickCheckTests, testProperty)
 import Test.Utils (noShrink)
 
 main :: IO ()
-main = defaultMain . adjustOption go . testGroup "serialization" $ [
-  testProperty "Hex encoding of ShortByteString roundtrips" . forAllShrinkShow genSBS shrinkSBS (show . toList) $
-    \sbs -> let converted = sbsToHexText sbs in
-              counterexample ("Converted: " <> unpack converted) $
-                Just sbs === (hexTextToSBS . sbsToHexText $ sbs),
-  aesonLawsWith @(ControlParametersInitial Integer) genCPI noShrink,
-  goldenVsString "ControlParametersInitial Integer"
-                 "goldens/ControlParametersInitialInteger.golden"
-                 (pure . encode $ sampleYLS)
-  ]
+main =
+  defaultMain . adjustOption go . testGroup "serialization" $
+    [ testProperty "Hex encoding of ShortByteString roundtrips"
+        . forAllShrinkShow genSBS shrinkSBS (show . toList)
+        $ \sbs ->
+          let converted = sbsToHexText sbs
+           in counterexample ("Converted: " <> unpack converted) $
+                Just sbs === (hexTextToSBS . sbsToHexText $ sbs)
+    , aesonLawsWith @(ControlParametersInitial Integer) genCPI noShrink
+    , goldenVsString
+        "ControlParametersInitial Integer"
+        "goldens/ControlParametersInitialInteger.golden"
+        (pure . encode $ sampleYLS)
+    ]
   where
     go :: QuickCheckTests -> QuickCheckTests
     go = max 10_000
@@ -37,11 +54,13 @@ main = defaultMain . adjustOption go . testGroup "serialization" $ [
 -- Golden data
 
 sampleYLS :: ControlParametersInitial Integer
-sampleYLS = ControlParametersInitial 1
-                                     [1, 2]
-                                     alwaysSucceedsTwoArgumentScript
-                                     alwaysSucceedsValidator
-                                     (Config NoTracing)
+sampleYLS =
+  ControlParametersInitial
+    1
+    [1, 2]
+    alwaysSucceedsTwoArgumentScript
+    alwaysSucceedsValidator
+    (Config NoTracing)
 
 -- Generators and shrinkers
 
@@ -52,11 +71,13 @@ genCPI = do
   let myls = fromInteger myls'
   nl <- arbitrary
   tm <- elements [NoTracing, DetTracing, DoTracing, DoTracingAndBinds]
-  pure $ ControlParametersInitial myls
-                                  nl
-                                  alwaysSucceedsTwoArgumentScript
-                                  alwaysSucceedsValidator
-                                  (Config tm)
+  pure $
+    ControlParametersInitial
+      myls
+      nl
+      alwaysSucceedsTwoArgumentScript
+      alwaysSucceedsValidator
+      (Config tm)
 
 genSBS :: Gen ShortByteString
 genSBS = fromList <$> arbitrary

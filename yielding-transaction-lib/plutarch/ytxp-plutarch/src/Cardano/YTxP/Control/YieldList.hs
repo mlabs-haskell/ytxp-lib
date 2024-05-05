@@ -1,82 +1,251 @@
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
 {- | Module: Cardano.YTxP.Control.YieldList
 Description: Defines shared data types and utilities for YieldList scripts
 -}
 module Cardano.YTxP.Control.YieldList (
-  YieldList,
-  YieldedToHash,
-  immutableValidatorWrapper,
-  adminSigValidatorWrapper,
-  multiSigValidatorWrapper,
-  immutableMintingPolicyWrapper,
-  adminSigMintingPolicyWrapper,
-  multiSigMintingPolicyWrapper,
+  -- * Hashes
+  YieldedToHash (YieldedToValidator, YieldedToMP, YieldedToSV),
+  CustomScriptHash,
+  tryMkCustomScriptHash,
+  PYieldedToHash (PYieldedToValidator, PYieldedToMP, PYieldedToSV),
+
+  -- * Redeemers
+  YieldListMPWrapperRedeemer,
+  PYieldListMPWrapperRedeemer (PMint, PBurn),
+
+  -- * Datums
+  YieldListDatum (YieldListDatum),
+  PYieldListDatum (PYieldListDatum),
+
+  -- * Functions
+  getYieldedToHashByIndex,
 ) where
 
-import PlutusLedgerApi.V1.Scripts (ScriptHash)
-import Prelude (error)
+import Cardano.YTxP.Control.Vendored (
+  DerivePConstantViaEnum (DerivePConstantEnum),
+  EnumIsData (EnumIsData),
+  PlutusTypeDataList,
+  PlutusTypeEnumData,
+ )
+import Control.Monad (guard)
+import Generics.SOP qualified as SOP
+import Plutarch.Api.V2 (PScriptHash)
+import Plutarch.DataRepr (
+  DerivePConstantViaData (DerivePConstantViaData),
+  PDataFields,
+ )
+import Plutarch.Lift (
+  DerivePConstantViaNewtype (DerivePConstantViaNewtype),
+  PConstantDecl,
+  PLifted,
+  PUnsafeLiftDecl,
+ )
+import PlutusTx qualified
+import PlutusTx.Builtins qualified as Builtins
+import PlutusTx.Builtins.Internal qualified as BI
 
 --------------------------------------------------------------------------------
--- Types
 
--- | A collection of hashes that YieldingScripts can yield to
-newtype YieldList = YieldList [YieldedToHash] -- FIXME
+-- * Hashes
 
--- | A single hash that a yielding script can yield to
-data YieldedToHash -- FIXME
-  = YieldedToValidator ScriptHash
-  | YieldedToMP ScriptHash
-  | YieldedToSV ScriptHash
+------------------------------------------------------------
+
+-- ** CustomScriptHash
+
+-- We use this because the plutus-ledger-api ScriptHash isn't
+-- type safe.
+
+{- | We use this `CustomScriptHash` instead of `ScriptHash` in
+order to ensure that the hash is of length 28.
+-}
+newtype CustomScriptHash = CustomScriptHash {getCustomScriptHash :: Builtins.BuiltinByteString}
+  deriving stock
+    ( Show
+    , Eq
+    )
+
+instance PlutusTx.UnsafeFromData CustomScriptHash where
+  {-# INLINEABLE unsafeFromBuiltinData #-}
+  unsafeFromBuiltinData b =
+    let !args = BI.snd $ BI.unsafeDataAsConstr b
+        scriptHash = BI.unsafeDataAsB (BI.head args)
+     in CustomScriptHash scriptHash
+
+instance PlutusTx.ToData CustomScriptHash where
+  {-# INLINEABLE toBuiltinData #-}
+  toBuiltinData (CustomScriptHash scriptHash) = PlutusTx.toBuiltinData scriptHash
+
+instance PlutusTx.FromData CustomScriptHash where
+  {-# INLINEABLE fromBuiltinData #-}
+  fromBuiltinData b = do
+    scriptHash <- PlutusTx.fromBuiltinData b
+    guard (Builtins.lengthOfByteString scriptHash == 28)
+    pure $ tryMkCustomScriptHash scriptHash
+
+{- | Note(Nigel): This will likely not compile under `plutus-tx`
+due to the use of `error` from the Haskell `Prelude`.
+We use `error` from Prelude here as using `traceError` doesn't give back the error message.
+See the following issue for more details: https://github.com/IntersectMBO/plutus/issues/3003
+-}
+{-# INLINEABLE tryMkCustomScriptHash #-}
+tryMkCustomScriptHash :: Builtins.BuiltinByteString -> CustomScriptHash
+tryMkCustomScriptHash scriptHash
+  | Builtins.lengthOfByteString scriptHash /= 28 =
+      error "tryMkCustomScriptHash: ScriptHash must have length 28"
+  | otherwise = CustomScriptHash scriptHash
+
+------------------------------------------------------------
+
+-- ** YieldToHash
+
+{- | A single hash that a yielding script can yield to
+A yielded to script can be a validator, minting policy or a stake validator
+-}
+data YieldedToHash
+  = YieldedToValidator CustomScriptHash
+  | YieldedToMP CustomScriptHash
+  | YieldedToSV CustomScriptHash
+  deriving stock
+    ( Show
+    , Generic
+    , Eq
+    )
+
+PlutusTx.makeIsDataIndexed
+  ''YieldedToHash
+  [ ('YieldedToValidator, 0)
+  , ('YieldedToMP, 1)
+  , ('YieldedToSV, 2)
+  ]
+
+data PYieldedToHash (s :: S)
+  = PYieldedToValidator (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
+  | PYieldedToMP (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
+  | PYieldedToSV (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
+  deriving stock
+    ( Generic
+    )
+  deriving anyclass
+    ( PlutusType
+    , PIsData
+    )
+
+instance DerivePlutusType PYieldedToHash where
+  type DPTStrat _ = PlutusTypeData
+
+instance PTryFrom PData (PAsData PYieldedToHash)
+
+instance PUnsafeLiftDecl PYieldedToHash where
+  type PLifted PYieldedToHash = YieldedToHash
+
+deriving via
+  (DerivePConstantViaData YieldedToHash PYieldedToHash)
+  instance
+    (PConstantDecl YieldedToHash)
 
 --------------------------------------------------------------------------------
--- Validator Wrappers
 
--- FIXME:
--- immutableWrapper :: Validator -> Validator
+-- * Redeemers
 
-{- | A wrapper to ensure that validator can never succeed.
-Useful for making an "immutable yield list UTxO", where
-transaction families cannot be removed or modified once deployed
--}
-immutableValidatorWrapper :: () -> ()
-immutableValidatorWrapper = error "unimplemented"
+-- | Redeemer for `mkYieldListMPWrapper`.
+data YieldListMPWrapperRedeemer
+  = -- | Mint branch
+    Mint
+  | -- | Burn branch
+    Burn
+  deriving stock
+    ( Show
+    , Generic
+    , Enum
+    , Bounded
+    )
+  deriving
+    ( PlutusTx.ToData
+    , PlutusTx.FromData
+    )
+    via (EnumIsData YieldListMPWrapperRedeemer)
 
--- FIXME:
--- adminSigWrapper :: PubKeyHash -> Validator -> Validator
+-- | Plutarch-level version of 'YieldListMPWrapperRedeemer'.
+data PYieldListMPWrapperRedeemer (s :: S)
+  = PMint
+  | PBurn
+  deriving stock
+    ( Generic
+    , Enum
+    , Bounded
+    )
+  deriving anyclass
+    ( PlutusType
+    , PIsData
+    , PEq
+    )
 
-{- | A wrapper that imposes an additional constraint on the wrapped script
-such that the admin signature must be include in the signatories of a
-transaction in order for the wrapped script to succeed.
--}
-adminSigValidatorWrapper :: () -> () -> ()
-adminSigValidatorWrapper = error "unimplemented"
+instance PTryFrom PData (PAsData PYieldListMPWrapperRedeemer)
 
--- FIXME:
--- adminSigWrapper :: Integer -> [PubKeyHash] -> Validator -> Validator
+instance DerivePlutusType PYieldListMPWrapperRedeemer where
+  type DPTStrat _ = PlutusTypeEnumData
 
-{- | A wrapper that imposes an additional constraint on the wrapped script
-such that at least `n` of the keys must be signatories of a
-transaction in order for the wrapped script to succeed.
--}
-multiSigValidatorWrapper :: () -> () -> ()
-multiSigValidatorWrapper = error "unimplemented"
+instance PUnsafeLiftDecl PYieldListMPWrapperRedeemer where
+  type PLifted PYieldListMPWrapperRedeemer = YieldListMPWrapperRedeemer
+
+deriving via
+  (DerivePConstantViaEnum YieldListMPWrapperRedeemer PYieldListMPWrapperRedeemer)
+  instance
+    (PConstantDecl YieldListMPWrapperRedeemer)
 
 --------------------------------------------------------------------------------
--- Minting Policy Wrappers
--- FIXME: update comments as well
 
--- FIXME:
--- immutableWrapper :: MintingPolicy -> MintingPolicy
-immutableMintingPolicyWrapper :: () -> ()
-immutableMintingPolicyWrapper = error "unimplemented"
+-- * Datums
 
--- FIXME:
--- adminSigWrapper :: PubKeyHash -> MintingPolicy -> MintingPolicy
-adminSigMintingPolicyWrapper :: () -> () -> ()
-adminSigMintingPolicyWrapper = error "unimplemented"
+{- | The `YieldListDatum` holds a collection of hashes that YieldingScripts can yield to.
+The length of the datum is checked upon creation in `mkYieldListSTMPWrapper` to ensure
+that the length of the list does not exceed the max list length passed as a parameter to that script.
+-}
+newtype YieldListDatum = YieldListDatum
+  { yieldedToScripts :: [YieldedToHash]
+  }
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass (SOP.Generic)
+  deriving newtype (PlutusTx.ToData, PlutusTx.FromData)
 
--- FIXME:
--- adminSigWrapper :: Integer -> [PubKeyHash] -> MintingPolicy -> MintingPolicy
-multiSigMintingPolicyWrapper :: () -> () -> ()
-multiSigMintingPolicyWrapper = error "unimplemented"
+deriving via
+  ( DerivePConstantViaNewtype
+      YieldListDatum
+      PYieldListDatum
+      (PBuiltinList PYieldedToHash)
+  )
+  instance
+    (PConstantDecl YieldListDatum)
+
+newtype PYieldListDatum (s :: S)
+  = PYieldListDatum
+      ( Term
+          s
+          ( PDataRecord
+              '[ "yieldedToScripts" ':= PBuiltinList (PAsData PYieldedToHash)
+               ]
+          )
+      )
+  deriving stock (Generic)
+  deriving anyclass (PlutusType, PIsData, PEq, PDataFields)
+
+instance DerivePlutusType PYieldListDatum where
+  type DPTStrat _ = PlutusTypeDataList
+
+instance PUnsafeLiftDecl PYieldListDatum where
+  type PLifted _ = YieldListDatum
+
+instance PTryFrom PData (PAsData PYieldListDatum)
+
+--------------------------------------------------------------------------------
+-- Helpers
+
+getYieldedToHashByIndex ::
+  Term s (PYieldListDatum :--> PInteger :--> PYieldedToHash)
+getYieldedToHashByIndex = plam $ \datum n ->
+  pmatch datum $ \case
+    PYieldListDatum ((pfield @"yieldedToScripts" #) -> yieldList) ->
+      pfromData $ yieldList #!! n

@@ -8,9 +8,8 @@ module Cardano.YTxP.Control.Yielding.Validator (
   mkYieldingValidatorCredential,
 ) where
 
-import Cardano.YTxP.Control.Stubs (alwaysSucceedsValidator,
-                                   noncedValidatorWrapper)
 import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
+import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Plutarch (Config, compile)
@@ -23,15 +22,16 @@ import PlutusLedgerApi.V2 (Credential (ScriptCredential))
 
 -- | @since 0.1.0
 newtype YieldingValidatorScript = YieldingValidatorScript
-  { -- | @since 0.1.0
-    getYieldingValidatorScript :: Script
+  { getYieldingValidatorScript :: Script
+  -- ^ @since 0.1.0
   }
-  deriving (
-    -- | @since 0.1.0
-    ToJSON,
-    -- | @since 0.1.0
-    FromJSON
-    ) via (HexStringScript "YieldingValidatorScript")
+  deriving
+    ( -- | @since 0.1.0
+      ToJSON
+    , -- | @since 0.1.0
+      FromJSON
+    )
+    via (HexStringScript "YieldingValidatorScript")
 
 compileYieldingValidator ::
   Config ->
@@ -44,7 +44,9 @@ compileYieldingValidator config ylstcs = do
       forall (s :: S).
       ( Term s (PData :--> PData :--> PScriptContext :--> POpaque)
       )
-    yieldingValidator = mkYieldingValidator ylstcs
+    -- Takes the @yieldingHelper@ and turn it into a 3 argument script
+    yieldingValidator = plam $ \_datum redeemer ctx ->
+      yieldingHelper ylstcs # redeemer # ctx
 
   script <- compile config yieldingValidator
   pure $ YieldingValidatorScript script
@@ -59,16 +61,3 @@ mkYieldingValidatorCredential ::
   YieldingValidatorScript -> YieldingValidatorCredential
 mkYieldingValidatorCredential (YieldingValidatorScript script) =
   YieldingValidatorCredential $ ScriptCredential (scriptHash script)
-
---------------------------------------------------------------------------------
--- Helpers (Unexported)
-
-mkYieldingValidator ::
-  forall (s :: S).
-  YieldListSTCS ->
-  Term s (PData :--> PData :--> PScriptContext :--> POpaque)
-mkYieldingValidator _ylstcs =
-  noncedValidatorWrapper
-    @PString
-    "YieldingValidator"
-    alwaysSucceedsValidator
