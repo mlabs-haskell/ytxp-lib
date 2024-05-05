@@ -6,42 +6,42 @@
 Description: Defines shared data types and utilities for YieldList scripts
 -}
 module Cardano.YTxP.Control.YieldList (
-  -- * Hashes
-  YieldedToHash (YieldedToValidator, YieldedToMP, YieldedToSV),
-  CustomScriptHash,
-  tryMkCustomScriptHash,
-  PYieldedToHash (PYieldedToValidator, PYieldedToMP, PYieldedToSV),
+    -- * Hashes
+    YieldedToHash (YieldedToValidator, YieldedToMP, YieldedToSV),
+    CustomScriptHash,
+    tryMkCustomScriptHash,
+    PYieldedToHash (PYieldedToValidator, PYieldedToMP, PYieldedToSV),
 
-  -- * Redeemers
-  YieldListMPWrapperRedeemer,
-  PYieldListMPWrapperRedeemer (PMint, PBurn),
+    -- * Redeemers
+    YieldListMPWrapperRedeemer,
+    PYieldListMPWrapperRedeemer (PMint, PBurn),
 
-  -- * Datums
-  YieldListDatum (YieldListDatum),
-  PYieldListDatum (PYieldListDatum),
+    -- * Datums
+    YieldListDatum (YieldListDatum),
+    PYieldListDatum (PYieldListDatum),
 
-  -- * Functions
-  getYieldedToHashByIndex,
+    -- * Functions
+    getYieldedToHashByIndex,
 ) where
 
 import Cardano.YTxP.Control.Vendored (
-  DerivePConstantViaEnum (DerivePConstantEnum),
-  EnumIsData (EnumIsData),
-  PlutusTypeDataList,
-  PlutusTypeEnumData,
+    DerivePConstantViaEnum (DerivePConstantEnum),
+    EnumIsData (EnumIsData),
+    PlutusTypeDataList,
+    PlutusTypeEnumData,
  )
 import Control.Monad (guard)
 import Generics.SOP qualified as SOP
 import Plutarch.Api.V2 (PScriptHash)
 import Plutarch.DataRepr (
-  DerivePConstantViaData (DerivePConstantViaData),
-  PDataFields,
+    DerivePConstantViaData (DerivePConstantViaData),
+    PDataFields,
  )
 import Plutarch.Lift (
-  DerivePConstantViaNewtype (DerivePConstantViaNewtype),
-  PConstantDecl,
-  PLifted,
-  PUnsafeLiftDecl,
+    DerivePConstantViaNewtype (DerivePConstantViaNewtype),
+    PConstantDecl,
+    PLifted,
+    PUnsafeLiftDecl,
  )
 import PlutusTx qualified
 import PlutusTx.Builtins qualified as Builtins
@@ -62,28 +62,28 @@ import PlutusTx.Builtins.Internal qualified as BI
 order to ensure that the hash is of length 28.
 -}
 newtype CustomScriptHash = CustomScriptHash {getCustomScriptHash :: Builtins.BuiltinByteString}
-  deriving stock
-    ( Show
-    , Eq
-    )
+    deriving stock
+        ( Show
+        , Eq
+        )
 
 instance PlutusTx.UnsafeFromData CustomScriptHash where
-  {-# INLINEABLE unsafeFromBuiltinData #-}
-  unsafeFromBuiltinData b =
-    let !args = BI.snd $ BI.unsafeDataAsConstr b
-        scriptHash = BI.unsafeDataAsB (BI.head args)
-     in CustomScriptHash scriptHash
+    {-# INLINEABLE unsafeFromBuiltinData #-}
+    unsafeFromBuiltinData b =
+        let !args = BI.snd $ BI.unsafeDataAsConstr b
+            scriptHash = BI.unsafeDataAsB (BI.head args)
+         in CustomScriptHash scriptHash
 
 instance PlutusTx.ToData CustomScriptHash where
-  {-# INLINEABLE toBuiltinData #-}
-  toBuiltinData (CustomScriptHash scriptHash) = PlutusTx.toBuiltinData scriptHash
+    {-# INLINEABLE toBuiltinData #-}
+    toBuiltinData (CustomScriptHash scriptHash) = PlutusTx.toBuiltinData scriptHash
 
 instance PlutusTx.FromData CustomScriptHash where
-  {-# INLINEABLE fromBuiltinData #-}
-  fromBuiltinData b = do
-    scriptHash <- PlutusTx.fromBuiltinData b
-    guard (Builtins.lengthOfByteString scriptHash == 28)
-    pure $ tryMkCustomScriptHash scriptHash
+    {-# INLINEABLE fromBuiltinData #-}
+    fromBuiltinData b = do
+        scriptHash <- PlutusTx.fromBuiltinData b
+        guard (Builtins.lengthOfByteString scriptHash == 28)
+        pure $ tryMkCustomScriptHash scriptHash
 
 {- | Note(Nigel): This will likely not compile under `plutus-tx`
 due to the use of `error` from the Haskell `Prelude`.
@@ -93,9 +93,9 @@ See the following issue for more details: https://github.com/IntersectMBO/plutus
 {-# INLINEABLE tryMkCustomScriptHash #-}
 tryMkCustomScriptHash :: Builtins.BuiltinByteString -> CustomScriptHash
 tryMkCustomScriptHash scriptHash
-  | Builtins.lengthOfByteString scriptHash /= 28 =
-      error "tryMkCustomScriptHash: ScriptHash must have length 28"
-  | otherwise = CustomScriptHash scriptHash
+    | Builtins.lengthOfByteString scriptHash /= 28 =
+        error "tryMkCustomScriptHash: ScriptHash must have length 28"
+    | otherwise = CustomScriptHash scriptHash
 
 ------------------------------------------------------------
 
@@ -105,46 +105,46 @@ tryMkCustomScriptHash scriptHash
 A yielded to script can be a validator, minting policy or a stake validator
 -}
 data YieldedToHash
-  = YieldedToValidator CustomScriptHash
-  | YieldedToMP CustomScriptHash
-  | YieldedToSV CustomScriptHash
-  deriving stock
-    ( Show
-    , Generic
-    , Eq
-    )
+    = YieldedToValidator CustomScriptHash
+    | YieldedToMP CustomScriptHash
+    | YieldedToSV CustomScriptHash
+    deriving stock
+        ( Show
+        , Generic
+        , Eq
+        )
 
 PlutusTx.makeIsDataIndexed
-  ''YieldedToHash
-  [ ('YieldedToValidator, 0)
-  , ('YieldedToMP, 1)
-  , ('YieldedToSV, 2)
-  ]
+    ''YieldedToHash
+    [ ('YieldedToValidator, 0)
+    , ('YieldedToMP, 1)
+    , ('YieldedToSV, 2)
+    ]
 
 data PYieldedToHash (s :: S)
-  = PYieldedToValidator (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
-  | PYieldedToMP (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
-  | PYieldedToSV (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
-  deriving stock
-    ( Generic
-    )
-  deriving anyclass
-    ( PlutusType
-    , PIsData
-    )
+    = PYieldedToValidator (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
+    | PYieldedToMP (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
+    | PYieldedToSV (Term s (PDataRecord '["scriptHash" ':= PScriptHash]))
+    deriving stock
+        ( Generic
+        )
+    deriving anyclass
+        ( PlutusType
+        , PIsData
+        )
 
 instance DerivePlutusType PYieldedToHash where
-  type DPTStrat _ = PlutusTypeData
+    type DPTStrat _ = PlutusTypeData
 
 instance PTryFrom PData (PAsData PYieldedToHash)
 
 instance PUnsafeLiftDecl PYieldedToHash where
-  type PLifted PYieldedToHash = YieldedToHash
+    type PLifted PYieldedToHash = YieldedToHash
 
 deriving via
-  (DerivePConstantViaData YieldedToHash PYieldedToHash)
-  instance
-    (PConstantDecl YieldedToHash)
+    (DerivePConstantViaData YieldedToHash PYieldedToHash)
+    instance
+        (PConstantDecl YieldedToHash)
 
 --------------------------------------------------------------------------------
 
@@ -152,49 +152,49 @@ deriving via
 
 -- | Redeemer for `mkYieldListMPWrapper`.
 data YieldListMPWrapperRedeemer
-  = -- | Mint branch
-    Mint
-  | -- | Burn branch
-    Burn
-  deriving stock
-    ( Show
-    , Generic
-    , Enum
-    , Bounded
-    )
-  deriving
-    ( PlutusTx.ToData
-    , PlutusTx.FromData
-    )
-    via (EnumIsData YieldListMPWrapperRedeemer)
+    = -- | Mint branch
+      Mint
+    | -- | Burn branch
+      Burn
+    deriving stock
+        ( Show
+        , Generic
+        , Enum
+        , Bounded
+        )
+    deriving
+        ( PlutusTx.ToData
+        , PlutusTx.FromData
+        )
+        via (EnumIsData YieldListMPWrapperRedeemer)
 
 -- | Plutarch-level version of 'YieldListMPWrapperRedeemer'.
 data PYieldListMPWrapperRedeemer (s :: S)
-  = PMint
-  | PBurn
-  deriving stock
-    ( Generic
-    , Enum
-    , Bounded
-    )
-  deriving anyclass
-    ( PlutusType
-    , PIsData
-    , PEq
-    )
+    = PMint
+    | PBurn
+    deriving stock
+        ( Generic
+        , Enum
+        , Bounded
+        )
+    deriving anyclass
+        ( PlutusType
+        , PIsData
+        , PEq
+        )
 
 instance PTryFrom PData (PAsData PYieldListMPWrapperRedeemer)
 
 instance DerivePlutusType PYieldListMPWrapperRedeemer where
-  type DPTStrat _ = PlutusTypeEnumData
+    type DPTStrat _ = PlutusTypeEnumData
 
 instance PUnsafeLiftDecl PYieldListMPWrapperRedeemer where
-  type PLifted PYieldListMPWrapperRedeemer = YieldListMPWrapperRedeemer
+    type PLifted PYieldListMPWrapperRedeemer = YieldListMPWrapperRedeemer
 
 deriving via
-  (DerivePConstantViaEnum YieldListMPWrapperRedeemer PYieldListMPWrapperRedeemer)
-  instance
-    (PConstantDecl YieldListMPWrapperRedeemer)
+    (DerivePConstantViaEnum YieldListMPWrapperRedeemer PYieldListMPWrapperRedeemer)
+    instance
+        (PConstantDecl YieldListMPWrapperRedeemer)
 
 --------------------------------------------------------------------------------
 
@@ -205,38 +205,38 @@ The length of the datum is checked upon creation in `mkYieldListSTMPWrapper` to 
 that the length of the list does not exceed the max list length passed as a parameter to that script.
 -}
 newtype YieldListDatum = YieldListDatum
-  { yieldedToScripts :: [YieldedToHash]
-  }
-  deriving stock (Show, Eq, Generic)
-  deriving anyclass (SOP.Generic)
-  deriving newtype (PlutusTx.ToData, PlutusTx.FromData)
+    { yieldedToScripts :: [YieldedToHash]
+    }
+    deriving stock (Show, Eq, Generic)
+    deriving anyclass (SOP.Generic)
+    deriving newtype (PlutusTx.ToData, PlutusTx.FromData)
 
 deriving via
-  ( DerivePConstantViaNewtype
-      YieldListDatum
-      PYieldListDatum
-      (PBuiltinList PYieldedToHash)
-  )
-  instance
-    (PConstantDecl YieldListDatum)
+    ( DerivePConstantViaNewtype
+        YieldListDatum
+        PYieldListDatum
+        (PBuiltinList PYieldedToHash)
+    )
+    instance
+        (PConstantDecl YieldListDatum)
 
 newtype PYieldListDatum (s :: S)
-  = PYieldListDatum
-      ( Term
-          s
-          ( PDataRecord
-              '[ "yieldedToScripts" ':= PBuiltinList (PAsData PYieldedToHash)
-               ]
-          )
-      )
-  deriving stock (Generic)
-  deriving anyclass (PlutusType, PIsData, PEq, PDataFields)
+    = PYieldListDatum
+        ( Term
+            s
+            ( PDataRecord
+                '[ "yieldedToScripts" ':= PBuiltinList (PAsData PYieldedToHash)
+                 ]
+            )
+        )
+    deriving stock (Generic)
+    deriving anyclass (PlutusType, PIsData, PEq, PDataFields)
 
 instance DerivePlutusType PYieldListDatum where
-  type DPTStrat _ = PlutusTypeDataList
+    type DPTStrat _ = PlutusTypeDataList
 
 instance PUnsafeLiftDecl PYieldListDatum where
-  type PLifted _ = YieldListDatum
+    type PLifted _ = YieldListDatum
 
 instance PTryFrom PData (PAsData PYieldListDatum)
 
@@ -244,8 +244,8 @@ instance PTryFrom PData (PAsData PYieldListDatum)
 -- Helpers
 
 getYieldedToHashByIndex ::
-  Term s (PYieldListDatum :--> PInteger :--> PYieldedToHash)
+    Term s (PYieldListDatum :--> PInteger :--> PYieldedToHash)
 getYieldedToHashByIndex = plam $ \datum n ->
-  pmatch datum $ \case
-    PYieldListDatum ((pfield @"yieldedToScripts" #) -> yieldList) ->
-      pfromData $ yieldList #!! n
+    pmatch datum $ \case
+        PYieldListDatum ((pfield @"yieldedToScripts" #) -> yieldList) ->
+            pfromData $ yieldList #!! n

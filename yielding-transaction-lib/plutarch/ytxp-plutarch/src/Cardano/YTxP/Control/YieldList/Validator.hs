@@ -1,13 +1,13 @@
 {-# LANGUAGE TypeApplications #-}
 
 module Cardano.YTxP.Control.YieldList.Validator (
-  -- * Validator
-  YieldListValidatorScript,
-  compileYieldListValidator,
+    -- * Validator
+    YieldListValidatorScript,
+    compileYieldListValidator,
 
-  -- * Credential
-  YieldListValidatorCredential,
-  mkYieldListValidatorWrapperCredential,
+    -- * Credential
+    YieldListValidatorCredential,
+    mkYieldListValidatorWrapperCredential,
 ) where
 
 import Data.Aeson (FromJSON, ToJSON)
@@ -19,9 +19,9 @@ import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (Credential (ScriptCredential))
 import Prettyprinter (Pretty)
 import Utils (
-  pands,
-  phasOneScriptInputAtValidatorWithExactlyOneToken,
-  poutputsDoNotContainToken,
+    pands,
+    phasOneScriptInputAtValidatorWithExactlyOneToken,
+    poutputsDoNotContainToken,
  )
 
 --------------------------------------------------------------------------------
@@ -29,44 +29,44 @@ import Utils (
 
 -- | @since 0.1.0
 newtype YieldListValidatorScript = YieldListValidatorScript Script
-  deriving
-    ( -- | @since 0.1.0
-      ToJSON
-    , -- | @since 0.1.0
-      FromJSON
-    )
-    via (HexStringScript "YieldListValidatorScript")
-  deriving
-    ( -- | @since 0.1.0
-      Eq
-    , -- | @since 0.1.0
-      Pretty
-    )
-    via SerialForm
+    deriving
+        ( -- | @since 0.1.0
+          ToJSON
+        , -- | @since 0.1.0
+          FromJSON
+        )
+        via (HexStringScript "YieldListValidatorScript")
+    deriving
+        ( -- | @since 0.1.0
+          Eq
+        , -- | @since 0.1.0
+          Pretty
+        )
+        via SerialForm
 
 compileYieldListValidator ::
-  Config ->
-  (forall (s :: S). Term s (PData :--> PData :--> PScriptContext :--> POpaque)) ->
-  Either Text YieldListValidatorScript
+    Config ->
+    (forall (s :: S). Term s (PData :--> PData :--> PScriptContext :--> POpaque)) ->
+    Either Text YieldListValidatorScript
 compileYieldListValidator config scriptToWrap = do
-  script <- compile config (mkYieldListValidatorWrapper # scriptToWrap)
-  pure $ YieldListValidatorScript script
+    script <- compile config (mkYieldListValidatorWrapper # scriptToWrap)
+    pure $ YieldListValidatorScript script
 
 --------------------------------------------------------------------------------
 -- YieldListSTCS
 
 -- | Opaque, semantic newtype for the YieldList state thread currency symbol
 newtype YieldListValidatorCredential
-  = YieldListValidatorCredential PlutusLedgerApi.V2.Credential
+    = YieldListValidatorCredential PlutusLedgerApi.V2.Credential
 
 mkYieldListValidatorWrapperCredential ::
-  YieldListValidatorScript ->
-  YieldListValidatorCredential
+    YieldListValidatorScript ->
+    YieldListValidatorCredential
 mkYieldListValidatorWrapperCredential (YieldListValidatorScript script) =
-  YieldListValidatorCredential
-    . PlutusLedgerApi.V2.ScriptCredential
-    . scriptHash
-    $ script
+    YieldListValidatorCredential
+        . PlutusLedgerApi.V2.ScriptCredential
+        . scriptHash
+        $ script
 
 --------------------------------------------------------------------------------
 -- Helpers (Unexported)
@@ -95,46 +95,46 @@ mkYieldListValidatorWrapperCredential (YieldListValidatorScript script) =
 
 -}
 mkYieldListValidatorWrapper ::
-  forall (s :: S).
-  Term
-    s
-    ( (PData :--> PData :--> PScriptContext :--> POpaque)
-        :--> PCurrencySymbol
-        :--> PData
-        :--> PData
-        :--> PScriptContext
-        :--> POpaque
-    )
+    forall (s :: S).
+    Term
+        s
+        ( (PData :--> PData :--> PScriptContext :--> POpaque)
+            :--> PCurrencySymbol
+            :--> PData
+            :--> PData
+            :--> PScriptContext
+            :--> POpaque
+        )
 mkYieldListValidatorWrapper = plam $ \_scriptToWrap yieldListSymbol _datum _redeemer context -> unTermCont $ do
-  let txInfo = pfromData $ pfield @"txInfo" # context
-      purpose = pfromData $ pfield @"purpose" # context
-      inputs = pfromData $ pfield @"inputs" # txInfo
-      outputs = pfromData $ pfield @"outputs" # txInfo
+    let txInfo = pfromData $ pfield @"txInfo" # context
+        purpose = pfromData $ pfield @"purpose" # context
+        inputs = pfromData $ pfield @"inputs" # txInfo
+        outputs = pfromData $ pfield @"outputs" # txInfo
 
-  PSpending ((pfield @"_0" #) -> yieldListInputRef) <- pmatchC purpose
+    PSpending ((pfield @"_0" #) -> yieldListInputRef) <- pmatchC purpose
 
-  pure $
-    popaque $
-      ptraceIfFalse
-        "mkYieldListValidatorWrapper failed"
-        ( pands
-            [ -- For efficiency reasons we use this helper to make a couple of checks,
-              -- Namely, it ensures that there is one input at the yield list validator
-              -- with exactly one YieldListSTT.
-              -- It also checks that there are no other script inputs with a YieldListSTT.
-              -- (There is no need to check the wallet inputs as a YieldListSTT is never
-              --  sent to one in the first place.)
-              ptraceIfFalse
-                ( mconcat
-                    [ "Must have one input at the yield list validator with exactly one YieldListSTT,"
-                    , " and no other inputs containing a YieldListSTT"
+    pure $
+        popaque $
+            ptraceIfFalse
+                "mkYieldListValidatorWrapper failed"
+                ( pands
+                    [ -- For efficiency reasons we use this helper to make a couple of checks,
+                      -- Namely, it ensures that there is one input at the yield list validator
+                      -- with exactly one YieldListSTT.
+                      -- It also checks that there are no other script inputs with a YieldListSTT.
+                      -- (There is no need to check the wallet inputs as a YieldListSTT is never
+                      --  sent to one in the first place.)
+                      ptraceIfFalse
+                        ( mconcat
+                            [ "Must have one input at the yield list validator with exactly one YieldListSTT,"
+                            , " and no other inputs containing a YieldListSTT"
+                            ]
+                        )
+                        $ phasOneScriptInputAtValidatorWithExactlyOneToken inputs
+                            # yieldListSymbol
+                            # yieldListInputRef
+                    , ptraceIfFalse
+                        "Must be no YieldListSTT at any of the outputs"
+                        $ poutputsDoNotContainToken outputs # yieldListSymbol
                     ]
                 )
-                $ phasOneScriptInputAtValidatorWithExactlyOneToken inputs
-                  # yieldListSymbol
-                  # yieldListInputRef
-            , ptraceIfFalse
-                "Must be no YieldListSTT at any of the outputs"
-                $ poutputsDoNotContainToken outputs # yieldListSymbol
-            ]
-        )

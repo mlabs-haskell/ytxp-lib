@@ -1,11 +1,11 @@
 module Main (main) where
 
 import Cardano.YTxP.Control.ParametersInitial (
-  ControlParametersInitial (ControlParametersInitial),
+    ControlParametersInitial (ControlParametersInitial),
  )
 import Cardano.YTxP.Control.Stubs (
-  alwaysSucceedsTwoArgumentScript,
-  alwaysSucceedsValidator,
+    alwaysSucceedsTwoArgumentScript,
+    alwaysSucceedsValidator,
  )
 import Control.Monad (guard)
 import Data.Aeson (encode)
@@ -13,8 +13,8 @@ import Data.ByteString.Short (ShortByteString)
 import Data.Text (unpack)
 import GHC.Exts (fromList, toList)
 import Plutarch.Internal (
-  Config (Config),
-  TracingMode (DetTracing, DoTracing, DoTracingAndBinds, NoTracing),
+    Config (Config),
+    TracingMode (DetTracing, DoTracing, DoTracingAndBinds, NoTracing),
  )
 import Test.Laws (aesonLawsWith)
 import Test.QuickCheck (
@@ -55,12 +55,12 @@ main =
 
 sampleYLS :: ControlParametersInitial Integer
 sampleYLS =
-  ControlParametersInitial
-    1
-    [1, 2]
-    alwaysSucceedsTwoArgumentScript
-    alwaysSucceedsValidator
-    (Config NoTracing)
+    ControlParametersInitial
+        1
+        [1, 2]
+        alwaysSucceedsTwoArgumentScript
+        alwaysSucceedsValidator
+        (Config NoTracing)
 
 -- Generators and shrinkers
 

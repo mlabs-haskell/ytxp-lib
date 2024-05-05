@@ -1,11 +1,11 @@
 module Cardano.YTxP.Control.Yielding.MintingPolicy (
-  -- * Minting Policy
-  YieldingMPScript (getYieldingMPScript),
-  compileYieldingMP,
+    -- * Minting Policy
+    YieldingMPScript (getYieldingMPScript),
+    compileYieldingMP,
 
-  -- * Currency Symbol
-  YieldingMPCS,
-  mkYieldingMPCS,
+    -- * Currency Symbol
+    YieldingMPCS,
+    mkYieldingMPCS,
 ) where
 
 import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
@@ -22,33 +22,33 @@ import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
 
 -- | @since 0.1.0
 newtype YieldingMPScript = YieldingMPScript
-  { getYieldingMPScript :: Script
-  -- ^ @since 0.1.0
-  }
-  deriving
-    ( -- | @since 0.1.0
-      ToJSON
-    , -- | @since 0.1.0
-      FromJSON
-    )
-    via (HexStringScript "YieldingMPScript")
+    { getYieldingMPScript :: Script
+    -- ^ @since 0.1.0
+    }
+    deriving
+        ( -- | @since 0.1.0
+          ToJSON
+        , -- | @since 0.1.0
+          FromJSON
+        )
+        via (HexStringScript "YieldingMPScript")
 
 compileYieldingMP ::
-  Config ->
-  YieldListSTCS ->
-  Either
-    Text
-    YieldingMPScript
+    Config ->
+    YieldListSTCS ->
+    Either
+        Text
+        YieldingMPScript
 compileYieldingMP config ylstcs = do
-  let
-    yieldingMP ::
-      forall (s :: S).
-      ( Term s (PData :--> PScriptContext :--> POpaque)
-      )
-    yieldingMP = yieldingHelper ylstcs
+    let
+        yieldingMP ::
+            forall (s :: S).
+            ( Term s (PData :--> PScriptContext :--> POpaque)
+            )
+        yieldingMP = yieldingHelper ylstcs
 
-  script <- compile config yieldingMP
-  pure $ YieldingMPScript script
+    script <- compile config yieldingMP
+    pure $ YieldingMPScript script
 
 -------------------------------------------------------------------------------
 -- Yielding Minting Policy Currency Symbol
@@ -58,4 +58,4 @@ newtype YieldingMPCS = YieldingMPCS CurrencySymbol
 
 mkYieldingMPCS :: YieldingMPScript -> YieldingMPCS
 mkYieldingMPCS (YieldingMPScript script) =
-  YieldingMPCS $ CurrencySymbol (getScriptHash $ scriptHash script)
+    YieldingMPCS $ CurrencySymbol (getScriptHash $ scriptHash script)

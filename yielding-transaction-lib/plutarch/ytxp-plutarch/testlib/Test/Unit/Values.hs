@@ -1,36 +1,36 @@
 module Test.Unit.Values (
-  dummySymbolOne,
-  dummySymbolTwo,
-  dummySymbolThree,
-  dummyValueOne,
-  dummyValueTwo,
-  dummyValueThree,
+    dummySymbolOne,
+    dummySymbolTwo,
+    dummySymbolThree,
+    dummyValueOne,
+    dummyValueTwo,
+    dummyValueThree,
 ) where
 
 import PlutusLedgerApi.V1.Value (
-  CurrencySymbol (CurrencySymbol),
-  Value,
-  singleton,
+    CurrencySymbol (CurrencySymbol),
+    Value,
+    singleton,
  )
 import PlutusLedgerApi.V2 (getLedgerBytes)
 
 -- | Sample symbol for tests
 dummySymbolOne :: CurrencySymbol
 dummySymbolOne =
-  CurrencySymbol $
-    getLedgerBytes "00000000000000000000000000000000000000000000000000000000"
+    CurrencySymbol $
+        getLedgerBytes "00000000000000000000000000000000000000000000000000000000"
 
 -- | Sample symbol for tests
 dummySymbolTwo :: CurrencySymbol
 dummySymbolTwo =
-  CurrencySymbol $
-    getLedgerBytes "11111111111111111111111111111111111111111111111111111111"
+    CurrencySymbol $
+        getLedgerBytes "11111111111111111111111111111111111111111111111111111111"
 
 -- | Sample symbol for tests
 dummySymbolThree :: CurrencySymbol
 dummySymbolThree =
-  CurrencySymbol $
-    getLedgerBytes "22222222222222222222222222222222222222222222222222222222"
+    CurrencySymbol $
+        getLedgerBytes "22222222222222222222222222222222222222222222222222222222"
 
 dummyValueOne :: Value
 dummyValueOne = mkSomeValue dummySymbolOne 1

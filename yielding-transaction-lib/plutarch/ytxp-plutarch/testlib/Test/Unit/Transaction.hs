@@ -1,34 +1,34 @@
 module Test.Unit.Transaction (
-  pdummyTxOutSingletonListWithTxOutWithEmptyYieldListDatum,
-  pdummyTxInInfoSingletonList,
-  pdummyTxInInfoTwoElementList,
-  pdummyTxInInfoSingletonListTwo,
-  pdummyTxInInfoThreeElementList,
-  pdummyTxOutSingletonList,
-  pdummyTxOutTwoElementList,
-  pdummyTxOutRefOne,
-  pdummyTxOutRefTwo,
-  dummyTxOutRefOne,
+    pdummyTxOutSingletonListWithTxOutWithEmptyYieldListDatum,
+    pdummyTxInInfoSingletonList,
+    pdummyTxInInfoTwoElementList,
+    pdummyTxInInfoSingletonListTwo,
+    pdummyTxInInfoThreeElementList,
+    pdummyTxOutSingletonList,
+    pdummyTxOutTwoElementList,
+    pdummyTxOutRefOne,
+    pdummyTxOutRefTwo,
+    dummyTxOutRefOne,
 ) where
 
 import Plutarch.Api.V2 (PTxInInfo, PTxOut, PTxOutRef)
 import PlutusLedgerApi.V2 (
-  TxId (TxId),
-  TxInInfo (TxInInfo),
-  TxOut (TxOut),
-  TxOutRef (TxOutRef),
-  getLedgerBytes,
+    TxId (TxId),
+    TxInInfo (TxInInfo),
+    TxOut (TxOut),
+    TxOutRef (TxOutRef),
+    getLedgerBytes,
  )
 import Test.Unit.Addresses (
-  dummyScriptAddressOne,
-  dummyScriptAddressThree,
-  dummyScriptAddressTwo,
+    dummyScriptAddressOne,
+    dummyScriptAddressThree,
+    dummyScriptAddressTwo,
  )
 import Test.Unit.Datums (
-  dummyOutputDatumOne,
-  dummyOutputDatumThree,
-  dummyOutputDatumTwo,
-  dummyYieldListEmptyListOutputDatum,
+    dummyOutputDatumOne,
+    dummyOutputDatumThree,
+    dummyOutputDatumTwo,
+    dummyYieldListEmptyListOutputDatum,
  )
 import Test.Unit.Values (dummyValueOne, dummyValueThree, dummyValueTwo)
 
@@ -40,9 +40,9 @@ pdummyTxOutTwoElementList :: Term s (PBuiltinList PTxOut)
 pdummyTxOutTwoElementList = pconstant [dummyTxOutOne, dummyTxOutTwo]
 
 pdummyTxOutSingletonListWithTxOutWithEmptyYieldListDatum ::
-  Term s (PBuiltinList PTxOut)
+    Term s (PBuiltinList PTxOut)
 pdummyTxOutSingletonListWithTxOutWithEmptyYieldListDatum =
-  pconstant [dummyTxOutWithYieldListDatumEmptyList]
+    pconstant [dummyTxOutWithYieldListDatumEmptyList]
 
 -- * PTxInInfo lists
 pdummyTxInInfoThreeElementList :: Term s (PBuiltinList PTxInInfo)
@@ -87,11 +87,11 @@ dummyTxOutFour = TxOut dummyScriptAddressThree dummyValueThree dummyOutputDatumT
 
 dummyTxOutWithYieldListDatumEmptyList :: TxOut
 dummyTxOutWithYieldListDatumEmptyList =
-  TxOut
-    dummyScriptAddressOne
-    dummyValueOne
-    dummyYieldListEmptyListOutputDatum
-    Nothing
+    TxOut
+        dummyScriptAddressOne
+        dummyValueOne
+        dummyYieldListEmptyListOutputDatum
+        Nothing
 
 -- * TxOutRef samples
 dummyTxOutRefOne :: TxOutRef
@@ -115,18 +115,18 @@ dummyTxOutRefFour = TxOutRef dummyTxIdThree 3
 -- * TxId samples
 dummyTxIdOne :: TxId
 dummyTxIdOne =
-  TxId $
-    getLedgerBytes
-      "1111111111111111111111111111111111111111111111111111111111111111"
+    TxId $
+        getLedgerBytes
+            "1111111111111111111111111111111111111111111111111111111111111111"
 
 dummyTxIdTwo :: TxId
 dummyTxIdTwo =
-  TxId $
-    getLedgerBytes
-      "2222222222222222222222222222222222222222222222222222222222222222"
+    TxId $
+        getLedgerBytes
+            "2222222222222222222222222222222222222222222222222222222222222222"
 
 dummyTxIdThree :: TxId
 dummyTxIdThree =
-  TxId $
-    getLedgerBytes
-      "3333333333333333333333333333333333333333333333333333333333333333"
+    TxId $
+        getLedgerBytes
+            "3333333333333333333333333333333333333333333333333333333333333333"
