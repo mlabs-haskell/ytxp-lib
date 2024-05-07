@@ -24,6 +24,8 @@ module PPrelude (
   equatePMintingPolicy,
   prettyPValidator,
   prettyPMintingPolicy,
+  sbsToHexText,
+  hexTextToSBS,
 ) where
 
 import Control.Monad ((<=<), (>=>))
@@ -37,6 +39,7 @@ import Data.Aeson (
 import Data.Aeson.Types (Parser)
 import Data.ByteString.Short (ShortByteString)
 import Data.ByteString.Short qualified as SBS
+import Data.Foldable (foldl')
 import Data.List qualified as List
 import Data.Proxy (Proxy (Proxy))
 import Data.Text (Text)
@@ -57,9 +60,58 @@ import Plutarch.Internal (
 import Plutarch.Prelude
 import Plutarch.Script (Script (Script), deserialiseScript, serialiseScript)
 import Prettyprinter (Doc, Pretty (pretty), braces, punctuate, sep, (<+>))
-import Text.Builder qualified as TBuilder
 import UntypedPlutusCore.Core.Type qualified as UPLC
 import Prelude
+
+{- | Converts a 'ShortByteString' into a textual representation in hex, with a
+leading 0x.
+
+@since 0.1.0
+-}
+sbsToHexText :: ShortByteString -> Text
+sbsToHexText = ("0x" <>) . foldl' go "" . SBS.unpack
+  where
+    go :: Text -> Word8 -> Text
+    go acc w8 =
+      acc
+        <> ( case w8 `quotRem` 16 of
+              (0, r) -> "0" <> toHexDigit r
+              (q, r) -> toHexDigit q <> toHexDigit r
+           )
+    toHexDigit :: Word8 -> Text
+    toHexDigit = \case
+      0 -> "0"
+      1 -> "1"
+      2 -> "2"
+      3 -> "3"
+      4 -> "4"
+      5 -> "5"
+      6 -> "6"
+      7 -> "7"
+      8 -> "8"
+      9 -> "9"
+      10 -> "A"
+      11 -> "B"
+      12 -> "C"
+      13 -> "D"
+      14 -> "E"
+      _ -> "F"
+
+{- | Attempts to parse the given 'Text' into the 'ShortByteString' that would
+have produced it via 'sbsToHexText', indicating parse failures with 'fail'.
+
+@since 0.1.0
+-}
+hexTextToSBS ::
+  forall (m :: Type -> Type).
+  (MonadFail m) =>
+  Text ->
+  m ShortByteString
+hexTextToSBS t = case Text.stripPrefix "0x" t of
+  Nothing -> fail "Provided value does not have a leading \'0x\'"
+  Just stripped -> do
+    paired <- toPairs . Text.unpack $ stripped
+    SBS.pack <$> traverse decodeFromHexPair paired
 
 {- | Avoids an orphan 'Eq' instance for 'Config'.
 
@@ -328,25 +380,18 @@ instance ToJSON (HexStringScript scriptLabel) where
 -- | @since 0.1.0
 instance (KnownSymbol scriptLabel) => FromJSON (HexStringScript scriptLabel) where
   {-# INLINEABLE parseJSON #-}
-  parseJSON = (pure . HexStringScript . deserialiseScript) <=< withText scriptLabel' go
+  parseJSON =
+    (pure . HexStringScript . deserialiseScript)
+      <=< withText scriptLabel' hexTextToSBS
     where
       scriptLabel' :: String
       scriptLabel' = symbolVal (Proxy @scriptLabel)
-      go :: Text -> Parser ShortByteString
-      go t = case Text.stripPrefix "0x" t of
-        Nothing -> fail "Provided value does not have a leading \'0x\'"
-        Just t' ->
-          SBS.pack <$> do
-            asPairList <- toPairs . Text.unpack $ t'
-            traverse decodeFromHexPair asPairList
 
 -- Helpers
 
 -- Munges a 'Script' into a 'Text' form suitable for JSON serialization
 mungeScript :: Script -> Text
-mungeScript script =
-  TBuilder.run $
-    "0x" <> (foldMap toPaddedHex . SBS.unpack . serialiseScript $ script)
+mungeScript = sbsToHexText . serialiseScript
 
 toPairs ::
   forall (m :: Type -> Type) (a :: Type).
@@ -376,10 +421,3 @@ unsafeTermFromScript ::
   forall (a :: S -> Type). Script -> forall (s :: S). Term s a
 unsafeTermFromScript (Script script) =
   Term $ const $ pure $ TermResult (RCompiled $ UPLC._progTerm script) []
-
--- Ensures we pad hex values to be exactly 2 digits.
-toPaddedHex :: Word8 -> TBuilder.Builder
-toPaddedHex w8 =
-  if w8 < 128
-    then "0" <> TBuilder.unsignedHexadecimal w8
-    else TBuilder.unsignedHexadecimal w8
