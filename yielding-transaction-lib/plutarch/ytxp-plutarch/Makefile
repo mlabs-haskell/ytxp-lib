@@ -29,12 +29,16 @@ usage:
 	# Test
 	@echo "    test_serialization                                          -- Test serialization"
 	@echo ""
+	# Check Typos
+	@echo "    typos_check                                                 -- Check typos"
+	@echo "    typos_fix                                                   -- Fix typos"
+	@echo ""
 
 ################################################################################
 # Code
 
 # Leave the cabal build directory and the legacy code submodule alone
-FIND_EXCLUDE_PATH := -not -path '**/dist-*/*'
+FIND_EXCLUDE_PATH := -not -path '*/dist-/*'
 
 # NOTE: we want to apply the same style rule for both ytxp-plutarch and ytxp-convex even if the
 # GHC version is different)
@@ -127,3 +131,13 @@ build_write-config:
 .PHONY: test_serialization
 test_serialization:
 	cabal test -j serialization
+
+################################################################################
+# Test
+.PHONY: typos_check
+typos_check :
+	typos -c ../../.typos.toml ../../
+
+.PHONY: typos_fix
+typos_fix:
+	typos -w -c ../../.typos.toml ../../
