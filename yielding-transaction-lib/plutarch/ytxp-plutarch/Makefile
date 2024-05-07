@@ -33,12 +33,16 @@ usage:
 	@echo "    typos_check                                                 -- Check typos"
 	@echo "    typos_fix                                                   -- Fix typos"
 	@echo ""
+	# Doc
+	@echo "    build_doc                                                   -- Build haddock documentation"
+	@echo ""
+
 
 ################################################################################
 # Code
 
 # Leave the cabal build directory and the legacy code submodule alone
-FIND_EXCLUDE_PATH := -not -path '*/dist-/*'
+FIND_EXCLUDE_PATH := -not -path '*/dist-*/*'
 
 # NOTE: we want to apply the same style rule for both ytxp-plutarch and ytxp-convex even if the
 # GHC version is different)
@@ -141,3 +145,9 @@ typos_check :
 .PHONY: typos_fix
 typos_fix:
 	typos -w -c ../../.typos.toml ../../
+
+################################################################################
+# Doc
+.PHONY: build_doc
+build_doc:
+	cabal haddock --haddock-all --haddock-quickjump
