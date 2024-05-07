@@ -42,7 +42,7 @@ usage:
 # Code
 
 # Leave the cabal build directory and the legacy code submodule alone
-FIND_EXCLUDE_PATH := -not -path '*/dist-/*'
+FIND_EXCLUDE_PATH := -not -path '*/dist-*/*'
 
 # NOTE: we want to apply the same style rule for both ytxp-plutarch and ytxp-convex even if the
 # GHC version is different)
