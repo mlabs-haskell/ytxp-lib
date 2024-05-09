@@ -8,7 +8,7 @@ module Cardano.YTxP.Control.Parameters (
     yieldListMintingPolicy
   ),
   YieldingScripts (
-    yieldingMintingPolicy,
+    yieldingMintingPolicies,
     yieldingValidator,
     yieldingStakingValidators
   ),
@@ -23,9 +23,10 @@ import Cardano.YTxP.Control.ParametersInitial (
     ControlParametersInitial,
     compilationConfig,
     maxYieldListSize,
-    nonceList,
+    mintingPoliciesNonceList,
     scriptToWrapYieldListMP,
-    scriptToWrapYieldListValidator
+    scriptToWrapYieldListValidator,
+    stakingValidatorsNonceList
   ),
  )
 import Cardano.YTxP.Control.YieldList.MintingPolicy (
@@ -120,7 +121,7 @@ by the YieldListScripts.
 @since 0.1.0
 -}
 data YieldingScripts (nonceType :: Type) = YieldingScripts
-  { yieldingMintingPolicy :: YieldingMPScript
+  { yieldingMintingPolicies :: [YieldingMPScript nonceType]
   -- ^ @since 0.1.0
   , yieldingValidator :: YieldingValidatorScript
   -- ^ @since 0.1.0
@@ -136,14 +137,14 @@ instance (ToJSON nonceType) => ToJSON (YieldingScripts nonceType) where
   {-# INLINEABLE toJSON #-}
   toJSON ys =
     object
-      [ "yieldingMintingPolicy" .= yieldingMintingPolicy ys
+      [ "yieldingMintingPolicies" .= yieldingMintingPolicies ys
       , "yieldingValidator" .= yieldingValidator ys
       , "yieldingStakingValidators" .= yieldingStakingValidators ys
       ]
   {-# INLINEABLE toEncoding #-}
   toEncoding ys =
     pairs $
-      "yieldingMintingPolicy" .= yieldingMintingPolicy ys
+      "yieldingMintingPolicies" .= yieldingMintingPolicies ys
         <> "yieldingValidator" .= yieldingValidator ys
         <> "yieldingStakingValidators" .= yieldingStakingValidators ys
 
@@ -151,7 +152,7 @@ instance (ToJSON nonceType) => ToJSON (YieldingScripts nonceType) where
 instance (FromJSON nonceType) => FromJSON (YieldingScripts nonceType) where
   {-# INLINEABLE parseJSON #-}
   parseJSON = withObject "YieldingScripts" $ \obj -> do
-    ysmp <- obj .: "yieldingMintingPolicy"
+    ysmp <- obj .: "yieldingMintingPolicies"
     ysv <- obj .: "yieldingValidator"
     ysvs <- obj .: "yieldingStakingValidators"
     pure $ YieldingScripts ysmp ysv ysvs
@@ -212,7 +213,8 @@ mkControlParameters ::
 mkControlParameters
   cpi@ControlParametersInitial
     { maxYieldListSize
-    , nonceList
+    , stakingValidatorsNonceList
+    , mintingPoliciesNonceList
     , scriptToWrapYieldListMP
     , scriptToWrapYieldListValidator
     , compilationConfig
@@ -231,7 +233,6 @@ mkControlParameters
 
       ------------------------------------------------------------
       -- Now compile the yielding scripts
-      yieldingMP <- compileYieldingMP compilationConfig ylstcs
       yieldingVal <- compileYieldingValidator compilationConfig ylstcs
 
       -- Compile the staking validators, pulling any @Left@s (containing compilation
@@ -239,7 +240,12 @@ mkControlParameters
       yieldingStakingVals <-
         mapM
           (compileYieldingStakingValidator compilationConfig ylstcs)
-          nonceList
+          stakingValidatorsNonceList
+
+      yieldingMPs <-
+        mapM
+          (compileYieldingMP compilationConfig ylstcs)
+          mintingPoliciesNonceList
 
       pure $
         ControlParameters
@@ -249,7 +255,7 @@ mkControlParameters
                 yieldListSTMP
           , yieldingScripts =
               YieldingScripts
-                yieldingMP
+                yieldingMPs
                 yieldingVal
                 yieldingStakingVals
           , controlParametersInitial = cpi

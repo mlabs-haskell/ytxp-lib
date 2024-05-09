@@ -58,6 +58,7 @@ sampleYLS =
   ControlParametersInitial
     1
     [1, 2]
+    [1, 2, 3]
     alwaysSucceedsTwoArgumentScript
     alwaysSucceedsValidator
     (Config NoTracing)
@@ -69,12 +70,14 @@ genCPI :: Gen (ControlParametersInitial Integer)
 genCPI = do
   NonNegative myls' <- arbitrary
   let myls = fromInteger myls'
-  nl <- arbitrary
+  stakingValsNonceList <- arbitrary
+  mintingPoliciesNonceList <- arbitrary
   tm <- elements [NoTracing, DetTracing, DoTracing, DoTracingAndBinds]
   pure $
     ControlParametersInitial
       myls
-      nl
+      stakingValsNonceList
+      mintingPoliciesNonceList
       alwaysSucceedsTwoArgumentScript
       alwaysSucceedsValidator
       (Config tm)
