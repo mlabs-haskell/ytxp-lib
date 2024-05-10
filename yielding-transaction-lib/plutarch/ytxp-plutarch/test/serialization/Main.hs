@@ -19,7 +19,7 @@ import Plutarch.Internal (
 import Test.Laws (aesonLawsWith)
 import Test.QuickCheck (
   Gen,
-  NonNegative (NonNegative),
+  NonNegative (NonNegative, getNonNegative),
   arbitrary,
   counterexample,
   elements,
@@ -41,9 +41,9 @@ main =
           let converted = sbsToHexText sbs
            in counterexample ("Converted: " <> unpack converted) $
                 Just sbs === (hexTextToSBS . sbsToHexText $ sbs)
-    , aesonLawsWith @(ControlParametersInitial Integer) genCPI noShrink
+    , aesonLawsWith @ControlParametersInitial genCPI noShrink
     , goldenVsString
-        "ControlParametersInitial Integer"
+        "ControlParametersInitial"
         "goldens/ControlParametersInitialInteger.golden"
         (pure . encode $ sampleYLS)
     ]
@@ -53,7 +53,7 @@ main =
 
 -- Golden data
 
-sampleYLS :: ControlParametersInitial Integer
+sampleYLS :: ControlParametersInitial
 sampleYLS =
   ControlParametersInitial
     1
@@ -66,12 +66,12 @@ sampleYLS =
 -- Generators and shrinkers
 
 -- TODO: This definitely needs more thought.
-genCPI :: Gen (ControlParametersInitial Integer)
+genCPI :: Gen ControlParametersInitial
 genCPI = do
   NonNegative myls' <- arbitrary
   let myls = fromInteger myls'
-  stakingValsNonceList <- arbitrary
-  mintingPoliciesNonceList <- arbitrary
+  stakingValsNonceList <- map (fromInteger . getNonNegative) <$> arbitrary
+  mintingPoliciesNonceList <- map (fromInteger . getNonNegative) <$> arbitrary
   tm <- elements [NoTracing, DetTracing, DoTracing, DoTracingAndBinds]
   pure $
     ControlParametersInitial

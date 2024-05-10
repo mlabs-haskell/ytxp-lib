@@ -19,11 +19,10 @@ import Data.Aeson (
   (.:),
   (.=),
  )
-
 import Data.Text (Text)
+import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
 import Plutarch.Api.V2 (PScriptContext, scriptHash)
-import Plutarch.Lift (PConstantDecl, PConstanted, PLifted)
 import Plutarch.Script (Script)
 import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
 
@@ -31,15 +30,15 @@ import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
 -- Yielding Minting Policy Script
 
 -- | @since 0.1.0
-data YieldingMPScript (nonceType :: Type) = YieldingMPScript
-  { nonce :: nonceType
+data YieldingMPScript = YieldingMPScript
+  { nonce :: Natural
   -- ^ @since 0.1.0
   , mintingPolicy :: Script
   -- ^ @since 0.1.0
   }
 
 -- | @since 0.1.0
-instance (ToJSON nonceType) => ToJSON (YieldingMPScript nonceType) where
+instance ToJSON YieldingMPScript where
   {-# INLINEABLE toJSON #-}
   toJSON ysvs =
     object
@@ -55,32 +54,28 @@ instance (ToJSON nonceType) => ToJSON (YieldingMPScript nonceType) where
           .= (HexStringScript @"StakingValidator" . mintingPolicy $ ysvs)
 
 -- | @since 0.1.0
-instance (FromJSON nonceType) => FromJSON (YieldingMPScript nonceType) where
+instance FromJSON YieldingMPScript where
   {-# INLINEABLE parseJSON #-}
   parseJSON = withObject "YieldingMPScript" $ \obj -> do
-    ysvsNonce :: nonceType <- obj .: "nonce"
+    ysvsNonce <- obj .: "nonce"
     (HexStringScript ysvsStakingValidator) :: HexStringScript "StakingValidator" <-
       obj .: "mintingPolicy"
     pure $ YieldingMPScript ysvsNonce ysvsStakingValidator
 
 compileYieldingMP ::
-  forall (nonceType :: Type).
-  ( PConstantDecl nonceType
-  , nonceType ~ PLifted (PConstanted nonceType)
-  ) =>
   Config ->
   YieldListSTCS ->
-  nonceType ->
+  Natural ->
   Either
     Text
-    (YieldingMPScript nonceType)
+    YieldingMPScript
 compileYieldingMP config ylstcs nonce = do
   let
     yieldingMP ::
       forall (s :: S).
       ( Term s (PData :--> PScriptContext :--> POpaque)
       )
-    yieldingMP = plet (pconstant nonce) (const $ yieldingHelper ylstcs)
+    yieldingMP = plet (pconstant $ toInteger nonce) (const $ yieldingHelper ylstcs)
   script <- compile config yieldingMP
   pure $ YieldingMPScript nonce script
 
@@ -90,6 +85,6 @@ compileYieldingMP config ylstcs nonce = do
 -- | Opaque, semantic newtype for the YieldList state thread currency symbol
 newtype YieldingMPCS = YieldingMPCS CurrencySymbol
 
-mkYieldingMPCS :: YieldingMPScript nonceType -> YieldingMPCS
+mkYieldingMPCS :: YieldingMPScript -> YieldingMPCS
 mkYieldingMPCS (YieldingMPScript _nonce script) =
   YieldingMPCS $ CurrencySymbol (getScriptHash $ scriptHash script)

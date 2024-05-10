@@ -60,7 +60,6 @@ import Data.Aeson (
   (.=),
  )
 import Data.Text (Text)
-import Plutarch.Lift (PConstantDecl, PConstanted, PLifted)
 import Prettyprinter (Pretty (pretty), braces, punctuate, sep, (<+>))
 
 {- | Scripts that govern which transaction families can be "yielded to"
@@ -120,12 +119,12 @@ by the YieldListScripts.
 
 @since 0.1.0
 -}
-data YieldingScripts (nonceType :: Type) = YieldingScripts
-  { yieldingMintingPolicies :: [YieldingMPScript nonceType]
+data YieldingScripts = YieldingScripts
+  { yieldingMintingPolicies :: [YieldingMPScript]
   -- ^ @since 0.1.0
   , yieldingValidator :: YieldingValidatorScript
   -- ^ @since 0.1.0
-  , yieldingStakingValidators :: [YieldingStakingValidatorScript nonceType]
+  , yieldingStakingValidators :: [YieldingStakingValidatorScript]
   -- ^ @since 0.1.0
   }
 
@@ -133,7 +132,7 @@ data YieldingScripts (nonceType :: Type) = YieldingScripts
 -- pool.
 
 -- | @since 0.1.0
-instance (ToJSON nonceType) => ToJSON (YieldingScripts nonceType) where
+instance ToJSON YieldingScripts where
   {-# INLINEABLE toJSON #-}
   toJSON ys =
     object
@@ -149,7 +148,7 @@ instance (ToJSON nonceType) => ToJSON (YieldingScripts nonceType) where
         <> "yieldingStakingValidators" .= yieldingStakingValidators ys
 
 -- | @since 0.1.0
-instance (FromJSON nonceType) => FromJSON (YieldingScripts nonceType) where
+instance FromJSON YieldingScripts where
   {-# INLINEABLE parseJSON #-}
   parseJSON = withObject "YieldingScripts" $ \obj -> do
     ysmp <- obj .: "yieldingMintingPolicies"
@@ -164,17 +163,17 @@ library.
 
 @since 0.1.0
 -}
-data ControlParameters (nonceType :: Type) = ControlParameters
+data ControlParameters = ControlParameters
   { yieldListScripts :: YieldListScripts
   -- ^ @since 0.1.0
-  , yieldingScripts :: YieldingScripts nonceType
+  , yieldingScripts :: YieldingScripts
   -- ^ @since 0.1.0
-  , controlParametersInitial :: ControlParametersInitial nonceType
+  , controlParametersInitial :: ControlParametersInitial
   -- ^ @since 0.1.0
   }
 
 -- | @since 0.1.0
-instance (ToJSON nonceType) => ToJSON (ControlParameters nonceType) where
+instance ToJSON ControlParameters where
   {-# INLINEABLE toJSON #-}
   toJSON cp =
     object
@@ -190,7 +189,7 @@ instance (ToJSON nonceType) => ToJSON (ControlParameters nonceType) where
         <> "controlParametersInitial" .= controlParametersInitial cp
 
 -- | @since 0.1.0
-instance (FromJSON nonceType) => FromJSON (ControlParameters nonceType) where
+instance FromJSON ControlParameters where
   {-# INLINEABLE parseJSON #-}
   parseJSON = withObject "ControlParameters" $ \obj -> do
     yls <- obj .: "yieldListScripts"
@@ -202,14 +201,10 @@ instance (FromJSON nonceType) => FromJSON (ControlParameters nonceType) where
 script hashes
 -}
 mkControlParameters ::
-  forall (nonceType :: Type).
-  ( PLifted (PConstanted nonceType) ~ nonceType
-  , PConstantDecl nonceType
-  ) =>
-  ControlParametersInitial nonceType ->
+  ControlParametersInitial ->
   Either
     Text
-    (ControlParameters nonceType)
+    ControlParameters
 mkControlParameters
   cpi@ControlParametersInitial
     { maxYieldListSize

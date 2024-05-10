@@ -18,9 +18,9 @@ import Data.Aeson (
   (.=),
  )
 import Data.Text (Text)
+import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
 import Plutarch.Api.V2 (PScriptContext)
-import Plutarch.Lift (PConstantDecl, PConstanted, PLifted)
 import Plutarch.Script (Script)
 
 --------------------------------------------------------------------------------
@@ -30,15 +30,15 @@ import Plutarch.Script (Script)
 
 @since 0.1.0
 -}
-data YieldingStakingValidatorScript (nonceType :: Type) = YieldingStakingValidatorScript
-  { nonce :: nonceType
+data YieldingStakingValidatorScript = YieldingStakingValidatorScript
+  { nonce :: Natural
   -- ^ @since 0.1.0
   , stakingValidator :: Script
   -- ^ @since 0.10
   }
 
 -- | @since 0.1.0
-instance (ToJSON nonceType) => ToJSON (YieldingStakingValidatorScript nonceType) where
+instance ToJSON YieldingStakingValidatorScript where
   {-# INLINEABLE toJSON #-}
   toJSON ysvs =
     object
@@ -54,10 +54,10 @@ instance (ToJSON nonceType) => ToJSON (YieldingStakingValidatorScript nonceType)
           .= (HexStringScript @"StakingValidator" . stakingValidator $ ysvs)
 
 -- | @since 0.1.0
-instance (FromJSON nonceType) => FromJSON (YieldingStakingValidatorScript nonceType) where
+instance FromJSON YieldingStakingValidatorScript where
   {-# INLINEABLE parseJSON #-}
   parseJSON = withObject "YieldingStakingValidatorScript" $ \obj -> do
-    ysvsNonce :: nonceType <- obj .: "nonce"
+    ysvsNonce <- obj .: "nonce"
     (HexStringScript ysvsStakingValidator) :: HexStringScript "StakingValidator" <-
       obj .: "stakingValidator"
     pure $ YieldingStakingValidatorScript ysvsNonce ysvsStakingValidator
@@ -68,22 +68,18 @@ be delegated to a single pool; the inclusion of the nonce will change the
 script hash.
 -}
 compileYieldingStakingValidator ::
-  forall (nonceType :: Type).
-  ( PConstantDecl nonceType
-  , nonceType ~ PLifted (PConstanted nonceType)
-  ) =>
   Config ->
   YieldListSTCS ->
-  nonceType ->
+  Natural ->
   Either
     Text
-    (YieldingStakingValidatorScript nonceType)
+    YieldingStakingValidatorScript
 compileYieldingStakingValidator config ylstcs nonce = do
   let
     yieldingStakingValidator ::
       Term s (PData :--> PScriptContext :--> POpaque)
     yieldingStakingValidator =
-      plet (pconstant nonce) (const $ yieldingHelper ylstcs)
+      plet (pconstant $ toInteger nonce) (const $ yieldingHelper ylstcs)
 
   -- Pull the "Either" through the list
   script <- compile config yieldingStakingValidator
