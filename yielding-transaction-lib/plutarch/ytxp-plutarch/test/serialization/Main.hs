@@ -44,7 +44,7 @@ main =
     , aesonLawsWith @ControlParametersInitial genCPI noShrink
     , goldenVsString
         "ControlParametersInitial"
-        "goldens/ControlParametersInitialInteger.golden"
+        "goldens/ControlParametersInitial.golden"
         (pure . encode $ sampleYLS)
     ]
   where
