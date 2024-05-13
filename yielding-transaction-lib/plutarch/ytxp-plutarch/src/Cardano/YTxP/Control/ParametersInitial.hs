@@ -32,13 +32,17 @@ Cardano.YTxP.Control.Utils
 
 @since 0.1.0
 -}
-data ControlParametersInitial (nonceType :: Type) = ControlParametersInitial
+data ControlParametersInitial = ControlParametersInitial
   { maxYieldListSize :: !Natural
   -- ^ If the yield list exceeds this size, blow up during STT minting
   -- @since 0.1.0
-  , nonceList :: [nonceType]
+  , stakingValidatorsNonceList :: [Natural]
   -- ^ A list of nonces for the yielding staking validators. One staking
   -- validator is compiled for each nonce.
+  -- @since 0.1.0
+  , mintingPoliciesNonceList :: [Natural]
+  -- ^ A list of nonces for the yielding minting policies. One minting
+  -- policy is compiled for each nonce.
   -- @since 0.1.0
   , scriptToWrapYieldListMP ::
       forall (s :: S).
@@ -55,14 +59,15 @@ data ControlParametersInitial (nonceType :: Type) = ControlParametersInitial
   }
 
 -- | @since 0.1.0
-instance (Eq nonceType) => Eq (ControlParametersInitial nonceType) where
+instance Eq ControlParametersInitial where
   {-# INLINEABLE (==) #-}
   cpi1 == cpi2 =
     let conf1 = compilationConfig cpi1
         conf2 = compilationConfig cpi2
      in equateConfig conf1 conf2
           && maxYieldListSize cpi1 == maxYieldListSize cpi2
-          && nonceList cpi1 == nonceList cpi2
+          && stakingValidatorsNonceList cpi1 == stakingValidatorsNonceList cpi2
+          && mintingPoliciesNonceList cpi1 == mintingPoliciesNonceList cpi2
           &&
           -- Note from Koz (11/03/24): If we get this far, the two Configs are equal,
           -- so it doesn't matter which one we use.
@@ -76,13 +81,14 @@ instance (Eq nonceType) => Eq (ControlParametersInitial nonceType) where
             (scriptToWrapYieldListMP cpi2)
 
 -- | @since 0.1.0
-instance (Pretty nonceType) => Pretty (ControlParametersInitial nonceType) where
+instance Pretty ControlParametersInitial where
   {-# INLINEABLE pretty #-}
   pretty cpi =
     let conf = compilationConfig cpi
      in ("ControlParametersInitial" <+>) . braces . sep . punctuate "," $
           [ "maxYieldListSize:" <+> (pretty . maxYieldListSize $ cpi)
-          , "nonceList:" <+> (pretty . nonceList $ cpi)
+          , "stakingValidatorsNonceList:" <+> (pretty . stakingValidatorsNonceList $ cpi)
+          , "mintingPoliciesNonceList:" <+> (pretty . mintingPoliciesNonceList $ cpi)
           , "scriptToWrapYieldListMP:"
               <+> prettyPMintingPolicy conf (scriptToWrapYieldListMP cpi)
           , "scriptToWrapYieldListValidator:"
@@ -91,13 +97,14 @@ instance (Pretty nonceType) => Pretty (ControlParametersInitial nonceType) where
           ]
 
 -- | @since 0.1.0
-instance (ToJSON nonceType) => ToJSON (ControlParametersInitial nonceType) where
+instance ToJSON ControlParametersInitial where
   {-# INLINEABLE toJSON #-}
   toJSON cpi =
     let conf = compilationConfig cpi
      in object
           [ "maxYieldListSize" .= maxYieldListSize cpi
-          , "nonceList" .= nonceList cpi
+          , "stakingValidatorsNonceList" .= stakingValidatorsNonceList cpi
+          , "mintingPoliciesNonceList" .= mintingPoliciesNonceList cpi
           , -- Note from Koz (08/03/24): We need this _exact_ form or the compiler
             -- will complain with an unintelligible error message.
             "scriptToWrapYieldListMP"
@@ -111,7 +118,8 @@ instance (ToJSON nonceType) => ToJSON (ControlParametersInitial nonceType) where
     let conf = compilationConfig cpi
      in pairs $
           "maxYieldListSize" .= maxYieldListSize cpi
-            <> "nonceList" .= nonceList cpi
+            <> "stakingValidatorsNonceList" .= stakingValidatorsNonceList cpi
+            <> "mintingPoliciesNonceList" .= mintingPoliciesNonceList cpi
             <> "scriptToWrapYieldListMP"
               .= toJSONPMintingPolicy conf (scriptToWrapYieldListMP cpi)
             <> "scriptToWrapYieldListValidator"
@@ -119,7 +127,7 @@ instance (ToJSON nonceType) => ToJSON (ControlParametersInitial nonceType) where
             <> "compilationConfig" .= WrappedConfig conf
 
 -- | @since 0.1.0
-instance (FromJSON nonceType) => FromJSON (ControlParametersInitial nonceType) where
+instance FromJSON ControlParametersInitial where
   {-# INLINEABLE parseJSON #-}
   -- Note from Koz (08/03/24): We have to write this method in such a convoluted
   -- way because we have to return impredicatively from the parser helpers for
@@ -137,12 +145,15 @@ instance (FromJSON nonceType) => FromJSON (ControlParametersInitial nonceType) w
           >>= parseJSONPValidator
           >>= \v -> do
             cpiMaxYieldListSize <- obj .: "maxYieldListSize"
-            cpiNonceList <- obj .: "nonceList"
+            cpiStakingValidatorsNonceList <- obj .: "stakingValidatorsNonceList"
+            cpiMintingPoliciesNonceList <- obj .: "mintingPoliciesNonceList"
+
             WrappedConfig cpiConfig <- obj .: "compilationConfig"
             pure $
               ControlParametersInitial
                 cpiMaxYieldListSize
-                cpiNonceList
+                cpiStakingValidatorsNonceList
+                cpiMintingPoliciesNonceList
                 mp
                 v
                 cpiConfig
