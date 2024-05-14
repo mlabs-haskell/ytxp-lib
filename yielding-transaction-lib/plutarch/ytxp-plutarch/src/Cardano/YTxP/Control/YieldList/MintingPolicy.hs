@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unused-do-bind #-}
+
 module Cardano.YTxP.Control.YieldList.MintingPolicy (
   -- * Script
   YieldListSTMPScript,
@@ -14,6 +16,7 @@ module Cardano.YTxP.Control.YieldList.MintingPolicy (
 import Cardano.YTxP.Control.YieldList (
   PYieldListMPWrapperRedeemer (PBurn, PMint),
  )
+import Control.Monad (void)
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Numeric.Natural (Natural)
@@ -141,7 +144,9 @@ mkYieldListSTMPWrapper ::
     )
 mkYieldListSTMPWrapper
   maxYieldListSize =
-    plam $ \_scriptToWrap redeemer context' -> unTermCont $ do
+    plam $ \scriptToWrap redeemer context' -> unTermCont $ do
+      void $ pletC $ scriptToWrap # redeemer # context'
+
       let txInfo = pfromData $ pfield @"txInfo" # context'
           purpose = pfromData $ pfield @"purpose" # context'
           mint = pfromData $ pfield @"mint" # txInfo
@@ -156,58 +161,64 @@ mkYieldListSTMPWrapper
       pure $ pmatch yieldPolicyRedeemer $ \case
         PMint -> unTermCont $ do
           pure $
-            popaque $
-              ptraceIfFalse
-                "mkYieldListSTMPWrapper failed"
-                ( pands
-                    [ ptraceIfFalse
-                        "Must mint exactly one YieldList token with an empty token name"
-                        $ pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount
-                          # mint
-                          # yieldListSymbol
-                          # pemptyTokenName
-                          # 1
-                    , -- We combine a few of the checks into one with this check for efficiency,
-                      -- this check ensures that there is exactly one valid script output with a YieldListSTT,
-                      -- it also ensures that no other script output contains a YieldListSTT,
-                      -- and that no wallet output contains a YieldListSTT.
-                      ptraceIfFalse
-                        ( mconcat
-                            [ "Must have exactly one valid script output with yield list token"
-                            , ", and no other outputs with one or more yield list token"
-                            ]
-                        )
-                        $ phasOnlyOneValidScriptOutputWithToken
-                          maxYieldListSize
-                          outputs
-                          # yieldListSymbol
-                    , ptraceIfFalse
-                        "Cannot have script input that contains a YieldListSTT"
-                        $ phasNoScriptInputWithToken
-                          inputs
-                          # yieldListSymbol
-                    ]
-                )
+            pif
+              ( ptraceIfFalse
+                  "mkYieldListSTMPWrapper failed"
+                  ( pands
+                      [ ptraceIfFalse
+                          "Must mint exactly one YieldList token with an empty token name"
+                          $ pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount
+                            # mint
+                            # yieldListSymbol
+                            # pemptyTokenName
+                            # 1
+                      , -- We combine a few of the checks into one with this check for efficiency,
+                        -- this check ensures that there is exactly one valid script output with a YieldListSTT,
+                        -- it also ensures that no other script output contains a YieldListSTT,
+                        -- and that no wallet output contains a YieldListSTT.
+                        ptraceIfFalse
+                          ( mconcat
+                              [ "Must have exactly one valid script output with yield list token"
+                              , ", and no other outputs with one or more yield list token"
+                              ]
+                          )
+                          $ phasOnlyOneValidScriptOutputWithToken
+                            maxYieldListSize
+                            outputs
+                            # yieldListSymbol
+                      , ptraceIfFalse
+                          "Cannot have script input that contains a YieldListSTT"
+                          $ phasNoScriptInputWithToken
+                            inputs
+                            # yieldListSymbol
+                      ]
+                  )
+              )
+              (popaque $ pconstant ())
+              perror
         PBurn -> unTermCont $ do
           pure $
-            popaque $
-              ptraceIfFalse
-                "mkYieldListSTMPWrapper failed"
-                ( pands
-                    [ ptraceIfFalse
-                        "Must burn exactly one yield list token"
-                        $ pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount
-                          # mint
-                          # yieldListSymbol
-                          # pemptyTokenName
-                          # (-1)
-                    , ptraceIfFalse
-                        "Must have exactly one input that carries exactly one yield list token"
-                        $ phasOnlyOneInputWithExactlyOneTokenWithSymbol
-                          inputs
-                          # yieldListSymbol
-                    ]
-                )
+            pif
+              ( ptraceIfFalse
+                  "mkYieldListSTMPWrapper failed"
+                  ( pands
+                      [ ptraceIfFalse
+                          "Must burn exactly one yield list token"
+                          $ pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount
+                            # mint
+                            # yieldListSymbol
+                            # pemptyTokenName
+                            # (-1)
+                      , ptraceIfFalse
+                          "Must have exactly one input that carries exactly one yield list token"
+                          $ phasOnlyOneInputWithExactlyOneTokenWithSymbol
+                            inputs
+                            # yieldListSymbol
+                      ]
+                  )
+              )
+              (popaque $ pconstant ())
+              perror
 
 {- | Checks that the given 'PValue' contains the YieldListSTT
 TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead
