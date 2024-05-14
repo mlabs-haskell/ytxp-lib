@@ -10,13 +10,16 @@ module Cardano.YTxP.Control.YieldList.Validator (
   mkYieldListValidatorWrapperCredential,
 ) where
 
+import Control.Monad (void)
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Plutarch (Config, compile)
 import Plutarch.Api.V1.Value (PCurrencySymbol)
 import Plutarch.Api.V2 (PScriptContext, PScriptPurpose (PSpending), scriptHash)
-import Plutarch.Script (Script)
-import PlutusLedgerApi.V2 (Credential (ScriptCredential))
+import Plutarch.Script (Script (Script))
+import PlutusLedgerApi.V2 (
+  Credential (ScriptCredential),
+ )
 import Prettyprinter (Pretty)
 import Utils (
   pands,
@@ -85,6 +88,7 @@ mkYieldListValidatorWrapperCredential (YieldListValidatorScript script) =
       we account for in this script. There may also be other wallet inputs and outputs, depending on the
       type of wrapping script.
       * We need to ensure that these other inputs or outputs do not carry a YieldListSTT
+    - The wrapped script succeeds
 
   Additional validation semantics must be user defined via wrapping scripts.
   Examples include:
@@ -105,36 +109,40 @@ mkYieldListValidatorWrapper ::
         :--> PScriptContext
         :--> POpaque
     )
-mkYieldListValidatorWrapper = plam $ \_scriptToWrap yieldListSymbol _datum _redeemer context -> unTermCont $ do
+mkYieldListValidatorWrapper = phoistAcyclic $ plam $ \scriptToWrap yieldListSymbol datum redeemer context -> unTermCont $ do
+  void $ pletC $ scriptToWrap # datum # redeemer # context
+
   let txInfo = pfromData $ pfield @"txInfo" # context
       purpose = pfromData $ pfield @"purpose" # context
       inputs = pfromData $ pfield @"inputs" # txInfo
       outputs = pfromData $ pfield @"outputs" # txInfo
 
   PSpending ((pfield @"_0" #) -> yieldListInputRef) <- pmatchC purpose
-
   pure $
-    popaque $
-      ptraceIfFalse
-        "mkYieldListValidatorWrapper failed"
-        ( pands
-            [ -- For efficiency reasons we use this helper to make a couple of checks,
-              -- Namely, it ensures that there is one input at the yield list validator
-              -- with exactly one YieldListSTT.
-              -- It also checks that there are no other script inputs with a YieldListSTT.
-              -- (There is no need to check the wallet inputs as a YieldListSTT is never
-              --  sent to one in the first place.)
-              ptraceIfFalse
-                ( mconcat
-                    [ "Must have one input at the yield list validator with exactly one YieldListSTT,"
-                    , " and no other inputs containing a YieldListSTT"
-                    ]
-                )
-                $ phasOneScriptInputAtValidatorWithExactlyOneToken inputs
-                  # yieldListSymbol
-                  # yieldListInputRef
-            , ptraceIfFalse
-                "Must be no YieldListSTT at any of the outputs"
-                $ poutputsDoNotContainToken outputs # yieldListSymbol
-            ]
-        )
+    pif
+      ( ptraceIfFalse
+          "mkYieldListValidatorWrapper failed"
+          ( pands
+              [ -- For efficiency reasons we use this helper to make a couple of checks,
+                -- Namely, it ensures that there is one input at the yield list validator
+                -- with exactly one YieldListSTT.
+                -- It also checks that there are no other script inputs with a YieldListSTT.
+                -- (There is no need to check the wallet inputs as a YieldListSTT is never
+                --  sent to one in the first place.)
+                ptraceIfFalse
+                  ( mconcat
+                      [ "Must have one input at the yield list validator with exactly one YieldListSTT,"
+                      , " and no other inputs containing a YieldListSTT"
+                      ]
+                  )
+                  $ phasOneScriptInputAtValidatorWithExactlyOneToken inputs
+                    # yieldListSymbol
+                    # yieldListInputRef
+              , ptraceIfFalse
+                  "Must be no YieldListSTT at any of the outputs"
+                  $ poutputsDoNotContainToken outputs # yieldListSymbol
+              ]
+          )
+      )
+      (popaque $ pconstant ())
+      perror
