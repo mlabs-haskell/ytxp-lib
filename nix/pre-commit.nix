@@ -2,9 +2,9 @@
 # (e.g. inside .git folder) because we have the hooks of the root project
 # to run these checks, we will have to manually run `nix flake check` from the old
 # pre-commit pipeline. The bash script `pre-commit-ytxp-lib.sh` can be used to achieve that.
-{ inputs, ... }:
+{ inputs, self, ... }:
 {
-  perSystem = { system, lib, ... }: {
+  perSystem = { system, ... }: {
     pre-commit.check.enable = true;
     checks = {
       pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
