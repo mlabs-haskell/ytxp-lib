@@ -8,7 +8,7 @@
     pre-commit.check.enable = true;
     checks = {
       pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
-        src = ../..;
+        src = self.outPath;
         hooks = {
           # NOTE (alberto 2024-04-24): we currently running this thanks to the iogx pre-commit setup in the root flake,
           # we will eventually uncomment this when ytxp-lib will live in a separate repo  
