@@ -10,6 +10,7 @@ in
   tools = {
     cabal = "latest";
     haskell-language-server = "latest";
+    ghcid = "latest";
   };
   inputsFrom = [ inputShell ];
 }

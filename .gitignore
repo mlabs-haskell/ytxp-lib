@@ -27,3 +27,4 @@ cabal.project.local~
 .spago/
 node_modules/
 /result
+TAGS
