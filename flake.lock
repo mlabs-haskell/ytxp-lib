@@ -222,7 +222,7 @@
         "url": "https://gitlab.haskell.org/ghc/ghc"
       }
     },
-    "git-hooks.nix": {
+    "git-hooks": {
       "inputs": {
         "flake-compat": "flake-compat",
         "gitignore": "gitignore",
@@ -233,20 +233,20 @@
         "lastModified": 1715870890,
         "narHash": "sha256-nacSOeXtUEM77Gn0G4bTdEOeFIrkCBXiyyFZtdGwuH0=",
         "owner": "cachix",
-        "repo": "pre-commit-hooks.nix",
+        "repo": "git-hooks.nix",
         "rev": "fa606cccd7b0ccebe2880051208e4a0f61bfc8c1",
         "type": "github"
       },
       "original": {
         "owner": "cachix",
-        "repo": "pre-commit-hooks.nix",
+        "repo": "git-hooks.nix",
         "type": "github"
       }
     },
     "gitignore": {
       "inputs": {
         "nixpkgs": [
-          "git-hooks.nix",
+          "git-hooks",
           "nixpkgs"
         ]
       },
@@ -841,7 +841,7 @@
       "inputs": {
         "CHaP": "CHaP",
         "flake-parts": "flake-parts",
-        "git-hooks.nix": "git-hooks.nix",
+        "git-hooks": "git-hooks",
         "haskellNix": "haskellNix",
         "iohk-nix": "iohk-nix",
         "nixpkgs": [

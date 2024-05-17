@@ -1,0 +1,10 @@
+[default]
+extend-ignore-identifiers-re = [
+    "orgc.*"
+]
+[ default.extend-words ]
+strat = "strat"
+lits = "lits"
+wheres = "wheres"
+# NOTE: This is temporary, that's a typo we inherit from a dependency
+withdrawl = "withdrawl"

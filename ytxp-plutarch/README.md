@@ -2,17 +2,12 @@
 
 ## Dev Shell
 
-You can launch the dev shell with:
+Youbash can launch the dev shell with:
 
-```
+```bash
 nix develop
 ```
 
-
 ## Notes
 
-Some vendored utility functions require the following license
-
-
-
-https://github.com/Liqwid-Labs/liqwid-libs/blob/e45647e49a106d64799193491af4e52553917ead/LICENSE
+Some vendored utility functions require the following [license](https://github.com/Liqwid-Labs/liqwid-libs/blob/e45647e49a106d64799193491af4e52553917ead/LICENSE)
