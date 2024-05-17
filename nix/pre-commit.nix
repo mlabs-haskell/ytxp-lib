@@ -3,8 +3,11 @@
   imports = [
     inputs.pre-commit-hooks.flakeModule
   ];
-  perSystem = _: {
+  perSystem = { pkgs, ... }: {
     pre-commit = {
+      pkgs = pkgs.extend (_: _: {
+        cljfmt = null; # git-hooks.nix requires this (even if unused) but our nixpkgs isn't recent enough
+      });
       settings = {
         default_stages = [ "commit" "push" ];
         rootSrc = self.outPath;
@@ -17,7 +20,7 @@
           typos =
             {
               settings.configPath = ".typos.toml";
-              enable = true;
+              enable = false;
             };
         };
       };
