@@ -1,4 +1,4 @@
-final: prev: {
+final: _prev: {
   ytxp-plutarch = final.haskell-nix.cabalProject' {
     compiler-nix-name = "ghc964";
     src = final.lib.cleanSource ./../ytxp-plutarch;

@@ -1,7 +1,7 @@
 { inputs, self, ... }:
 {
   imports = [
-    inputs."git-hooks.nix".flakeModule
+    inputs.git-hooks.flakeModule
   ];
   perSystem = { pkgs, ... }: {
     pre-commit = {
@@ -17,11 +17,9 @@
           fourmolu.enable = true;
           hlint.enable = true;
           nixpkgs-fmt.enable = true;
-          typos =
-            {
-              settings.configPath = ".typos.toml";
-              enable = false;
-            };
+          typos.enable = true;
+          markdownlint.enable = true;
+          check-json.enable = true;
         };
       };
     };

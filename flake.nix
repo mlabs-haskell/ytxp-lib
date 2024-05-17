@@ -9,7 +9,7 @@
       url = "github:intersectmbo/cardano-haskell-packages?ref=repo";
       flake = false;
     };
-    "git-hooks.nix".url = "github:cachix/pre-commit-hooks.nix";
+    git-hooks.url = "github:cachix/git-hooks.nix";
   };
 
   outputs = inputs:

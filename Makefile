@@ -36,7 +36,11 @@ usage:
 	# Doc
 	@echo "    build_doc                                                   -- Build haddock documentation"
 	@echo ""
-
+	# Doc
+	@echo "    build_doc                                                   -- Build haddock documentation"
+	@echo "    lint_markdown_check                                         -- Check markdownlint suggestions"
+	@echo "    lint_markdown                                               -- Apply markdownlint suggestions"
+	@echo ""
 
 ################################################################################
 # Code
@@ -49,6 +53,7 @@ FIND_EXCLUDE_PATH := -not -path '*/dist-*/*'
 FIND_HASKELL_SOURCES := find -name '*.hs' $(FIND_EXCLUDE_PATH)
 FIND_NIX_SOURCES := find -name '*.nix' $(FIND_EXCLUDE_PATH)
 FIND_CABAL_SOURCES := find -name '*.cabal' $(FIND_EXCLUDE_PATH)
+FIND_MARKDOWN_SOURCES := find -name '*.md' $(FIND_EXCLUDE_PATH)
 
 # Runs as command on all results of the `find` call at one.
 # e.g.
@@ -95,14 +100,18 @@ format_check_cabal:
 
 
 # Apply hlint suggestions
-.PHONY: lint
-lint:
+.PHONY: lint_haskell
+lint_haskell:
 	$(call find_exec_one_by_one_fn, $(FIND_HASKELL_SOURCES), hlint -j --refactor --refactor-options="-i")
 
 # Check hlint suggestions
-.PHONY: lint_check
-lint_check:
+.PHONY: lint_haskell_check
+lint_haskell_check:
 	$(call find_exec_all_fn, $(FIND_HASKELL_SOURCES), hlint -j)
+
+# Apply lint suggestions
+.PHONY: lint
+lint: lint_haskell lint_markdown
 
 # Apply format and hlint
 .PHONY: format_lint
@@ -151,3 +160,14 @@ typos_fix:
 .PHONY: build_doc
 build_doc:
 	cabal haddock --haddock-all --haddock-quickjump
+
+# Check markdownlint suggestions
+.PHONY: lint_markdown_check
+lint_markdown_check: 
+	$(call find_exec_all_fn, $(FIND_MARKDOWN_SOURCES), markdownlint)
+
+# Apply markdownlint suggestions.
+# NOTE: there are some warnings that cannot be automatically fixed
+.PHONY: lint_markdown
+lint_markdown: 
+	$(call find_exec_all_fn, $(FIND_MARKDOWN_SOURCES), markdownlint -f)
