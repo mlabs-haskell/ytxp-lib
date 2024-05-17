@@ -9,8 +9,6 @@
         (import ./project.nix)
         (_: _: {
           inherit inputs;
-          # TODO this is not doing the expected this
-          inherit (inputs.nixpkgs-unstable) cljfmt;
           flake = config;
         })
       ];
