@@ -5,12 +5,11 @@
     haskellNix.url = "github:input-output-hk/haskell.nix";
     iohk-nix.url = "github:input-output-hk/iohk-nix";
     nixpkgs.follows = "haskellNix/nixpkgs-unstable";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     CHaP = {
       url = "github:intersectmbo/cardano-haskell-packages?ref=repo";
       flake = false;
     };
-    pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
+    "git-hooks.nix".url = "github:cachix/pre-commit-hooks.nix";
   };
 
   outputs = inputs:
