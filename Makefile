@@ -119,31 +119,33 @@ format_lint: format lint
 
 ################################################################################
 # Build
+CABAL_YTXP_PLUTARCH := cd ytxp-plutarch && cabal
+
 .PHONY: build_all
 build_all:
-	cabal build -j all
+	$(CABAL_YTXP_PLUTARCH) build -j all
 
 .PHONY: build_ytxp-plutarch
 build_ytxp-plutarch:
-	cabal build -j ytxp-plutarch
+	$(CABAL_YTXP_PLUTARCH) build -j ytxp-plutarch
 
 .PHONY: build_testlib
 build_testlib:
-	cabal build -j testlib
+	$(CABAL_YTXP_PLUTARCH) build -j testlib
 
 .PHONY: build_pprelude
 build_pprelude:
-	cabal build -j pprelude
+	$(CABAL_YTXP_PLUTARCH) build -j pprelude
 
 .PHONY: build_write-config
 build_write-config:
-	cabal build -j write-config
+	$(CABAL_YTXP_PLUTARCH) build -j write-config
 
 ################################################################################
 # Test
 .PHONY: test_serialization
 test_serialization:
-	cabal test -j serialization
+	$(CABAL_YTXP_PLUTARCH) test -j serialization
 
 ################################################################################
 # Test
@@ -159,7 +161,7 @@ typos_fix:
 # Doc
 .PHONY: build_doc
 build_doc:
-	cabal haddock --haddock-all --haddock-quickjump
+	$(CABAL_YTXP_PLUTARCH) haddock --haddock-all --haddock-quickjump
 
 # Check markdownlint suggestions
 .PHONY: lint_markdown_check

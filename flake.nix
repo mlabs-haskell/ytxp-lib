@@ -18,6 +18,7 @@
       imports = [
         ./nix/pre-commit.nix
         ./nix/packages.nix
+        ./nix/checks.nix
       ];
     };
 }
