@@ -1,6 +1,6 @@
 final: _prev: {
   ytxp-plutarch = final.haskell-nix.cabalProject' {
-    compiler-nix-name = "ghc964";
+    compiler-nix-name = "ghc96";
     src = final.lib.cleanSource ./../ytxp-plutarch;
     shell = import ./shell.nix {
       flake = final.flake;
