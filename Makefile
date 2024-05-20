@@ -5,7 +5,7 @@ usage:
 	@echo
 	@echo "Available commands:"
 	@echo ""
-	# Code format (works for both ytxp-plutarch and ytxp-convex)
+	# Code format
 	@echo "    format_lint                                                 -- Formats .hs, .cabal, .nix files and auto-refactors code"
 	@echo "    format                                                      -- Formats .hs, .cabal, .nix files"
 	@echo "    format_check                                                -- Check formatting of .hs, .cabal, .nix files"
@@ -48,8 +48,6 @@ usage:
 # Leave the cabal build directory and the legacy code submodule alone
 FIND_EXCLUDE_PATH := -not -path '*/dist-*/*'
 
-# NOTE: we want to apply the same style rule for both ytxp-plutarch and ytxp-convex even if the
-# GHC version is different)
 FIND_HASKELL_SOURCES := find -name '*.hs' $(FIND_EXCLUDE_PATH)
 FIND_NIX_SOURCES := find -name '*.nix' $(FIND_EXCLUDE_PATH)
 FIND_CABAL_SOURCES := find -name '*.cabal' $(FIND_EXCLUDE_PATH)
