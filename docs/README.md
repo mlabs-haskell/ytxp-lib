@@ -103,41 +103,36 @@ Transaction families are implemented as &ldquo;Yielded To&rdquo; scripts. These 
 - validator hashes, which may be useful for legacy reasons or integration with existing protocols. However, these require spending a UTxO, which may be a superfluous side effect.
 
 See [this](https://github.com/Anastasia-Labs/design-patterns/blob/main/stake-validator/STAKE-VALIDATOR-TRICK.md) for more details on the idea and execution of the
-&ldquo;withdraw 0&rdquo
+&ldquo;withdraw 0&rdquo;
 
-### Development Experience (Using Nix)
+## Tooling
 
-<explain how to setup dev shell with nix>
+### Continuous Integration (CI)
+The CI for this project runs using [Hercules CI](https://hercules-ci.com). All the pre-commit checks will run in CI.
 
-#### Tooling
+### Developer Experience (DevEx)
+All the commands used for development purposes are exposed through the [Makefile](./Makefile). To see the available commands, you can simply run:
 
-<do we still need to keep the makefile?>
+```bash
+make
+```
 
-##### Formatting
-To format your code run
+### Formatting
+The format of most of the source files is checked. You can use individual commands through the `Makefile` or you can simply run:
 
 ```bash
 make format_lint
 ```
 
-##### Typos
-<what does this check exactly?>
+to apply all the linters and formatters. This might be useful.
 
-```bash
-make typos_check
-```
+**Note:** Some linters cannot automatically fix your code. For example, `markdownlint` may signal that a code block (delimited by ```) does not have the language specified but cannot automatically infer the language of the code. This means that in general, `make format_lint` does not resolve all the problems that pre-commit checks can raise.
 
-#### Pre-commit hooks
-
-<this should all work fine now>
-
-#### Haddock Documentation
-
-<check if this still works>
+### Haddock Documentation
 
 Below are instructions for generating Haddock documentation using different methods:
 
-##### Using Make Target
+#### Using Make Target
 To build documentation directly, utilize the following make target:
 
 ```bash
@@ -146,7 +141,7 @@ make build_doc
 
 After the execution, this command will specify the location of the generated documentation.
 
-##### Using Nix (specifically for ytxp-plutarch)
+#### Using Nix
 If you are using nix, the documentation for `ytxp-plutarch library` , generating documentation can be achieved by running:
 
 ```bash
@@ -154,3 +149,11 @@ nix build .#ytxp-plutarch-lib.doc
 ```
 
 The resulting documentation will be accessible within the `result-doc` directory.
+
+## Tests
+Tests will run in CI thanks to some specific checks in the Nix flake.
+
+You can run tests:
+
+- Using Nix: `nix flake check`: this will run all the checks, not only the tests;
+- Using Cabal directly (assuming it is present in the `$PATH`). See the `Makefile` targets to check the available test suites.
