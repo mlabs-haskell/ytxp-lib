@@ -149,11 +149,11 @@ test_serialization:
 # Test
 .PHONY: typos_check
 typos_check :
-	typos -c ../../.typos.toml ../../
+	typos -c ./typos.toml ./
 
 .PHONY: typos_fix
 typos_fix:
-	typos -w -c ../../.typos.toml ../../
+	typos -w -c ./typos.toml ./
 
 ################################################################################
 # Docs
