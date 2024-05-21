@@ -5,7 +5,7 @@ The Yielding Transaction Pattern is pretty simple.
 - A Yielding Script only succeeds if it can find evidence that an _authorized_ "Yielded To" script also succeeded.
 - The _authorization_ is determined by examination of the script context.
 - The _authorization_ is checked by:
-  - Indexing the reference inputs to find evidence that a "Yielded To" script containing a valid `YieldedToSTCS` is being referenced
+  - Indexing the reference inputs to find evidence that a "Yielded To" script containing a token minted with the `authorisedScriptsSTCS` is being referenced
   - Searching for evidence that this script was triggered
     In practice this will involve either:
     - Looking at the `txInfoWithdrawls` field for a staking validator being triggered with the correct StakingCredential

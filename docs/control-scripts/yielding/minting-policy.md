@@ -16,7 +16,7 @@ This script is implemented via the ["yield helper"](./helper.md) script.
 
 This script has all of the parameter of the  ["yield helper"](./helper.md) script, as well as:
 
-- **yieldingMintingPolicyNonce**: `BuiltinByteString`
+- **yieldingMintingPolicyNonce**: `BuiltinInteger`
 
 <a id="org45e406a"></a>
 

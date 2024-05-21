@@ -1,8 +1,10 @@
-A sequence of the following families (in order):
+A sequence of the following transactions (in order):
 
+- Mint Authorised Script ST
+    Mint a token with the `authorisedScriptsSTCS` currency symbol and arbitrary token name. This token will be used to identify Authorised Scripts.
+    This token could be minted by an admin, a multi-sig, or some governance vote.
 - Reference Script Deploying
-    The script where we are <span class="underline">sending</span> the reference scripts should be deployed first.
-    This will allow us to subsequently deploy more scripts at once.
+    One or more authorised reference script must be deployed. The UTxO for these reference scripts <span class="underline">must</span> contain a token with the `authorisedScriptsSTCS`.
 - Staking Validator Registering
     You must register <span class="underline">all</span> staking validators during this step, including the `yieldingStakingValidators`
     and the yielded-to staking validators (the ones that encode the TxF business logic)

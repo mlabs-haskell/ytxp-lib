@@ -5,7 +5,7 @@
 3. [Semantics](#org8648bdd)
 
 This script is a "two argument script", expecting a redeemer and a script context.
-It is used as the basis for implementing the yielding minting policy, yielding validator, and yielding transaction validator.
+It is used as the basis for implementing the yielding minting policy, yielding validator, and yielding staking validator.
 
 <a id="org0673dab"></a>
 
