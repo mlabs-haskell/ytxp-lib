@@ -2,7 +2,7 @@
 
 module Cardano.YTxP.Control.YieldList.MintingPolicy (
   -- * Script
-  YieldListSTMPScript,
+  YieldListSTMPScript (..),
   compileYieldListSTMP,
 
   -- * Currency Symbol
@@ -16,9 +16,10 @@ module Cardano.YTxP.Control.YieldList.MintingPolicy (
 import Cardano.YTxP.Control.YieldList (
   PYieldListMPWrapperRedeemer (PBurn, PMint),
  )
-import Control.Monad (void)
-import Data.Aeson (FromJSON, ToJSON)
-import Data.Text (Text)
+import Control.Monad (void, (<=<))
+import Data.Aeson (FromJSON, ToJSON, parseJSON, toEncoding, toJSON, withText)
+import Data.String (IsString, fromString)
+import Data.Text (Text, unpack)
 import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
 import Plutarch.Api.V1.Value (PValue)
@@ -81,13 +82,28 @@ compileYieldListSTMP config maxYieldListSize scriptToWrap = do
 
 --------------------------------------------------------------------------------
 -- YieldListSTCS
+-- TODO: Rename to AuthorisedScriptSTCS and move to ytxp-sdk
 
 -- | Opaque, semantic newtype for the YieldList state thread currency symbol
 newtype YieldListSTCS = YieldListSTCS CurrencySymbol
+  deriving newtype (Eq, IsString)
 
 mkYieldListSTCS :: YieldListSTMPScript -> YieldListSTCS
 mkYieldListSTCS (YieldListSTMPScript script) =
   YieldListSTCS $ CurrencySymbol (getScriptHash $ scriptHash script)
+
+instance FromJSON YieldListSTCS where
+  {-# INLINEABLE parseJSON #-}
+  parseJSON =
+    (pure . YieldListSTCS)
+      <=< withText "YieldListSTCS" (pure . fromString . unpack)
+
+instance ToJSON YieldListSTCS where
+  {-# INLINEABLE toJSON #-}
+  toJSON (YieldListSTCS cs) = toJSON . show $ cs
+
+  {-# INLINEABLE toEncoding #-}
+  toEncoding (YieldListSTCS cs) = toEncoding . show $ cs
 
 --------------------------------------------------------------------------------
 -- Helpers (Unexported)

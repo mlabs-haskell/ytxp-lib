@@ -1,12 +1,13 @@
 module Main (main) where
 
 import Cardano.YTxP.Control.ParametersInitial (
-  ControlParametersInitial (ControlParametersInitial),
+  SdkParameters (SdkParameters),
  )
 import Cardano.YTxP.Control.Stubs (
   alwaysSucceedsTwoArgumentScript,
   alwaysSucceedsValidator,
  )
+import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS (..))
 import Control.Monad (guard)
 import Data.Aeson (encode)
 import Data.ByteString.Short (ShortByteString)
@@ -41,10 +42,10 @@ main =
           let converted = sbsToHexText sbs
            in counterexample ("Converted: " <> unpack converted) $
                 Just sbs === (hexTextToSBS . sbsToHexText $ sbs)
-    , aesonLawsWith @ControlParametersInitial genCPI noShrink
+    , aesonLawsWith @SdkParameters genCPI noShrink
     , goldenVsString
-        "ControlParametersInitial"
-        "goldens/ControlParametersInitial.golden"
+        "SdkParameters"
+        "goldens/SdkParameters.golden"
         (pure . encode $ sampleYLS)
     ]
   where
@@ -53,20 +54,18 @@ main =
 
 -- Golden data
 
-sampleYLS :: ControlParametersInitial
+sampleYLS :: SdkParameters
 sampleYLS =
-  ControlParametersInitial
-    1
+  SdkParameters
     [1, 2]
     [1, 2, 3]
-    alwaysSucceedsTwoArgumentScript
-    alwaysSucceedsValidator
+    "aaaa"
     (Config NoTracing)
 
 -- Generators and shrinkers
 
 -- TODO: This definitely needs more thought.
-genCPI :: Gen ControlParametersInitial
+genCPI :: Gen SdkParameters
 genCPI = do
   NonNegative myls' <- arbitrary
   let myls = fromInteger myls'
@@ -74,12 +73,10 @@ genCPI = do
   mintingPoliciesNonceList <- map (fromInteger . getNonNegative) <$> arbitrary
   tm <- elements [NoTracing, DetTracing, DoTracing, DoTracingAndBinds]
   pure $
-    ControlParametersInitial
-      myls
+    SdkParameters
       stakingValsNonceList
       mintingPoliciesNonceList
-      alwaysSucceedsTwoArgumentScript
-      alwaysSucceedsValidator
+      "aaaa"
       (Config tm)
 
 genSBS :: Gen ShortByteString
