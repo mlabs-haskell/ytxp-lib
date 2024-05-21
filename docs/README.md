@@ -102,6 +102,9 @@ Transaction families are implemented as &ldquo;Yielded To&rdquo; scripts. These 
 - minting policies, which are known as &ldquo;transaction tokens&rdquo;, and may be useful for legacy reasons or integration with existing protocols. However, these require minting a token, which may be a superfluous side-effect.
 - validator hashes, which may be useful for legacy reasons or integration with existing protocols. However, these require spending a UTxO, which may be a superfluous side effect.
 
+See [this](https://github.com/Anastasia-Labs/design-patterns/blob/main/stake-validator/STAKE-VALIDATOR-TRICK.md) for more details on the idea and execution of the
+&ldquo;withdraw 0&rdquo
+
 ### Development Experience (Using Nix)
 
 <explain how to setup dev shell with nix>
