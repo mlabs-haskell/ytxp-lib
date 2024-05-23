@@ -132,7 +132,9 @@ to apply all the linters and formatters. This might be useful.
 
 Below are instructions for generating Haddock documentation using different methods:
 
-#### Using Make Target
+#### Build
+
+##### Using Make Target
 To build documentation directly, utilize the following make target:
 
 ```bash
@@ -141,11 +143,20 @@ make build_doc
 
 After the execution, this command will specify the location of the generated documentation.
 
-#### Using Nix
+##### Using Nix
+
 If you are using nix, the documentation for `ytxp-plutarch library` , generating documentation can be achieved by running:
 
 ```bash
 nix build .#ytxp-plutarch-lib.doc
+```
+
+#### Serve documentation locally
+
+To serve the documentation locally, utilize the following make target:
+
+```bash
+make serve_doc
 ```
 
 The resulting documentation will be accessible within the `result-doc` directory.

@@ -35,9 +35,9 @@ usage:
 	@echo ""
 	# Doc
 	@echo "    build_doc                                                   -- Build haddock documentation"
+	@echo "    serve_doc                                                   -- Serve haddock documentation locally"
 	@echo ""
-	# Doc
-	@echo "    build_doc                                                   -- Build haddock documentation"
+	# Documentation lint
 	@echo "    lint_markdown_check                                         -- Check markdownlint suggestions"
 	@echo "    lint_markdown                                               -- Apply markdownlint suggestions"
 	@echo ""
@@ -160,6 +160,8 @@ typos_fix:
 .PHONY: build_doc
 build_doc:
 	nix build .#doc
+
+.PHONY: serve_doc
 serve_doc:
 	nix run .#serve-doc
 
