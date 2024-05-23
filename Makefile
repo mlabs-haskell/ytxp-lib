@@ -159,7 +159,9 @@ typos_fix:
 # Doc
 .PHONY: build_doc
 build_doc:
-	$(CABAL_YTXP_PLUTARCH) haddock --haddock-all --haddock-quickjump
+	nix build .#doc
+serve_doc:
+	nix run .#serve-doc
 
 # Check markdownlint suggestions
 .PHONY: lint_markdown_check
