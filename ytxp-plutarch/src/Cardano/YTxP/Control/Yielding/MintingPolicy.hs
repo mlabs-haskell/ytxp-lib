@@ -7,20 +7,13 @@ module Cardano.YTxP.Control.Yielding.MintingPolicy (
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
 import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
 import Data.Aeson (
-  FromJSON (parseJSON),
-  ToJSON (toEncoding, toJSON),
-  object,
-  pairs,
-  withObject,
-  (.:),
-  (.=),
+  FromJSON,
+  ToJSON,
  )
 import Data.Text (Text)
 import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
-import Plutarch.Api.V2 (PScriptContext, scriptHash)
-import Plutarch.Script (Script)
-import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
+import Plutarch.Api.V2 (PScriptContext)
 
 --------------------------------------------------------------------------------
 -- Yielding Minting Policy Script

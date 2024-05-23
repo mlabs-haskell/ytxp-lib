@@ -26,7 +26,7 @@ import Cardano.YTxP.Control.Yielding.Validator (
   YieldingValidatorScript,
   compileYieldingValidator,
  )
-import Cardano.YTxP.SDK.SdkParameters (Config (..), SdkParameters (..), TracingMode (..))
+import Cardano.YTxP.SDK.SdkParameters (Config (tracing), SdkParameters (SdkParameters, authorisedScriptsSTCS, compilationConfig, mintingPoliciesNonceList, stakingValidatorsNonceList), TracingMode (DetTracing, DoTracing, DoTracingAndBinds, NoTracing))
 import Data.Aeson (
   FromJSON (parseJSON),
   ToJSON (toEncoding, toJSON),
@@ -38,7 +38,6 @@ import Data.Aeson (
  )
 import Data.Text (Text)
 import Plutarch qualified
-import Prettyprinter (Pretty (pretty), braces, punctuate, sep, (<+>))
 
 {- | Scripts that yield to transaction families identified by reference scripts
 which carry a state thread token
@@ -159,5 +158,8 @@ mkControlParameters
           }
 
 toPlutarchConfig :: Config -> Plutarch.Config
-toPlutarchConfig (Config {tracing = DoTracing}) = Plutarch.Config Plutarch.DoTracing
-toPlutarchConfig (Config {tracing = NoTracing}) = Plutarch.Config Plutarch.NoTracing
+toPlutarchConfig conf = case tracing conf of
+  DoTracing -> Plutarch.Config Plutarch.DoTracing
+  NoTracing -> Plutarch.Config Plutarch.NoTracing
+  DetTracing -> Plutarch.Config Plutarch.DetTracing
+  DoTracingAndBinds -> Plutarch.Config Plutarch.DoTracingAndBinds
