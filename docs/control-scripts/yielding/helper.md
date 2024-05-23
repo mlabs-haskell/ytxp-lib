@@ -19,8 +19,9 @@ It is used as the basis for implementing the yielding minting policy, yielding v
 
 - **authorisedScriptIndex:** Integer
     The index of the `TxInReferenceInput` that contains the authorised reference script
-- **yieldedToProofIndex:** YieldedToProofIndex
-    This pair indicates the yielded to script type and the index at which to find proof
+
+- **authorisedScriptProofIndex:** AuthorisedScriptPurpose
+    This pair indicates the yielded to (authorised) script type and the index at which to find proof
     of the script execution.
     This index has a different meaning depending on if the yielded-to script is a valdiator,
     minting policy, or staking validator.
@@ -32,9 +33,9 @@ It is used as the basis for implementing the yielding minting policy, yielding v
 - Look at the UTxO at the `n` th entry in the `txInfoReferenceInputs`, where `n` is equal to `authorisedScriptIndex`.
   - Call this UTxO `authorisedScriptUTxO`.
   - Check that the `authorisedScriptUTxO` is carrying exactly one token with the `authorisedScriptsSTCS`. Blow up if not.
-  - Call the hash of the reference script carried by the `authorisedScriptUTxO` the `yieldToHash`.
-- Obtain evidence that the script with `yieldToHash` was triggered via the `checkYieldTo` function.
-    This function looks at `yieldedToProofIndex` and indexes in one of the following ways:
+  - Call the hash of the reference script carried by the `authorisedScriptUTxO` the `AuthorisedScriptHash`.
+- Obtain evidence that the script with `AuthorisedScriptHash` was triggered via the `checkAuthorisedScript` function. TODO(alberto 20240-05-24) checkAuthorisedTo function does not exist yet
+    This function looks at `authorisedScriptProofIndex` and indexes in one of the following ways:
   - If the `ScriptPurpose` is `Spending`, it indexes into the `TxInfoInputs` field and checks whether the `ScriptAddress` of the input matches the hash (erroring if not)
   - If the `ScriptPurpose` is `Minting`, it looks at the `TxInfoMint` field and checks for the presence of the hash in the mint `Value` (error if not)
   - If the `ScriptPurpose` is `Rewarding`, it looks  at the `TxInfoWithdrawals` field and checks for the presence of the hash in the list (erroring if not)

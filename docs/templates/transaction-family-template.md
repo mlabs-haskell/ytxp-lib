@@ -12,7 +12,7 @@ Transaction families described using this template should accomplish three goals
 
 - A description sufficient for non-technical, semi-technical, and technical reviewers to understand what the transaction family does and why it exists.
   Specifically, business stakeholders should understand what the transaction represents; management and product-owners should get a understanding of how "large" of a transaction family this is and be able to make effort estimates for implementation; and auditors, developers, or other specifiers should be able to get a complete picture of the family.
-- A description sufficient to implement a `YieldedTo` script that encodes the business logic described in the family, as well as to test the behavior of the family in a black-box manner.
+- A description sufficient to implement a `AuthorisedScript` script that encodes the business logic described in the family, as well as to test the behavior of the family in a black-box manner.
 - A description sufficient to implement an offchain function that builds and submits a transaction that is part of this family, as well as to test such transaction building and submission in a black-box manner.
 
 Not all sections will be equally relevant for all stakeholders.
@@ -56,7 +56,7 @@ This template can be used to describe transaction families that do not strictly 
 
 > A transaction family specified according to the YTxP Architecture will typically trigger multiple scripts:
 >
-> - A "YieldedTo" script (usually a staking validator)
+> - A "AuthorisedScript" script (usually a staking validator)
 > - One or more "Yielding" scripts
 > - Additional scripts needed for integration with other protocols or non-YTxP Architecture scripts
 > Each of these scripts should be listed here.
