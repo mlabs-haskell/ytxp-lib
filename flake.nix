@@ -10,6 +10,10 @@
       flake = false;
     };
     git-hooks.url = "github:cachix/git-hooks.nix";
+    combine-haddock = {
+      url = "https://raw.githubusercontent.com/Plutonomicon/plutarch-plutus/f78b70eca8841a4a009cb6791a59c999cbc68745/nix/combine-haddock.nix";
+      flake = false;
+    };
   };
 
   outputs = inputs:

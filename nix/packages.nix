@@ -18,7 +18,23 @@
     {
       packages = with flake.packages; {
         inherit "ytxp-plutarch:lib:ytxp-plutarch" "ytxp-plutarch:test:serialization" "ytxp-plutarch:exe:write-config";
+        doc = import inputs.combine-haddock.outPath { inherit pkgs lib; } {
+          cabalProject = pkgs.ytxp-plutarch;
+          targetPackages = [
+            "ytxp-plutarch"
+          ];
+          prologue = ''
+            = Plutarch Documentation
+            Documentation of Plutarch /and/ Documentation of Plutus libraries.
+          '';
+        };
+        serve-doc = pkgs.writeShellApplication {
+          name = "serve-docs";
+          runtimeInputs = [ ];
+          text = "${lib.getExe pkgs.python3} -m http.server -d ${config.packages.doc}/share/doc 8284";
+        };
       };
       inherit (flake) devShells;
     };
+
 }
