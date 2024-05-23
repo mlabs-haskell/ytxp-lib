@@ -116,7 +116,6 @@ library pprelude
     , bytestring
     , plutarch
     , plutus-core
-    , prettyprinter
     , text
 
   exposed-modules:  PPrelude
@@ -163,7 +162,6 @@ library
     , plutus-ledger-api
     , plutus-tx
     , pprelude
-    , prettyprinter
     , text
     , ytxp-sdk
 
@@ -198,7 +196,7 @@ executable write-config
 
 -- Tests
 
-test-suite serialization
+test-suite ytxp-lib-test
   import:         common-language, common-test
   type:           exitcode-stdio-1.0
   main-is:        Main.hs
@@ -213,4 +211,4 @@ test-suite serialization
     , text
     , ytxp-sdk
 
-  hs-source-dirs: test/serialization
+  hs-source-dirs: test

@@ -10,7 +10,7 @@ where
 
 import Cardano.YTxP.Control.YieldList (PYieldedToHash, getYieldedToHashByIndex)
 import Cardano.YTxP.SDK.SdkParameters (
-  YieldListSTCS (..),
+  YieldListSTCS (YieldListSTCS),
  )
 import Plutarch.Api.V2 (PTxInInfo, PValue)
 import Plutarch.DataRepr (PDataFields)

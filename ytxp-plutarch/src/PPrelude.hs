@@ -48,7 +48,6 @@ import Plutarch.Internal (
 import Plutarch.Prelude
 import Plutarch.Script (Script (Script))
 import Plutarch.Script qualified as PScript
-import Prettyprinter (Doc, Pretty (pretty), braces, punctuate, sep, (<+>))
 import UntypedPlutusCore.Core.Type qualified as UPLC
 import Prelude
 

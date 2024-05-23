@@ -9,9 +9,7 @@ import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Plutarch (Config, compile)
-import Plutarch.Api.V2 (PScriptContext, scriptHash)
-import Plutarch.Script (Script)
-import PlutusLedgerApi.V2 (Credential (ScriptCredential))
+import Plutarch.Api.V2 (PScriptContext)
 
 --------------------------------------------------------------------------------
 -- Yielding Validator Script
