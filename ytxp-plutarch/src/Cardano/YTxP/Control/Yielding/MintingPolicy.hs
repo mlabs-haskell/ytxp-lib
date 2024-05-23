@@ -1,15 +1,11 @@
 module Cardano.YTxP.Control.Yielding.MintingPolicy (
   -- * Minting Policy
-  YieldingMPScript (mintingPolicy),
+  YieldingMPScript (getYieldingMPScript),
   compileYieldingMP,
-
-  -- * Currency Symbol
-  YieldingMPCS,
-  mkYieldingMPCS,
 ) where
 
-import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
+import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
 import Data.Aeson (
   FromJSON (parseJSON),
   ToJSON (toEncoding, toJSON),
@@ -29,38 +25,15 @@ import PlutusLedgerApi.V2 (CurrencySymbol (CurrencySymbol), getScriptHash)
 --------------------------------------------------------------------------------
 -- Yielding Minting Policy Script
 
--- | @since 0.1.0
-data YieldingMPScript = YieldingMPScript
-  { nonce :: Natural
-  -- ^ @since 0.1.0
-  , mintingPolicy :: Script
-  -- ^ @since 0.1.0
+newtype YieldingMPScript = YieldingMPScript
+  { getYieldingMPScript :: Text
   }
-
--- | @since 0.1.0
-instance ToJSON YieldingMPScript where
-  {-# INLINEABLE toJSON #-}
-  toJSON ysvs =
-    object
-      [ "nonce" .= nonce ysvs
-      , "stakingValidator"
-          .= (HexStringScript @"StakingValidator" . mintingPolicy $ ysvs)
-      ]
-  {-# INLINEABLE toEncoding #-}
-  toEncoding ysvs =
-    pairs $
-      "nonce" .= nonce ysvs
-        <> "mintingPolicy"
-          .= (HexStringScript @"StakingValidator" . mintingPolicy $ ysvs)
-
--- | @since 0.1.0
-instance FromJSON YieldingMPScript where
-  {-# INLINEABLE parseJSON #-}
-  parseJSON = withObject "YieldingMPScript" $ \obj -> do
-    ysvsNonce <- obj .: "nonce"
-    (HexStringScript ysvsStakingValidator) :: HexStringScript "StakingValidator" <-
-      obj .: "mintingPolicy"
-    pure $ YieldingMPScript ysvsNonce ysvsStakingValidator
+  deriving newtype
+    ( ToJSON
+    , FromJSON
+    , Eq
+    , Show
+    )
 
 compileYieldingMP ::
   Config ->
@@ -77,14 +50,4 @@ compileYieldingMP config ylstcs nonce = do
       )
     yieldingMP = plet (pconstant $ toInteger nonce) (const $ yieldingHelper ylstcs)
   script <- compile config yieldingMP
-  pure $ YieldingMPScript nonce script
-
--------------------------------------------------------------------------------
--- Yielding Minting Policy Currency Symbol
-
--- | Opaque, semantic newtype for the YieldList state thread currency symbol
-newtype YieldingMPCS = YieldingMPCS CurrencySymbol
-
-mkYieldingMPCS :: YieldingMPScript -> YieldingMPCS
-mkYieldingMPCS (YieldingMPScript _nonce script) =
-  YieldingMPCS $ CurrencySymbol (getScriptHash $ scriptHash script)
+  pure $ YieldingMPScript (serialiseScript script)

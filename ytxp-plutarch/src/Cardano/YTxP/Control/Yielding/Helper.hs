@@ -6,8 +6,8 @@ module Cardano.YTxP.Control.Yielding.Helper (yieldingHelper) where
 import Cardano.YTxP.Control.YieldList (
   PYieldedToHash (PYieldedToMP, PYieldedToSV, PYieldedToValidator),
  )
-import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
 import Cardano.YTxP.Control.Yielding (getYieldedToHash)
+import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
 import Plutarch.Api.V1.Address (
   PCredential (PPubKeyCredential, PScriptCredential),
  )

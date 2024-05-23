@@ -14,28 +14,19 @@ module Cardano.YTxP.Control.Parameters (
   mkControlParameters,
 ) where
 
-import Cardano.YTxP.Control.ParametersInitial (SdkParameters (..))
-import Cardano.YTxP.Control.YieldList.MintingPolicy (
-  YieldListSTMPScript,
-  compileYieldListSTMP,
-  mkYieldListSTCS,
- )
-import Cardano.YTxP.Control.YieldList.Validator (
-  YieldListValidatorScript,
-  compileYieldListValidator,
- )
 import Cardano.YTxP.Control.Yielding.MintingPolicy (
   YieldingMPScript,
   compileYieldingMP,
  )
 import Cardano.YTxP.Control.Yielding.StakingValidator (
-  YieldingStakingValidatorScript,
-  compileYieldingStakingValidator,
+  YieldingSVScript,
+  compileYieldingSV,
  )
 import Cardano.YTxP.Control.Yielding.Validator (
   YieldingValidatorScript,
   compileYieldingValidator,
  )
+import Cardano.YTxP.SDK.SdkParameters (Config (..), SdkParameters (..), TracingMode (..))
 import Data.Aeson (
   FromJSON (parseJSON),
   ToJSON (toEncoding, toJSON),
@@ -46,6 +37,7 @@ import Data.Aeson (
   (.=),
  )
 import Data.Text (Text)
+import Plutarch qualified
 import Prettyprinter (Pretty (pretty), braces, punctuate, sep, (<+>))
 
 {- | Scripts that yield to transaction families identified by reference scripts
@@ -58,7 +50,7 @@ data YieldingScripts = YieldingScripts
   -- ^ @since 0.1.0
   , yieldingValidator :: YieldingValidatorScript
   -- ^ @since 0.1.0
-  , yieldingStakingValidators :: [YieldingStakingValidatorScript]
+  , yieldingStakingValidators :: [YieldingSVScript]
   -- ^ @since 0.1.0
   }
 
@@ -139,20 +131,21 @@ mkControlParameters
     , compilationConfig
     } =
     do
+      let pcompilationConfig = toPlutarchConfig compilationConfig
       ------------------------------------------------------------
       -- Now compile the yielding scripts
-      yieldingVal <- compileYieldingValidator compilationConfig authorisedScriptsSTCS
+      yieldingVal <- compileYieldingValidator pcompilationConfig authorisedScriptsSTCS
 
       -- Compile the staking validators, pulling any @Left@s (containing compilation
       -- error messages) through the list
-      yieldingStakingVals <-
+      yieldingSVs <-
         mapM
-          (compileYieldingStakingValidator compilationConfig authorisedScriptsSTCS)
+          (compileYieldingSV pcompilationConfig authorisedScriptsSTCS)
           stakingValidatorsNonceList
 
       yieldingMPs <-
         mapM
-          (compileYieldingMP compilationConfig authorisedScriptsSTCS)
+          (compileYieldingMP pcompilationConfig authorisedScriptsSTCS)
           mintingPoliciesNonceList
 
       pure $
@@ -161,6 +154,10 @@ mkControlParameters
               YieldingScripts
                 yieldingMPs
                 yieldingVal
-                yieldingStakingVals
+                yieldingSVs
           , sdkParameters = cpi
           }
+
+toPlutarchConfig :: Config -> Plutarch.Config
+toPlutarchConfig (Config {tracing = DoTracing}) = Plutarch.Config Plutarch.DoTracing
+toPlutarchConfig (Config {tracing = NoTracing}) = Plutarch.Config Plutarch.NoTracing
