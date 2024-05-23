@@ -9,13 +9,12 @@ module Cardano.YTxP.Control.Yielding (
 where
 
 import Cardano.YTxP.Control.YieldList (PYieldedToHash, getYieldedToHashByIndex)
-import Cardano.YTxP.Control.YieldList.MintingPolicy (
-  YieldListSTCS,
-  pcontainsYieldListSTT,
+import Cardano.YTxP.SDK.SdkParameters (
+  YieldListSTCS (..),
  )
-import Plutarch.Api.V2 (PTxInInfo)
+import Plutarch.Api.V2 (PTxInInfo, PValue)
 import Plutarch.DataRepr (PDataFields)
-import Utils (punsafeFromInlineDatum)
+import Utils (pmember, punsafeFromInlineDatum)
 
 -- | Represents an index into a YieldList
 newtype YieldListIndex = YieldListIndex Integer -- FIXME Int/Integer/Positive
@@ -136,3 +135,12 @@ getYieldedToHash yieldListSTCS = phoistAcyclic $
              in getYieldedToHashByIndex # ylDatum # pto ylIndex
           )
           (ptraceError "getYieldedToHash: Reference input does not contain YieldListSTCS")
+
+{- | Checks that the given 'PValue' contains the YieldListSTT
+TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead
+-}
+pcontainsYieldListSTT ::
+  YieldListSTCS -> Term s (PValue anyKey anyAmount :--> PBool)
+pcontainsYieldListSTT (YieldListSTCS symbol) =
+  plam $ \value ->
+    pmember # pconstant symbol # pto value

@@ -2,14 +2,10 @@ module Cardano.YTxP.Control.Yielding.Validator (
   -- * Validator
   YieldingValidatorScript (getYieldingValidatorScript),
   compileYieldingValidator,
-
-  -- * Script Credential
-  YieldingValidatorCredential,
-  mkYieldingValidatorCredential,
 ) where
 
-import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
+import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
 import Plutarch (Config, compile)
@@ -20,18 +16,15 @@ import PlutusLedgerApi.V2 (Credential (ScriptCredential))
 --------------------------------------------------------------------------------
 -- Yielding Validator Script
 
--- | @since 0.1.0
 newtype YieldingValidatorScript = YieldingValidatorScript
-  { getYieldingValidatorScript :: Script
-  -- ^ @since 0.1.0
+  { getYieldingValidatorScript :: Text
   }
-  deriving
-    ( -- | @since 0.1.0
-      ToJSON
-    , -- | @since 0.1.0
-      FromJSON
+  deriving newtype
+    ( ToJSON
+    , FromJSON
+    , Eq
+    , Show
     )
-    via (HexStringScript "YieldingValidatorScript")
 
 compileYieldingValidator ::
   Config ->
@@ -49,15 +42,4 @@ compileYieldingValidator config ylstcs = do
       yieldingHelper ylstcs # redeemer # ctx
 
   script <- compile config yieldingValidator
-  pure $ YieldingValidatorScript script
-
--------------------------------------------------------------------------------
--- Yielding Validator Credential
-
--- | Opaque, semantic newtype for the YieldList state thread currency symbol
-newtype YieldingValidatorCredential = YieldingValidatorCredential Credential
-
-mkYieldingValidatorCredential ::
-  YieldingValidatorScript -> YieldingValidatorCredential
-mkYieldingValidatorCredential (YieldingValidatorScript script) =
-  YieldingValidatorCredential $ ScriptCredential (scriptHash script)
+  pure $ YieldingValidatorScript (serialiseScript script)

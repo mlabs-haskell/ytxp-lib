@@ -1,13 +1,11 @@
 module Cardano.YTxP.Control.Yielding.StakingValidator (
   -- * Staking Validator
-  YieldingStakingValidatorScript (nonce, stakingValidator),
-  compileYieldingStakingValidator,
-
-  -- * Credential and Nonce
+  YieldingSVScript (getYieldingSVScript),
+  compileYieldingSV,
 ) where
 
-import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
+import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
 import Data.Aeson (
   FromJSON (parseJSON),
   ToJSON (toEncoding, toJSON),
@@ -26,63 +24,38 @@ import Plutarch.Script (Script)
 --------------------------------------------------------------------------------
 -- Yielding Staking Validator
 
-{- | A yielding staking validator together with its nonce.
-
-@since 0.1.0
--}
-data YieldingStakingValidatorScript = YieldingStakingValidatorScript
-  { nonce :: Natural
-  -- ^ @since 0.1.0
-  , stakingValidator :: Script
-  -- ^ @since 0.10
+-- | A yielding staking validator
+newtype YieldingSVScript = YieldingSVScript
+  { getYieldingSVScript :: Text
   }
-
--- | @since 0.1.0
-instance ToJSON YieldingStakingValidatorScript where
-  {-# INLINEABLE toJSON #-}
-  toJSON ysvs =
-    object
-      [ "nonce" .= nonce ysvs
-      , "stakingValidator"
-          .= (HexStringScript @"StakingValidator" . stakingValidator $ ysvs)
-      ]
-  {-# INLINEABLE toEncoding #-}
-  toEncoding ysvs =
-    pairs $
-      "nonce" .= nonce ysvs
-        <> "stakingValidator"
-          .= (HexStringScript @"StakingValidator" . stakingValidator $ ysvs)
-
--- | @since 0.1.0
-instance FromJSON YieldingStakingValidatorScript where
-  {-# INLINEABLE parseJSON #-}
-  parseJSON = withObject "YieldingStakingValidatorScript" $ \obj -> do
-    ysvsNonce <- obj .: "nonce"
-    (HexStringScript ysvsStakingValidator) :: HexStringScript "StakingValidator" <-
-      obj .: "stakingValidator"
-    pure $ YieldingStakingValidatorScript ysvsNonce ysvsStakingValidator
+  deriving newtype
+    ( ToJSON
+    , FromJSON
+    , Eq
+    , Show
+    )
 
 {- | Compile a yielding staking validator that has been nonced.
 The nonce is required because each staking validator can only
 be delegated to a single pool; the inclusion of the nonce will change the
 script hash.
 -}
-compileYieldingStakingValidator ::
+compileYieldingSV ::
   Config ->
   YieldListSTCS ->
   Natural ->
   Either
     Text
-    YieldingStakingValidatorScript
-compileYieldingStakingValidator config ylstcs nonce = do
+    YieldingSVScript
+compileYieldingSV config ylstcs nonce = do
   let
-    yieldingStakingValidator ::
+    yieldingSV ::
       Term s (PData :--> PScriptContext :--> POpaque)
-    yieldingStakingValidator =
+    yieldingSV =
       plet (pconstant $ toInteger nonce) (const $ yieldingHelper ylstcs)
 
   -- Pull the "Either" through the list
-  script <- compile config yieldingStakingValidator
+  script <- compile config yieldingSV
 
   pure $
-    YieldingStakingValidatorScript nonce script
+    YieldingSVScript (serialiseScript script)

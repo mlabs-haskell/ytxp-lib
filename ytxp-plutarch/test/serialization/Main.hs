@@ -1,22 +1,21 @@
 module Main (main) where
 
-import Cardano.YTxP.Control.ParametersInitial (
-  SdkParameters (SdkParameters),
- )
 import Cardano.YTxP.Control.Stubs (
   alwaysSucceedsTwoArgumentScript,
   alwaysSucceedsValidator,
  )
-import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS (..))
+import Cardano.YTxP.SDK.SdkParameters (
+  Config (..),
+  SdkParameters (SdkParameters),
+  TracingMode (..),
+  YieldListSTCS (..),
+ )
 import Control.Monad (guard)
 import Data.Aeson (encode)
 import Data.ByteString.Short (ShortByteString)
 import Data.Text (unpack)
 import GHC.Exts (fromList, toList)
-import Plutarch.Internal (
-  Config (Config),
-  TracingMode (DetTracing, DoTracing, DoTracingAndBinds, NoTracing),
- )
+import Prettyprinter (Pretty (pretty), viaShow)
 import Test.Laws (aesonLawsWith)
 import Test.QuickCheck (
   Gen,
@@ -36,13 +35,7 @@ import Test.Utils (noShrink)
 main :: IO ()
 main =
   defaultMain . adjustOption go . testGroup "serialization" $
-    [ testProperty "Hex encoding of ShortByteString roundtrips"
-        . forAllShrinkShow genSBS shrinkSBS (show . toList)
-        $ \sbs ->
-          let converted = sbsToHexText sbs
-           in counterexample ("Converted: " <> unpack converted) $
-                Just sbs === (hexTextToSBS . sbsToHexText $ sbs)
-    , aesonLawsWith @SdkParameters genCPI noShrink
+    [ aesonLawsWith @SdkParameters genCPI noShrink
     , goldenVsString
         "SdkParameters"
         "goldens/SdkParameters.golden"
@@ -51,6 +44,9 @@ main =
   where
     go :: QuickCheckTests -> QuickCheckTests
     go = max 10_000
+
+instance Pretty SdkParameters where
+  pretty = viaShow
 
 -- Golden data
 
@@ -71,7 +67,7 @@ genCPI = do
   let myls = fromInteger myls'
   stakingValsNonceList <- map (fromInteger . getNonNegative) <$> arbitrary
   mintingPoliciesNonceList <- map (fromInteger . getNonNegative) <$> arbitrary
-  tm <- elements [NoTracing, DetTracing, DoTracing, DoTracingAndBinds]
+  tm <- elements [NoTracing, DoTracing] -- , DetTracing, DoTracingAndBinds]
   pure $
     SdkParameters
       stakingValsNonceList

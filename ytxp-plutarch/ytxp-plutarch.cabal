@@ -112,6 +112,7 @@ library pprelude
   build-depends:
     , aeson
     , base
+    , base16-bytestring
     , bytestring
     , plutarch
     , plutus-core
@@ -164,11 +165,11 @@ library
     , pprelude
     , prettyprinter
     , text
+    , ytxp-sdk
 
   hs-source-dirs:  src
   exposed-modules:
     Cardano.YTxP.Control.Parameters
-    Cardano.YTxP.Control.ParametersInitial
     Cardano.YTxP.Control.Stubs
     Cardano.YTxP.Control.Vendored
     Cardano.YTxP.Control.Yielding
@@ -177,8 +178,6 @@ library
     Cardano.YTxP.Control.Yielding.StakingValidator
     Cardano.YTxP.Control.Yielding.Validator
     Cardano.YTxP.Control.YieldList
-    Cardano.YTxP.Control.YieldList.MintingPolicy
-    Cardano.YTxP.Control.YieldList.Validator
     Utils
 
 -- Executables
@@ -207,9 +206,11 @@ test-suite serialization
     , aeson
     , bytestring
     , plutarch
+    , prettyprinter
     , QuickCheck
     , tasty-golden
     , tasty-quickcheck
     , text
+    , ytxp-sdk
 
   hs-source-dirs: test/serialization
