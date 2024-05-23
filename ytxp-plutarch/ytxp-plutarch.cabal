@@ -176,7 +176,6 @@ library
     Cardano.YTxP.Control.Yielding.MintingPolicy
     Cardano.YTxP.Control.Yielding.StakingValidator
     Cardano.YTxP.Control.Yielding.Validator
-    Cardano.YTxP.Control.YieldList
     Utils
 
 -- Executables

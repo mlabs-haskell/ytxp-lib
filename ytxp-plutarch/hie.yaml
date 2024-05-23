@@ -12,5 +12,5 @@ cradle:
     - path: "./app/write-config/Main.hs"
       component: "ytxp-plutarch:exe:write-config"
 
-    - path: "./test/serialization"
-      component: "ytxp-plutarch:test:serialization"
+    - path: "./test"
+      component: "ytxp-plutarch:test:ytxp-lib-test"

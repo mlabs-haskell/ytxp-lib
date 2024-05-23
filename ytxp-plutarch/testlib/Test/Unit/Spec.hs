@@ -26,7 +26,6 @@ import Utils (
   phasNoScriptInputWithToken,
   phasOneScriptInputAtValidatorWithExactlyOneToken,
   phasOnlyOneInputWithExactlyOneTokenWithSymbol,
-  phasOnlyOneValidScriptOutputWithToken,
   pmember,
   poutputsDoNotContainToken,
  )
@@ -209,23 +208,6 @@ phasOneScriptInputAtValidatorWithExactlyOneTokenTestSix =
     #== pexpectedResultTrue
 
 -- | Empty list so should be false
-phasOnlyOneValidScriptOutputWithTokenTestOne :: Term s PBool
-phasOnlyOneValidScriptOutputWithTokenTestOne =
-  phasOnlyOneValidScriptOutputWithToken
-    3
-    (pconstant [])
-    # pconstant dummySymbolOne
-    #== pexpectedResultFalse
-
--- | Should fail, won't decode datum
-phasOnlyOneValidScriptOutputWithTokenTestTwo :: Term s PBool
-phasOnlyOneValidScriptOutputWithTokenTestTwo =
-  phasOnlyOneValidScriptOutputWithToken
-    3
-    pdummyTxOutSingletonList
-    # pconstant dummySymbolOne
-    #== pexpectedResultFalse
-
 unitSpec :: [TestTree]
 unitSpec =
   [ -- Test for `psymbolValueOf` helper

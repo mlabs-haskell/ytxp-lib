@@ -59,11 +59,11 @@ Checks:
 
 -- | YMP fails when wrong YLIndex passed
 
--- | YMP fails if YieldedToHash not found; minting policy case
+-- | YMP fails if AuthorisedScriptHash not found; minting policy case
 
--- | YMP fails if YieldedToHash not found; staking validator case
+-- | YMP fails if AuthorisedScriptHash not found; staking validator case
 
--- | YMP fails if YieldedToHash not found; validator case
+-- | YMP fails if AuthorisedScriptHash not found; validator case
 
 --------------------------------------------------------------------------------
 -- YV Tests
@@ -74,11 +74,11 @@ Checks:
 
 -- | YV fails when wrong YLIndex passed
 
--- | YV fails if YieldedToHash not found; minting policy case
+-- | YV fails if AuthorisedScriptHash not found; minting policy case
 
--- | YV fails if YieldedToHash not found; staking validator case
+-- | YV fails if AuthorisedScriptHash not found; staking validator case
 
--- | YV fails if YieldedToHash not found; validator case
+-- | YV fails if AuthorisedScriptHash not found; validator case
 
 --------------------------------------------------------------------------------
 -- YSV Tests
@@ -89,8 +89,8 @@ Checks:
 
 -- | YSV fails when wrong YLIndex passed
 
--- | YSV fails if YieldedToHash not found; minting policy case
+-- | YSV fails if AuthorisedScriptHash not found; minting policy case
 
--- | YSV fails if YieldedToHash not found; staking validator case
+-- | YSV fails if AuthorisedScriptHash not found; staking validator case
 
--- | YSV fails if YieldedToHash not found; validator case
+-- | YSV fails if AuthorisedScriptHash not found; validator case

@@ -1,7 +1,6 @@
 module Utils (
   pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount,
   phasOneScriptInputAtValidatorWithExactlyOneToken,
-  phasOnlyOneValidScriptOutputWithToken,
   phasOnlyOneInputWithExactlyOneTokenWithSymbol,
   phasNoScriptInputWithToken,
   poutputsDoNotContainToken,
@@ -13,15 +12,12 @@ module Utils (
 )
 where
 
-import Cardano.YTxP.Control.YieldList (PYieldListDatum (PYieldListDatum))
 import Data.List.NonEmpty (nonEmpty)
-import Numeric.Natural (Natural)
 import Plutarch.Api.V1 (PCredential (PPubKeyCredential, PScriptCredential))
 import Plutarch.Api.V1.Value (
   PCurrencySymbol,
   PTokenName,
   PValue,
-  padaSymbol,
   pvalueOf,
  )
 import Plutarch.Api.V2 (
@@ -34,7 +30,6 @@ import Plutarch.Api.V2 (
   PTxOut,
   PTxOutRef,
  )
-import Plutarch.Extra.Map (pkeys)
 import Plutarch.List (pfoldl')
 import Plutarch.Unsafe (punsafeCoerce)
 
@@ -184,134 +179,6 @@ pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount = phoistAcyclic $
       #== amount
       #&& (plength #$ pto $ pto $ pto value)
       #== 2
-
-{- |
-Check that:
-  - there is exactly one script output with exactly one token
-    with the given `PCurrencySymbol` and `PTokenName`
-  - there is no other script output with one or more of these tokens
-    (We do this in order to use this helper to ensure that there are no other
-     script outputs containing one ore more of this token)
-  - there is no wallet output that contains one of these tokens
-  - if there is exactly one script output with exactly one of these tokens,
-    we check that it contains no other tokens aside from Ada
-  - finally check that the output also contains a valid (according to the spec) `POutputDatum`,
-    ensuring the length of the yield list does not exceed the provided `maxYieldListSize` parameter.
--}
-phasOnlyOneValidScriptOutputWithToken ::
-  Natural ->
-  Term s (PBuiltinList PTxOut) ->
-  Term
-    s
-    ( PCurrencySymbol
-        :--> PBool
-    )
-phasOnlyOneValidScriptOutputWithToken maxYieldListSize outputs =
-  plam $ \symbol ->
-    pmatch
-      ( pfilter
-          # plam
-            ( \txOut ->
-                -- Check the output contains one or more YieldListSTT.
-                -- At this step, we want to find any output (wallet or script)
-                -- that contains one or more YieldListSTT.
-                -- This is to avoid needing another helper to check that there are no script outputs or
-                -- wallet outputs containing one or more of these tokens.
-                pconstant 0
-                  #< (
-                       -- We inline the `psymbolValue` function for efficiency reasons
-                       let valueMap = pto (pto $ pfromData $ pfield @"value" # txOut)
-                           go = pfix #$ plam $ \self valueMap' ->
-                            pelimList
-                              ( \symbolAndTokens rest ->
-                                  pif
-                                    (pfromData (pfstBuiltin # symbolAndTokens) #== symbol)
-                                    ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
-                                       in pfoldl'
-                                            ( \acc tokenAndAmount ->
-                                                pfromData (psndBuiltin # tokenAndAmount) + acc
-                                            )
-                                            # 0
-                                            # tokens
-                                    )
-                                    (self # rest)
-                              )
-                              0
-                              valueMap'
-                        in go # valueMap
-                     )
-            )
-          # outputs
-      )
-      $ \case
-        -- Check that the resulting filtered list has exactly one element
-        PCons txOut' tailOfList ->
-          pmatch (pnull # tailOfList) $ \case
-            PTrue ->
-              -- If so then check that the output is a script output
-              pmatch
-                (pfromData $ pfield @"credential" #$ pfromData $ pfield @"address" # txOut')
-                $ \case
-                  PScriptCredential _ ->
-                    -- If there is only one output in the filtered result,
-                    -- and that output is a script output,
-                    -- then check that it contains exactly one token with the given symbol
-                    pmatch
-                      ( ( -- We inline the `psymbolValue` function for efficiency reasons
-                          let valueMap = pto (pto $ pfromData $ pfield @"value" # txOut')
-                              go = pfix #$ plam $ \self valueMap' ->
-                                pelimList
-                                  ( \symbolAndTokens rest ->
-                                      pif
-                                        (pfromData (pfstBuiltin # symbolAndTokens) #== symbol)
-                                        ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
-                                           in pfoldl'
-                                                ( \acc tokenAndAmount ->
-                                                    pfromData (psndBuiltin # tokenAndAmount) + acc
-                                                )
-                                                # 0
-                                                # tokens
-                                        )
-                                        (self # rest)
-                                  )
-                                  0
-                                  valueMap'
-                           in go # valueMap
-                        )
-                          #== pconstant 1
-                      )
-                      $ \case
-                        -- If it contains exactly one token with the given symbol
-                        -- then check that it does not contain any other tokens
-                        -- aside from Ada and the given token
-                        PTrue -> pmatch
-                          ( pfilter
-                              # plam
-                                ( \symbolInValue ->
-                                    pnot
-                                      #$ pfromData symbolInValue
-                                      #== symbol
-                                      #|| pfromData symbolInValue
-                                      #== padaSymbol
-                                )
-                              # (pkeys #$ pto $ pfromData $ pfield @"value" # txOut')
-                          )
-                          $ \case
-                            -- Finally check that it holds a valid output datum
-                            -- With the length of the yield list not exceeding `maxYieldListSize` parameter
-                            PNil ->
-                              pmatch (pfromData $ pfield @"datum" # txOut') $ \case
-                                POutputDatum (pfromData . (pfield @"outputDatum" #) -> datum) -> unTermCont $ do
-                                  PYieldListDatum ((pfield @"yieldedToScripts" #) -> yieldedToList) <-
-                                    pmatchC $ pfromData $ flip ptryFrom fst $ pto datum
-                                  pure $
-                                    plength # pfromData yieldedToList #<= pconstant (toInteger maxYieldListSize)
-                                _ -> pconstant False
-                            _ -> pconstant False
-                        PFalse -> pconstant False
-                  PPubKeyCredential _ -> pconstant False
-            PFalse -> pconstant False
-        PNil -> pconstant False
 
 -- Check that there is one input with exactly one token of given `PCurrencySymbol`,
 -- this input sits at a script address matching the given `PTxOutRef`,
