@@ -138,7 +138,7 @@ Below are instructions for generating Haddock documentation using different meth
 To build documentation directly, utilize the following make target:
 
 ```bash
-make build_doc
+make build_docs
 ```
 
 After the execution, this command will specify the location of the generated documentation.
@@ -156,7 +156,7 @@ nix build .#ytxp-plutarch-lib.doc
 To serve the documentation locally, utilize the following make target:
 
 ```bash
-make serve_doc
+make serve_docs
 ```
 
 The resulting documentation will be accessible within the `result-doc` directory.
