@@ -1,10 +1,9 @@
 module Cardano.YTxP.Control.Yielding.MintingPolicy (
-  -- * Minting Policy
-  YieldingMPScript (getYieldingMPScript),
   compileYieldingMP,
 ) where
 
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
+import Cardano.YTxP.SDK.ControlParameters (HexStringScript (..))
 import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
 import Data.Aeson (
   FromJSON,
@@ -12,21 +11,12 @@ import Data.Aeson (
  )
 import Data.Text (Text)
 import Numeric.Natural (Natural)
-import Plutarch (Config, compile)
+import Plutarch (Config, Script, compile)
 import Plutarch.Api.V2 (PScriptContext)
+import Plutarch.Script (serialiseScript)
 
 --------------------------------------------------------------------------------
 -- Yielding Minting Policy Script
-
-newtype YieldingMPScript = YieldingMPScript
-  { getYieldingMPScript :: Text
-  }
-  deriving newtype
-    ( ToJSON
-    , FromJSON
-    , Eq
-    , Show
-    )
 
 compileYieldingMP ::
   Config ->
@@ -34,7 +24,7 @@ compileYieldingMP ::
   Natural ->
   Either
     Text
-    YieldingMPScript
+    (HexStringScript "YieldingMP")
 compileYieldingMP config ylstcs nonce = do
   let
     yieldingMP ::
@@ -43,4 +33,4 @@ compileYieldingMP config ylstcs nonce = do
       )
     yieldingMP = plet (pconstant $ toInteger nonce) (const $ yieldingHelper ylstcs)
   script <- compile config yieldingMP
-  pure $ YieldingMPScript (serialiseScript script)
+  pure $ HexStringScript (serialiseScript script)

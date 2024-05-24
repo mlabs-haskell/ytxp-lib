@@ -1,10 +1,9 @@
 module Cardano.YTxP.Control.Yielding.StakingValidator (
-  -- * Staking Validator
-  YieldingSVScript (getYieldingSVScript),
   compileYieldingSV,
 ) where
 
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
+import Cardano.YTxP.SDK.ControlParameters (HexStringScript (..))
 import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
 import Data.Aeson (
   FromJSON,
@@ -12,22 +11,12 @@ import Data.Aeson (
  )
 import Data.Text (Text)
 import Numeric.Natural (Natural)
-import Plutarch (Config, compile)
+import Plutarch (Config, Script, compile)
 import Plutarch.Api.V2 (PScriptContext)
+import Plutarch.Script (serialiseScript)
 
 --------------------------------------------------------------------------------
 -- Yielding Staking Validator
-
--- | A yielding staking validator
-newtype YieldingSVScript = YieldingSVScript
-  { getYieldingSVScript :: Text
-  }
-  deriving newtype
-    ( ToJSON
-    , FromJSON
-    , Eq
-    , Show
-    )
 
 {- | Compile a yielding staking validator that has been nonced.
 The nonce is required because each staking validator can only
@@ -40,7 +29,7 @@ compileYieldingSV ::
   Natural ->
   Either
     Text
-    YieldingSVScript
+    (HexStringScript "YieldingSV")
 compileYieldingSV config ylstcs nonce = do
   let
     yieldingSV ::
@@ -50,6 +39,4 @@ compileYieldingSV config ylstcs nonce = do
 
   -- Pull the "Either" through the list
   script <- compile config yieldingSV
-
-  pure $
-    YieldingSVScript (serialiseScript script)
+  pure $ HexStringScript (serialiseScript script)

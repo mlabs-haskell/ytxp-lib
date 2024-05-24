@@ -1,34 +1,25 @@
 module Cardano.YTxP.Control.Yielding.Validator (
-  -- * Validator
-  YieldingValidatorScript (getYieldingValidatorScript),
   compileYieldingValidator,
 ) where
 
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
+import Cardano.YTxP.SDK.ControlParameters (HexStringScript (..))
 import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
-import Plutarch (Config, compile)
+import Plutarch (Config, Script, compile)
 import Plutarch.Api.V2 (PScriptContext)
+import Plutarch.Script (serialiseScript)
 
 --------------------------------------------------------------------------------
 -- Yielding Validator Script
 
-newtype YieldingValidatorScript = YieldingValidatorScript
-  { getYieldingValidatorScript :: Text
-  }
-  deriving newtype
-    ( ToJSON
-    , FromJSON
-    , Eq
-    , Show
-    )
-
 compileYieldingValidator ::
   Config ->
   YieldListSTCS ->
-  (Either Text)
-    YieldingValidatorScript
+  Either
+    Text
+    (HexStringScript "YieldingValidator")
 compileYieldingValidator config ylstcs = do
   let
     yieldingValidator ::
@@ -40,4 +31,4 @@ compileYieldingValidator config ylstcs = do
       yieldingHelper ylstcs # redeemer # ctx
 
   script <- compile config yieldingValidator
-  pure $ YieldingValidatorScript (serialiseScript script)
+  pure $ HexStringScript (serialiseScript script)

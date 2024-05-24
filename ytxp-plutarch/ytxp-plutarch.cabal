@@ -117,6 +117,7 @@ library pprelude
     , plutarch
     , plutus-core
     , text
+    , ytxp-sdk
 
   exposed-modules:  PPrelude
   hs-source-dirs:   src
