@@ -117,18 +117,6 @@
         "type": "github"
       }
     },
-    "combine-haddock": {
-      "flake": false,
-      "locked": {
-        "narHash": "sha256-BpX2FfDjnj+s8hssm5Q4DeXaYZ5gwyatvzGO6ojo9rA=",
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/Plutonomicon/plutarch-plutus/f78b70eca8841a4a009cb6791a59c999cbc68745/nix/combine-haddock.nix"
-      },
-      "original": {
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/Plutonomicon/plutarch-plutus/f78b70eca8841a4a009cb6791a59c999cbc68745/nix/combine-haddock.nix"
-      }
-    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -852,7 +840,6 @@
     "root": {
       "inputs": {
         "CHaP": "CHaP",
-        "combine-haddock": "combine-haddock",
         "flake-parts": "flake-parts",
         "git-hooks": "git-hooks",
         "haskellNix": "haskellNix",
