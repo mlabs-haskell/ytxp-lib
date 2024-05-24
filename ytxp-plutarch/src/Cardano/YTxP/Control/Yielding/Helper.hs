@@ -39,34 +39,34 @@ yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
 
   pure $
     popaque $
-      pmatch AuthorisedScriptHash $ \case
-        PAuthorisedScriptValidator ((pfield @"scriptHash" #) -> AuthorisedScriptHash') ->
+      pmatch authorisedScriptHash $ \case
+        PAuthorisedScriptValidator ((pfield @"scriptHash" #) -> authorisedScriptHash') ->
           let txInfoInputs = pfromData $ pfield @"inputs" # txInfo
-              AuthorisedScriptInput = txInfoInputs #!! AuthorisedScriptIndex
-              out = pfield @"resolved" # AuthorisedScriptInput
+              authorisedScriptInput = txInfoInputs #!! authorisedScriptIndex
+              out = pfield @"resolved" #aAuthorisedScriptInput
               address = pfield @"address" # pfromData out
               credential = pfield @"credential" # pfromData address
            in pmatch (pfromData credential) $ \case
                 PScriptCredential ((pfield @"_0" #) -> hash) ->
                   ptraceIfFalse "Input does not match expected yielded to validator" $
-                    hash #== AuthorisedScriptHash'
+                    hash #== authorisedScriptHash'
                 PPubKeyCredential _ ->
                   ptraceError "Input at specified index is not a script input"
-        PAuthorisedScriptMP ((pfield @"scriptHash" #) -> AuthorisedScriptHash') ->
+        PAuthorisedScriptMP ((pfield @"scriptHash" #) -> authorisedScriptHash') ->
           let txInfoMints = pfromData $ pfield @"mint" # txInfo
-              AuthorisedScriptMint = pto (pto txInfoMints) #!! AuthorisedScriptIndex
-              currencySymbol = pscriptHashToCurrencySymbol AuthorisedScriptHash'
+              authorisedScriptMint = pto (pto txInfoMints) #!! authorisedScriptIndex
+              currencySymbol = pscriptHashToCurrencySymbol authorisedScriptHash'
            in ptraceIfFalse "Minting policy does not match expected yielded to minting policy" $
-                pfromData (pfstBuiltin # AuthorisedScriptMint) #== currencySymbol
-        PAuthorisedScriptSV ((pfield @"scriptHash" #) -> AuthorisedScriptHash') ->
+                pfromData (pfstBuiltin # authorisedScriptMint) #== currencySymbol
+        PAuthorisedScriptSV ((pfield @"scriptHash" #) -> authorisedScriptHash') ->
           let txInfoWithdrawals = pfromData $ pfield @"wdrl" # txInfo
-              AuthorisedScriptWithdrawal = pto txInfoWithdrawals #!! AuthorisedScriptIndex
-           in pmatch (pfromData $ pfstBuiltin # AuthorisedScriptWithdrawal) $ \case
+              authorisedScriptWithdrawal = pto txInfoWithdrawals #!! authorisedScriptIndex
+           in pmatch (pfromData $ pfstBuiltin # authorisedScriptWithdrawal) $ \case
                 PStakingHash ((pfield @"_0" #) -> credential) ->
                   pmatch credential $ \case
                     PScriptCredential ((pfield @"_0" #) -> hash) ->
                       ptraceIfFalse "Withdrawal does not match expected yielded to staking validator" $
-                        hash #== AuthorisedScriptHash'
+                        hash #== authorisedScriptHash'
                     PPubKeyCredential _ ->
                       ptraceError "Staking credential at specified index is not a script credential"
                 PStakingPtr _ ->
