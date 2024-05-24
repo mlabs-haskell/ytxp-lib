@@ -33,11 +33,11 @@ usage:
 	@echo "    typos_check                                                 -- Check typos"
 	@echo "    typos_fix                                                   -- Fix typos"
 	@echo ""
-	# Doc
-	@echo "    build_doc                                                   -- Build haddock documentation"
+	# Docs
+	@echo "    build_docs                                                  -- Build haddock documentation"
+	@echo "    serve_docs                                                  -- Serve haddock documentation locally"
 	@echo ""
-	# Doc
-	@echo "    build_doc                                                   -- Build haddock documentation"
+	# Documentation lint
 	@echo "    lint_markdown_check                                         -- Check markdownlint suggestions"
 	@echo "    lint_markdown                                               -- Apply markdownlint suggestions"
 	@echo ""
@@ -156,10 +156,14 @@ typos_fix:
 	typos -w -c ../../.typos.toml ../../
 
 ################################################################################
-# Doc
-.PHONY: build_doc
-build_doc:
-	$(CABAL_YTXP_PLUTARCH) haddock --haddock-all --haddock-quickjump
+# Docs
+.PHONY: build_docs
+build_docs:
+	nix build .#docs
+
+.PHONY: serve_docs
+serve_docs:
+	nix run .#serve-docs
 
 # Check markdownlint suggestions
 .PHONY: lint_markdown_check
