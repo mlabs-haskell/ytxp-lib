@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Cardano.YTxP.Control.Yielding.Validator</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-2"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Validator</span></span><span>
+</span><span id="line-3"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#YieldingValidatorScript"><span class="hs-identifier">YieldingValidatorScript</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#%24sel%3AgetYieldingValidatorScript%3AYieldingValidatorScript"><span class="hs-identifier">getYieldingValidatorScript</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-4"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#compileYieldingValidator"><span class="hs-identifier">compileYieldingValidator</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-5"></span><span>
+</span><span id="line-6"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Script Credential</span></span><span>
+</span><span id="line-7"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#YieldingValidatorCredential"><span class="hs-identifier">YieldingValidatorCredential</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#mkYieldingValidatorCredential"><span class="hs-identifier">mkYieldingValidatorCredential</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.MintingPolicy.html"><span class="hs-identifier">Cardano.YTxP.Control.YieldList.MintingPolicy</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.MintingPolicy.html#YieldListSTCS"><span class="hs-identifier">YieldListSTCS</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Helper.html"><span class="hs-identifier">Cardano.YTxP.Control.Yielding.Helper</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Helper.html#yieldingHelper"><span class="hs-identifier">yieldingHelper</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">FromJSON</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">ToJSON</span></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Plutarch</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Config</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">compile</span></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Plutarch.Api.V2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">PScriptContext</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">scriptHash</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Plutarch.Script</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Script</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">PlutusLedgerApi.V2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Credential</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ScriptCredential</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- Yielding Validator Script</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-24"></span><span class="hs-keyword">newtype</span><span> </span><span id="YieldingValidatorScript"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#YieldingValidatorScript"><span class="hs-identifier hs-var">YieldingValidatorScript</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="YieldingValidatorScript"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#YieldingValidatorScript"><span class="hs-identifier hs-var">YieldingValidatorScript</span></a></span></span><span>
+</span><span id="line-25"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="%24sel%3AgetYieldingValidatorScript%3AYieldingValidatorScript"><span class="annot"><span class="annottext">YieldingValidatorScript -&gt; Script
+</span><a href="Cardano.YTxP.Control.Yielding.Validator.html#%24sel%3AgetYieldingValidatorScript%3AYieldingValidatorScript"><span class="hs-identifier hs-var hs-var">getYieldingValidatorScript</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Script</span></span><span>
+</span><span id="line-26"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ @since 0.1.0</span></span><span>
+</span><span id="line-27"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-28"></span><span>  </span><span class="hs-keyword">deriving</span><span>
+</span><span id="line-29"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-30"></span><span>      </span><span id="local-6989586621679274148"><span id="local-6989586621679274153"><span id="local-6989586621679274157"><span id="local-6989586621679274161"><span id="local-6989586621679274165"><span class="annot"><span class="annottext">[YieldingValidatorScript] -&gt; Value
+[YieldingValidatorScript] -&gt; Encoding
+YieldingValidatorScript -&gt; Bool
+YieldingValidatorScript -&gt; Value
+YieldingValidatorScript -&gt; Encoding
+(YieldingValidatorScript -&gt; Value)
+-&gt; (YieldingValidatorScript -&gt; Encoding)
+-&gt; ([YieldingValidatorScript] -&gt; Value)
+-&gt; ([YieldingValidatorScript] -&gt; Encoding)
+-&gt; (YieldingValidatorScript -&gt; Bool)
+-&gt; ToJSON YieldingValidatorScript
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; (a -&gt; Bool)
+-&gt; ToJSON a
+$ctoJSON :: YieldingValidatorScript -&gt; Value
+toJSON :: YieldingValidatorScript -&gt; Value
+$ctoEncoding :: YieldingValidatorScript -&gt; Encoding
+toEncoding :: YieldingValidatorScript -&gt; Encoding
+$ctoJSONList :: [YieldingValidatorScript] -&gt; Value
+toJSONList :: [YieldingValidatorScript] -&gt; Value
+$ctoEncodingList :: [YieldingValidatorScript] -&gt; Encoding
+toEncodingList :: [YieldingValidatorScript] -&gt; Encoding
+$comitField :: YieldingValidatorScript -&gt; Bool
+omitField :: YieldingValidatorScript -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span></span><span>
+</span><span id="line-31"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-32"></span><span>      </span><span id="local-6989586621679274171"><span id="local-6989586621679274177"><span id="local-6989586621679274182"><span class="annot"><span class="annottext">Maybe YieldingValidatorScript
+Value -&gt; Parser [YieldingValidatorScript]
+Value -&gt; Parser YieldingValidatorScript
+(Value -&gt; Parser YieldingValidatorScript)
+-&gt; (Value -&gt; Parser [YieldingValidatorScript])
+-&gt; Maybe YieldingValidatorScript
+-&gt; FromJSON YieldingValidatorScript
+forall a.
+(Value -&gt; Parser a)
+-&gt; (Value -&gt; Parser [a]) -&gt; Maybe a -&gt; FromJSON a
+$cparseJSON :: Value -&gt; Parser YieldingValidatorScript
+parseJSON :: Value -&gt; Parser YieldingValidatorScript
+$cparseJSONList :: Value -&gt; Parser [YieldingValidatorScript]
+parseJSONList :: Value -&gt; Parser [YieldingValidatorScript]
+$comittedField :: Maybe YieldingValidatorScript
+omittedField :: Maybe YieldingValidatorScript
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">FromJSON</span></span></span></span></span><span>
+</span><span id="line-33"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-34"></span><span>    </span><span class="hs-keyword">via</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HexStringScript</span></span><span> </span><span class="annot"><span class="hs-string">&quot;YieldingValidatorScript&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-35"></span><span>
+</span><span id="line-36"></span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#compileYieldingValidator"><span class="hs-identifier hs-type">compileYieldingValidator</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-37"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Config</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-38"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.MintingPolicy.html#YieldListSTCS"><span class="hs-identifier hs-type">YieldListSTCS</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-39"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/Data.Either.html#Either"><span class="hs-identifier hs-type">Either</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-40"></span><span>    </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#YieldingValidatorScript"><span class="hs-identifier hs-type">YieldingValidatorScript</span></a></span><span>
+</span><span id="line-41"></span><span id="compileYieldingValidator"><span class="annot"><span class="annottext">compileYieldingValidator :: Config -&gt; YieldListSTCS -&gt; Either Text YieldingValidatorScript
+</span><a href="Cardano.YTxP.Control.Yielding.Validator.html#compileYieldingValidator"><span class="hs-identifier hs-var hs-var">compileYieldingValidator</span></a></span></span><span> </span><span id="local-6989586621679274188"><span class="annot"><span class="annottext">Config
+</span><a href="#local-6989586621679274188"><span class="hs-identifier hs-var">config</span></a></span></span><span> </span><span id="local-6989586621679274189"><span class="annot"><span class="annottext">YieldListSTCS
+</span><a href="#local-6989586621679274189"><span class="hs-identifier hs-var">ylstcs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-keyword">let</span><span>
+</span><span id="line-43"></span><span>    </span><span class="annot"><a href="#local-6989586621679274190"><span class="hs-identifier hs-type">yieldingValidator</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-44"></span><span>      </span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679274098"><span class="annot"><a href="#local-6989586621679274098"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span class="hs-operator">.</span><span>
+</span><span id="line-45"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Term</span></span><span> </span><span class="annot"><a href="#local-6989586621679274098"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PScriptContext</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">POpaque</span></span><span class="hs-special">)</span><span>
+</span><span id="line-46"></span><span>      </span><span class="hs-special">)</span><span>
+</span><span id="line-47"></span><span>    </span><span class="hs-comment">-- Takes the @yieldingHelper@ and turn it into a 3 argument script</span><span>
+</span><span id="line-48"></span><span>    </span><span id="local-6989586621679274190"><span class="annot"><span class="annottext">yieldingValidator :: forall (s :: S).
+Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+</span><a href="#local-6989586621679274190"><span class="hs-identifier hs-var hs-var">yieldingValidator</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Term s PData
+ -&gt; Term s PData -&gt; Term s PScriptContext -&gt; Term s POpaque)
+-&gt; Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+forall a (b :: PType) (s :: S) (c :: PType).
+(PLamN a b s, HasCallStack) =&gt;
+(Term s c -&gt; a) -&gt; Term s (c :--&gt; b)
+forall (c :: PType).
+HasCallStack =&gt;
+(Term s c
+ -&gt; Term s PData -&gt; Term s PScriptContext -&gt; Term s POpaque)
+-&gt; Term s (c :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+</span><span class="hs-identifier hs-var">plam</span></span><span> </span><span class="annot"><span class="annottext">((Term s PData
+  -&gt; Term s PData -&gt; Term s PScriptContext -&gt; Term s POpaque)
+ -&gt; Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
+-&gt; (Term s PData
+    -&gt; Term s PData -&gt; Term s PScriptContext -&gt; Term s POpaque)
+-&gt; Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679274202"><span class="annot"><span class="annottext">Term s PData
+</span><a href="#local-6989586621679274202"><span class="hs-identifier hs-var">_datum</span></a></span></span><span> </span><span id="local-6989586621679274203"><span class="annot"><span class="annottext">Term s PData
+</span><a href="#local-6989586621679274203"><span class="hs-identifier hs-var">redeemer</span></a></span></span><span> </span><span id="local-6989586621679274204"><span class="annot"><span class="annottext">Term s PScriptContext
+</span><a href="#local-6989586621679274204"><span class="hs-identifier hs-var">ctx</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-49"></span><span>      </span><span class="annot"><span class="annottext">YieldListSTCS -&gt; Term s (PData :--&gt; (PScriptContext :--&gt; POpaque))
+forall (s :: S).
+YieldListSTCS -&gt; Term s (PData :--&gt; (PScriptContext :--&gt; POpaque))
+</span><a href="Cardano.YTxP.Control.Yielding.Helper.html#yieldingHelper"><span class="hs-identifier hs-var">yieldingHelper</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListSTCS
+</span><a href="#local-6989586621679274189"><span class="hs-identifier hs-var">ylstcs</span></a></span><span> </span><span class="annot"><span class="annottext">Term s (PData :--&gt; (PScriptContext :--&gt; POpaque))
+-&gt; Term s PData -&gt; Term s (PScriptContext :--&gt; POpaque)
+forall (s :: S) (a :: PType) (b :: PType).
+Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
+</span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s PData
+</span><a href="#local-6989586621679274203"><span class="hs-identifier hs-var">redeemer</span></a></span><span> </span><span class="annot"><span class="annottext">Term s (PScriptContext :--&gt; POpaque)
+-&gt; Term s PScriptContext -&gt; Term s POpaque
+forall (s :: S) (a :: PType) (b :: PType).
+Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
+</span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s PScriptContext
+</span><a href="#local-6989586621679274204"><span class="hs-identifier hs-var">ctx</span></a></span><span>
+</span><span id="line-50"></span><span>
+</span><span id="line-51"></span><span>  </span><span id="local-6989586621679274206"><span class="annot"><span class="annottext">Script
+</span><a href="#local-6989586621679274206"><span class="hs-identifier hs-var">script</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Config
+-&gt; (forall (s :: S).
+    Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
+-&gt; Either Text Script
+forall (a :: PType). Config -&gt; ClosedTerm a -&gt; Either Text Script
+</span><span class="hs-identifier hs-var">compile</span></span><span> </span><span class="annot"><span class="annottext">Config
+</span><a href="#local-6989586621679274188"><span class="hs-identifier hs-var">config</span></a></span><span> </span><span class="annot"><span class="annottext">Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+forall (s :: S).
+Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+</span><a href="#local-6989586621679274190"><span class="hs-identifier hs-var">yieldingValidator</span></a></span><span>
+</span><span id="line-52"></span><span>  </span><span class="annot"><span class="annottext">YieldingValidatorScript -&gt; Either Text YieldingValidatorScript
+forall a. a -&gt; Either Text a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#pure"><span class="hs-identifier hs-var">pure</span></a></span><span> </span><span class="annot"><span class="annottext">(YieldingValidatorScript -&gt; Either Text YieldingValidatorScript)
+-&gt; YieldingValidatorScript -&gt; Either Text YieldingValidatorScript
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">Script -&gt; YieldingValidatorScript
+</span><a href="Cardano.YTxP.Control.Yielding.Validator.html#YieldingValidatorScript"><span class="hs-identifier hs-var">YieldingValidatorScript</span></a></span><span> </span><span class="annot"><span class="annottext">Script
+</span><a href="#local-6989586621679274206"><span class="hs-identifier hs-var">script</span></a></span><span>
+</span><span id="line-53"></span><span>
+</span><span id="line-54"></span><span class="hs-comment">-------------------------------------------------------------------------------</span><span>
+</span><span id="line-55"></span><span class="hs-comment">-- Yielding Validator Credential</span><span>
+</span><span id="line-56"></span><span>
+</span><span id="line-57"></span><span class="annot"><span class="hs-comment">-- | Opaque, semantic newtype for the YieldList state thread currency symbol</span></span><span>
+</span><span id="line-58"></span><span class="hs-keyword">newtype</span><span> </span><span id="YieldingValidatorCredential"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#YieldingValidatorCredential"><span class="hs-identifier hs-var">YieldingValidatorCredential</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="YieldingValidatorCredential"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#YieldingValidatorCredential"><span class="hs-identifier hs-var">YieldingValidatorCredential</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Credential</span></span><span>
+</span><span id="line-59"></span><span>
+</span><span id="line-60"></span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#mkYieldingValidatorCredential"><span class="hs-identifier hs-type">mkYieldingValidatorCredential</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-61"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#YieldingValidatorScript"><span class="hs-identifier hs-type">YieldingValidatorScript</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#YieldingValidatorCredential"><span class="hs-identifier hs-type">YieldingValidatorCredential</span></a></span><span>
+</span><span id="line-62"></span><span id="mkYieldingValidatorCredential"><span class="annot"><span class="annottext">mkYieldingValidatorCredential :: YieldingValidatorScript -&gt; YieldingValidatorCredential
+</span><a href="Cardano.YTxP.Control.Yielding.Validator.html#mkYieldingValidatorCredential"><span class="hs-identifier hs-var hs-var">mkYieldingValidatorCredential</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#YieldingValidatorScript"><span class="hs-identifier hs-type">YieldingValidatorScript</span></a></span><span> </span><span id="local-6989586621679274208"><span class="annot"><span class="annottext">Script
+</span><a href="#local-6989586621679274208"><span class="hs-identifier hs-var">script</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-63"></span><span>  </span><span class="annot"><span class="annottext">Credential -&gt; YieldingValidatorCredential
+</span><a href="Cardano.YTxP.Control.Yielding.Validator.html#YieldingValidatorCredential"><span class="hs-identifier hs-var">YieldingValidatorCredential</span></a></span><span> </span><span class="annot"><span class="annottext">(Credential -&gt; YieldingValidatorCredential)
+-&gt; Credential -&gt; YieldingValidatorCredential
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">ScriptHash -&gt; Credential
+</span><span class="hs-identifier hs-var">ScriptCredential</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Script -&gt; ScriptHash
+</span><span class="hs-identifier hs-var">scriptHash</span></span><span> </span><span class="annot"><span class="annottext">Script
+</span><a href="#local-6989586621679274208"><span class="hs-identifier hs-var">script</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span></pre></body></html>

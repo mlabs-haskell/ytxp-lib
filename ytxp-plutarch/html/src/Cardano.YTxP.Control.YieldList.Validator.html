@@ -1,0 +1,564 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE TypeApplications #-}</span><span>
+</span><span id="line-2"></span><span>
+</span><span id="line-3"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Cardano.YTxP.Control.YieldList.Validator</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-4"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Validator</span></span><span>
+</span><span id="line-5"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#YieldListValidatorScript"><span class="hs-identifier">YieldListValidatorScript</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-6"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#compileYieldListValidator"><span class="hs-identifier">compileYieldListValidator</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-7"></span><span>
+</span><span id="line-8"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Credential</span></span><span>
+</span><span id="line-9"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#YieldListValidatorCredential"><span class="hs-identifier">YieldListValidatorCredential</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-10"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#mkYieldListValidatorWrapperCredential"><span class="hs-identifier">mkYieldListValidatorWrapperCredential</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-11"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-12"></span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/Control.Monad.html"><span class="hs-identifier">Control.Monad</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/Data.Functor.html#void"><span class="hs-identifier">void</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">FromJSON</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">ToJSON</span></span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Plutarch</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Config</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">compile</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Plutarch.Api.V1.Value</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">PCurrencySymbol</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Plutarch.Api.V2</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">PScriptContext</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">PScriptPurpose</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">PSpending</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">scriptHash</span></span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Plutarch.Script</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Script</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Script</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-20"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">PlutusLedgerApi.V2</span></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-21"></span><span>  </span><span class="annot"><span class="hs-identifier">Credential</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">ScriptCredential</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-22"></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-23"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prettyprinter</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Pretty</span></span><span class="hs-special">)</span><span>
+</span><span id="line-24"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Utils.html"><span class="hs-identifier">Utils</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-25"></span><span>  </span><span class="annot"><a href="Utils.html#pands"><span class="hs-identifier">pands</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-26"></span><span>  </span><span class="annot"><a href="Utils.html#phasOneScriptInputAtValidatorWithExactlyOneToken"><span class="hs-identifier">phasOneScriptInputAtValidatorWithExactlyOneToken</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-27"></span><span>  </span><span class="annot"><a href="Utils.html#poutputsDoNotContainToken"><span class="hs-identifier">poutputsDoNotContainToken</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-28"></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-29"></span><span>
+</span><span id="line-30"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-31"></span><span class="hs-comment">-- YieldListValidatorScript</span><span>
+</span><span id="line-32"></span><span>
+</span><span id="line-33"></span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-34"></span><span class="hs-keyword">newtype</span><span> </span><span id="YieldListValidatorScript"><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#YieldListValidatorScript"><span class="hs-identifier hs-var">YieldListValidatorScript</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="YieldListValidatorScript"><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#YieldListValidatorScript"><span class="hs-identifier hs-var">YieldListValidatorScript</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Script</span></span><span>
+</span><span id="line-35"></span><span>  </span><span class="hs-keyword">deriving</span><span>
+</span><span id="line-36"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-37"></span><span>      </span><span id="local-6989586621679272362"><span id="local-6989586621679272367"><span id="local-6989586621679272371"><span id="local-6989586621679272375"><span id="local-6989586621679272379"><span class="annot"><span class="annottext">[YieldListValidatorScript] -&gt; Value
+[YieldListValidatorScript] -&gt; Encoding
+YieldListValidatorScript -&gt; Bool
+YieldListValidatorScript -&gt; Value
+YieldListValidatorScript -&gt; Encoding
+(YieldListValidatorScript -&gt; Value)
+-&gt; (YieldListValidatorScript -&gt; Encoding)
+-&gt; ([YieldListValidatorScript] -&gt; Value)
+-&gt; ([YieldListValidatorScript] -&gt; Encoding)
+-&gt; (YieldListValidatorScript -&gt; Bool)
+-&gt; ToJSON YieldListValidatorScript
+forall a.
+(a -&gt; Value)
+-&gt; (a -&gt; Encoding)
+-&gt; ([a] -&gt; Value)
+-&gt; ([a] -&gt; Encoding)
+-&gt; (a -&gt; Bool)
+-&gt; ToJSON a
+$ctoJSON :: YieldListValidatorScript -&gt; Value
+toJSON :: YieldListValidatorScript -&gt; Value
+$ctoEncoding :: YieldListValidatorScript -&gt; Encoding
+toEncoding :: YieldListValidatorScript -&gt; Encoding
+$ctoJSONList :: [YieldListValidatorScript] -&gt; Value
+toJSONList :: [YieldListValidatorScript] -&gt; Value
+$ctoEncodingList :: [YieldListValidatorScript] -&gt; Encoding
+toEncodingList :: [YieldListValidatorScript] -&gt; Encoding
+$comitField :: YieldListValidatorScript -&gt; Bool
+omitField :: YieldListValidatorScript -&gt; Bool
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">ToJSON</span></span></span></span></span></span></span><span>
+</span><span id="line-38"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-39"></span><span>      </span><span id="local-6989586621679272385"><span id="local-6989586621679272391"><span id="local-6989586621679272396"><span class="annot"><span class="annottext">Maybe YieldListValidatorScript
+Value -&gt; Parser [YieldListValidatorScript]
+Value -&gt; Parser YieldListValidatorScript
+(Value -&gt; Parser YieldListValidatorScript)
+-&gt; (Value -&gt; Parser [YieldListValidatorScript])
+-&gt; Maybe YieldListValidatorScript
+-&gt; FromJSON YieldListValidatorScript
+forall a.
+(Value -&gt; Parser a)
+-&gt; (Value -&gt; Parser [a]) -&gt; Maybe a -&gt; FromJSON a
+$cparseJSON :: Value -&gt; Parser YieldListValidatorScript
+parseJSON :: Value -&gt; Parser YieldListValidatorScript
+$cparseJSONList :: Value -&gt; Parser [YieldListValidatorScript]
+parseJSONList :: Value -&gt; Parser [YieldListValidatorScript]
+$comittedField :: Maybe YieldListValidatorScript
+omittedField :: Maybe YieldListValidatorScript
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">FromJSON</span></span></span></span></span><span>
+</span><span id="line-40"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>    </span><span class="hs-keyword">via</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">HexStringScript</span></span><span> </span><span class="annot"><span class="hs-string">&quot;YieldListValidatorScript&quot;</span></span><span class="hs-special">)</span><span>
+</span><span id="line-42"></span><span>  </span><span class="hs-keyword">deriving</span><span>
+</span><span id="line-43"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-44"></span><span>      </span><span id="local-6989586621679272403"><span id="local-6989586621679272408"><span class="annot"><span class="annottext">YieldListValidatorScript -&gt; YieldListValidatorScript -&gt; Bool
+(YieldListValidatorScript -&gt; YieldListValidatorScript -&gt; Bool)
+-&gt; (YieldListValidatorScript -&gt; YieldListValidatorScript -&gt; Bool)
+-&gt; Eq YieldListValidatorScript
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: YieldListValidatorScript -&gt; YieldListValidatorScript -&gt; Bool
+== :: YieldListValidatorScript -&gt; YieldListValidatorScript -&gt; Bool
+$c/= :: YieldListValidatorScript -&gt; YieldListValidatorScript -&gt; Bool
+/= :: YieldListValidatorScript -&gt; YieldListValidatorScript -&gt; Bool
+</span><a href="../../../ghc-9.6.5/html/libraries/ghc-prim-0.10.0/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span>
+</span><span id="line-45"></span><span>    </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-46"></span><span>      </span><span id="local-6989586621679272414"><span id="local-6989586621679272419"><span class="annot"><span class="annottext">(forall ann. YieldListValidatorScript -&gt; Doc ann)
+-&gt; (forall ann. [YieldListValidatorScript] -&gt; Doc ann)
+-&gt; Pretty YieldListValidatorScript
+forall ann. [YieldListValidatorScript] -&gt; Doc ann
+forall ann. YieldListValidatorScript -&gt; Doc ann
+forall a.
+(forall ann. a -&gt; Doc ann)
+-&gt; (forall ann. [a] -&gt; Doc ann) -&gt; Pretty a
+$cpretty :: forall ann. YieldListValidatorScript -&gt; Doc ann
+pretty :: forall ann. YieldListValidatorScript -&gt; Doc ann
+$cprettyList :: forall ann. [YieldListValidatorScript] -&gt; Doc ann
+prettyList :: forall ann. [YieldListValidatorScript] -&gt; Doc ann
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Pretty</span></span></span></span><span>
+</span><span id="line-47"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-48"></span><span>    </span><span class="hs-keyword">via</span><span> </span><span class="annot"><span class="hs-identifier hs-type">SerialForm</span></span><span>
+</span><span id="line-49"></span><span>
+</span><span id="line-50"></span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#compileYieldListValidator"><span class="hs-identifier hs-type">compileYieldListValidator</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-51"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Config</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-52"></span><span>  </span><span class="hs-special">(</span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679272224"><span class="annot"><a href="#local-6989586621679272224"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span class="hs-operator">.</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Term</span></span><span> </span><span class="annot"><a href="#local-6989586621679272224"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PScriptContext</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">POpaque</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-53"></span><span>  </span><span class="annot"><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/Data.Either.html#Either"><span class="hs-identifier hs-type">Either</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#YieldListValidatorScript"><span class="hs-identifier hs-type">YieldListValidatorScript</span></a></span><span>
+</span><span id="line-54"></span><span id="compileYieldListValidator"><span class="annot"><span class="annottext">compileYieldListValidator :: Config
+-&gt; (forall (s :: S).
+    Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
+-&gt; Either Text YieldListValidatorScript
+</span><a href="Cardano.YTxP.Control.YieldList.Validator.html#compileYieldListValidator"><span class="hs-identifier hs-var hs-var">compileYieldListValidator</span></a></span></span><span> </span><span id="local-6989586621679272424"><span class="annot"><span class="annottext">Config
+</span><a href="#local-6989586621679272424"><span class="hs-identifier hs-var">config</span></a></span></span><span> </span><span id="local-6989586621679272425"><span class="annot"><span class="annottext">forall (s :: S).
+Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+</span><a href="#local-6989586621679272425"><span class="hs-identifier hs-var">scriptToWrap</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-55"></span><span>  </span><span id="local-6989586621679272426"><span class="annot"><span class="annottext">Script
+</span><a href="#local-6989586621679272426"><span class="hs-identifier hs-var">script</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Config
+-&gt; ClosedTerm
+     (PCurrencySymbol
+      :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
+-&gt; Either Text Script
+forall (a :: PType). Config -&gt; ClosedTerm a -&gt; Either Text Script
+</span><span class="hs-identifier hs-var">compile</span></span><span> </span><span class="annot"><span class="annottext">Config
+</span><a href="#local-6989586621679272424"><span class="hs-identifier hs-var">config</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Term
+  s
+  ((PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+   :--&gt; (PCurrencySymbol
+         :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))))
+forall (s :: S).
+Term
+  s
+  ((PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+   :--&gt; (PCurrencySymbol
+         :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))))
+</span><a href="Cardano.YTxP.Control.YieldList.Validator.html#mkYieldListValidatorWrapper"><span class="hs-identifier hs-var">mkYieldListValidatorWrapper</span></a></span><span> </span><span class="annot"><span class="annottext">Term
+  s
+  ((PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+   :--&gt; (PCurrencySymbol
+         :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))))
+-&gt; Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+-&gt; Term
+     s
+     (PCurrencySymbol
+      :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
+forall (s :: S) (a :: PType) (b :: PType).
+Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
+</span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+forall (s :: S).
+Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+</span><a href="#local-6989586621679272425"><span class="hs-identifier hs-var">scriptToWrap</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-56"></span><span>  </span><span class="annot"><span class="annottext">YieldListValidatorScript -&gt; Either Text YieldListValidatorScript
+forall a. a -&gt; Either Text a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#pure"><span class="hs-identifier hs-var">pure</span></a></span><span> </span><span class="annot"><span class="annottext">(YieldListValidatorScript -&gt; Either Text YieldListValidatorScript)
+-&gt; YieldListValidatorScript -&gt; Either Text YieldListValidatorScript
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">Script -&gt; YieldListValidatorScript
+</span><a href="Cardano.YTxP.Control.YieldList.Validator.html#YieldListValidatorScript"><span class="hs-identifier hs-var">YieldListValidatorScript</span></a></span><span> </span><span class="annot"><span class="annottext">Script
+</span><a href="#local-6989586621679272426"><span class="hs-identifier hs-var">script</span></a></span><span>
+</span><span id="line-57"></span><span>
+</span><span id="line-58"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-59"></span><span class="hs-comment">-- YieldListSTCS</span><span>
+</span><span id="line-60"></span><span>
+</span><span id="line-61"></span><span class="annot"><span class="hs-comment">-- | Opaque, semantic newtype for the YieldList state thread currency symbol</span></span><span>
+</span><span id="line-62"></span><span class="hs-keyword">newtype</span><span> </span><span id="YieldListValidatorCredential"><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#YieldListValidatorCredential"><span class="hs-identifier hs-var">YieldListValidatorCredential</span></a></span></span><span>
+</span><span id="line-63"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="YieldListValidatorCredential"><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#YieldListValidatorCredential"><span class="hs-identifier hs-var">YieldListValidatorCredential</span></a></span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlutusLedgerApi.V2.Credential</span></span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#mkYieldListValidatorWrapperCredential"><span class="hs-identifier hs-type">mkYieldListValidatorWrapperCredential</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-66"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#YieldListValidatorScript"><span class="hs-identifier hs-type">YieldListValidatorScript</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-67"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#YieldListValidatorCredential"><span class="hs-identifier hs-type">YieldListValidatorCredential</span></a></span><span>
+</span><span id="line-68"></span><span id="mkYieldListValidatorWrapperCredential"><span class="annot"><span class="annottext">mkYieldListValidatorWrapperCredential :: YieldListValidatorScript -&gt; YieldListValidatorCredential
+</span><a href="Cardano.YTxP.Control.YieldList.Validator.html#mkYieldListValidatorWrapperCredential"><span class="hs-identifier hs-var hs-var">mkYieldListValidatorWrapperCredential</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#YieldListValidatorScript"><span class="hs-identifier hs-type">YieldListValidatorScript</span></a></span><span> </span><span id="local-6989586621679272430"><span class="annot"><span class="annottext">Script
+</span><a href="#local-6989586621679272430"><span class="hs-identifier hs-var">script</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-69"></span><span>  </span><span class="annot"><span class="annottext">Credential -&gt; YieldListValidatorCredential
+</span><a href="Cardano.YTxP.Control.YieldList.Validator.html#YieldListValidatorCredential"><span class="hs-identifier hs-var">YieldListValidatorCredential</span></a></span><span>
+</span><span id="line-70"></span><span>    </span><span class="annot"><span class="annottext">(Credential -&gt; YieldListValidatorCredential)
+-&gt; (Script -&gt; Credential) -&gt; Script -&gt; YieldListValidatorCredential
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">ScriptHash -&gt; Credential
+</span><span class="hs-identifier hs-var">PlutusLedgerApi.V2.ScriptCredential</span></span><span>
+</span><span id="line-71"></span><span>    </span><span class="annot"><span class="annottext">(ScriptHash -&gt; Credential)
+-&gt; (Script -&gt; ScriptHash) -&gt; Script -&gt; Credential
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">Script -&gt; ScriptHash
+</span><span class="hs-identifier hs-var">scriptHash</span></span><span>
+</span><span id="line-72"></span><span>    </span><span class="annot"><span class="annottext">(Script -&gt; YieldListValidatorCredential)
+-&gt; Script -&gt; YieldListValidatorCredential
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">Script
+</span><a href="#local-6989586621679272430"><span class="hs-identifier hs-var">script</span></a></span><span>
+</span><span id="line-73"></span><span>
+</span><span id="line-74"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-75"></span><span class="hs-comment">-- Helpers (Unexported)</span><span>
+</span><span id="line-76"></span><span>
+</span><span id="line-77"></span><span class="hs-comment">{-
+  The `mkYieldListValidatorWrapper` script is used to build a validator that takes a wrapper validator
+  as an argument, while performing additional checks of its own, which are outlined below.
+
+  When spent, a YieldList UTxO must burn all of its tokens except for minAda.
+  Updates are not permissible, you must chain a creation and deletion.
+
+  The validator performs the following checks:
+    - The transaction is spending a UTXO at this address (checked via `PSpending`)
+    - There is one UTxO input at the YieldListValidator address with exactly one YieldListSTT
+    - Due to the wrapping script, there is a potential for other script inputs and outputs beyond the ones
+      we account for in this script. There may also be other wallet inputs and outputs, depending on the
+      type of wrapping script.
+      * We need to ensure that these other inputs or outputs do not carry a YieldListSTT
+    - The wrapped script succeeds
+
+  Additional validation semantics must be user defined via wrapping scripts.
+  Examples include:
+    - alwaysFail (immutable)
+    - multisig
+    - admin sig
+    - governance wrappers
+
+-}</span><span>
+</span><span id="line-101"></span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#mkYieldListValidatorWrapper"><span class="hs-identifier hs-type">mkYieldListValidatorWrapper</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-102"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679272236"><span class="annot"><a href="#local-6989586621679272236"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span class="hs-operator">.</span><span>
+</span><span id="line-103"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Term</span></span><span>
+</span><span id="line-104"></span><span>    </span><span class="annot"><a href="#local-6989586621679272236"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-105"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PScriptContext</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">POpaque</span></span><span class="hs-special">)</span><span>
+</span><span id="line-106"></span><span>        </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PCurrencySymbol</span></span><span>
+</span><span id="line-107"></span><span>        </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span>
+</span><span id="line-108"></span><span>        </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span>
+</span><span id="line-109"></span><span>        </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PScriptContext</span></span><span>
+</span><span id="line-110"></span><span>        </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">POpaque</span></span><span>
+</span><span id="line-111"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-112"></span><span id="mkYieldListValidatorWrapper"><span class="annot"><span class="annottext">mkYieldListValidatorWrapper :: forall (s :: S).
+Term
+  s
+  ((PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+   :--&gt; (PCurrencySymbol
+         :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))))
+</span><a href="Cardano.YTxP.Control.YieldList.Validator.html#mkYieldListValidatorWrapper"><span class="hs-identifier hs-var hs-var">mkYieldListValidatorWrapper</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(forall (s :: S).
+ Term
+   s
+   ((PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+    :--&gt; (PCurrencySymbol
+          :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))))
+-&gt; Term
+     s
+     ((PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+      :--&gt; (PCurrencySymbol
+            :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))))
+forall (a :: PType) (s :: S).
+HasCallStack =&gt;
+ClosedTerm a -&gt; Term s a
+</span><span class="hs-identifier hs-var">phoistAcyclic</span></span><span> </span><span class="annot"><span class="annottext">((forall (s :: S).
+  Term
+    s
+    ((PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+     :--&gt; (PCurrencySymbol
+           :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))))
+ -&gt; Term
+      s
+      ((PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+       :--&gt; (PCurrencySymbol
+             :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))))
+-&gt; (forall (s :: S).
+    Term
+      s
+      ((PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+       :--&gt; (PCurrencySymbol
+             :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))))
+-&gt; Term
+     s
+     ((PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+      :--&gt; (PCurrencySymbol
+            :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">(Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+ -&gt; Term s PCurrencySymbol
+ -&gt; Term s PData
+ -&gt; Term s PData
+ -&gt; Term s PScriptContext
+ -&gt; Term s POpaque)
+-&gt; Term
+     s
+     ((PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+      :--&gt; (PCurrencySymbol
+            :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))))
+forall a (b :: PType) (s :: S) (c :: PType).
+(PLamN a b s, HasCallStack) =&gt;
+(Term s c -&gt; a) -&gt; Term s (c :--&gt; b)
+forall (c :: PType).
+HasCallStack =&gt;
+(Term s c
+ -&gt; Term s PCurrencySymbol
+ -&gt; Term s PData
+ -&gt; Term s PData
+ -&gt; Term s PScriptContext
+ -&gt; Term s POpaque)
+-&gt; Term
+     s
+     (c
+      :--&gt; (PCurrencySymbol
+            :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))))
+</span><span class="hs-identifier hs-var">plam</span></span><span> </span><span class="annot"><span class="annottext">((Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+  -&gt; Term s PCurrencySymbol
+  -&gt; Term s PData
+  -&gt; Term s PData
+  -&gt; Term s PScriptContext
+  -&gt; Term s POpaque)
+ -&gt; Term
+      s
+      ((PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+       :--&gt; (PCurrencySymbol
+             :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))))
+-&gt; (Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+    -&gt; Term s PCurrencySymbol
+    -&gt; Term s PData
+    -&gt; Term s PData
+    -&gt; Term s PScriptContext
+    -&gt; Term s POpaque)
+-&gt; Term
+     s
+     ((PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+      :--&gt; (PCurrencySymbol
+            :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))))
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679272532"><span class="annot"><span class="annottext">Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+</span><a href="#local-6989586621679272532"><span class="hs-identifier hs-var">scriptToWrap</span></a></span></span><span> </span><span id="local-6989586621679272533"><span class="annot"><span class="annottext">Term s PCurrencySymbol
+</span><a href="#local-6989586621679272533"><span class="hs-identifier hs-var">yieldListSymbol</span></a></span></span><span> </span><span id="local-6989586621679272534"><span class="annot"><span class="annottext">Term s PData
+</span><a href="#local-6989586621679272534"><span class="hs-identifier hs-var">datum</span></a></span></span><span> </span><span id="local-6989586621679272535"><span class="annot"><span class="annottext">Term s PData
+</span><a href="#local-6989586621679272535"><span class="hs-identifier hs-var">redeemer</span></a></span></span><span> </span><span id="local-6989586621679272536"><span class="annot"><span class="annottext">Term s PScriptContext
+</span><a href="#local-6989586621679272536"><span class="hs-identifier hs-var">context</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">TermCont @POpaque s (Term s POpaque) -&gt; Term s POpaque
+forall (a :: PType) (s :: S). TermCont @a s (Term s a) -&gt; Term s a
+</span><span class="hs-identifier hs-var">unTermCont</span></span><span> </span><span class="annot"><span class="annottext">(TermCont @POpaque s (Term s POpaque) -&gt; Term s POpaque)
+-&gt; TermCont @POpaque s (Term s POpaque) -&gt; Term s POpaque
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-113"></span><span>  </span><span class="annot"><span class="annottext">TermCont @POpaque s (Term s POpaque) -&gt; TermCont @POpaque s ()
+forall (f :: Type -&gt; Type) a. Functor f =&gt; f a -&gt; f ()
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/Data.Functor.html#void"><span class="hs-identifier hs-var">void</span></a></span><span> </span><span class="annot"><span class="annottext">(TermCont @POpaque s (Term s POpaque) -&gt; TermCont @POpaque s ())
+-&gt; TermCont @POpaque s (Term s POpaque) -&gt; TermCont @POpaque s ()
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">Term s POpaque -&gt; TermCont @POpaque s (Term s POpaque)
+forall {r :: PType} (s :: S) (a :: PType).
+Term s a -&gt; TermCont @r s (Term s a)
+</span><span class="hs-identifier hs-var">pletC</span></span><span> </span><span class="annot"><span class="annottext">(Term s POpaque -&gt; TermCont @POpaque s (Term s POpaque))
+-&gt; Term s POpaque -&gt; TermCont @POpaque s (Term s POpaque)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+</span><a href="#local-6989586621679272532"><span class="hs-identifier hs-var">scriptToWrap</span></a></span><span> </span><span class="annot"><span class="annottext">Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+-&gt; Term s PData
+-&gt; Term s (PData :--&gt; (PScriptContext :--&gt; POpaque))
+forall (s :: S) (a :: PType) (b :: PType).
+Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
+</span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s PData
+</span><a href="#local-6989586621679272534"><span class="hs-identifier hs-var">datum</span></a></span><span> </span><span class="annot"><span class="annottext">Term s (PData :--&gt; (PScriptContext :--&gt; POpaque))
+-&gt; Term s PData -&gt; Term s (PScriptContext :--&gt; POpaque)
+forall (s :: S) (a :: PType) (b :: PType).
+Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
+</span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s PData
+</span><a href="#local-6989586621679272535"><span class="hs-identifier hs-var">redeemer</span></a></span><span> </span><span class="annot"><span class="annottext">Term s (PScriptContext :--&gt; POpaque)
+-&gt; Term s PScriptContext -&gt; Term s POpaque
+forall (s :: S) (a :: PType) (b :: PType).
+Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
+</span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s PScriptContext
+</span><a href="#local-6989586621679272536"><span class="hs-identifier hs-var">context</span></a></span><span>
+</span><span id="line-114"></span><span>
+</span><span id="line-115"></span><span>  </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679272539"><span class="annot"><span class="annottext">txInfo :: Term s PTxInfo
+</span><a href="#local-6989586621679272539"><span class="hs-identifier hs-var hs-var">txInfo</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Term s (PAsData PTxInfo) -&gt; Term s PTxInfo
+forall (a :: PType) (s :: S).
+PIsData a =&gt;
+Term s (PAsData a) -&gt; Term s a
+</span><span class="hs-identifier hs-var">pfromData</span></span><span> </span><span class="annot"><span class="annottext">(Term s (PAsData PTxInfo) -&gt; Term s PTxInfo)
+-&gt; Term s (PAsData PTxInfo) -&gt; Term s PTxInfo
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">forall (name :: Symbol) (b :: PType) (p :: PType) (s :: S)
+       (a :: PType) (as :: [PLabeledType]) (n :: Nat).
+(PDataFields p,
+ (as :: [PLabeledType]) ~ (PFields p :: [PLabeledType]),
+ (n :: Nat) ~ (PLabelIndex name as :: Nat), KnownNat n,
+ (a :: PType) ~ (PUnLabel (IndexList @PLabeledType n as) :: PType),
+ PFromDataable a b) =&gt;
+Term s (p :--&gt; b)
+</span><span class="hs-identifier hs-var">pfield</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;txInfo&quot;</span></span><span> </span><span class="annot"><span class="annottext">Term s (PScriptContext :--&gt; PAsData PTxInfo)
+-&gt; Term s PScriptContext -&gt; Term s (PAsData PTxInfo)
+forall (s :: S) (a :: PType) (b :: PType).
+Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
+</span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s PScriptContext
+</span><a href="#local-6989586621679272536"><span class="hs-identifier hs-var">context</span></a></span><span>
+</span><span id="line-116"></span><span>      </span><span id="local-6989586621679272542"><span class="annot"><span class="annottext">purpose :: Term s PScriptPurpose
+</span><a href="#local-6989586621679272542"><span class="hs-identifier hs-var hs-var">purpose</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Term s (PAsData PScriptPurpose) -&gt; Term s PScriptPurpose
+forall (a :: PType) (s :: S).
+PIsData a =&gt;
+Term s (PAsData a) -&gt; Term s a
+</span><span class="hs-identifier hs-var">pfromData</span></span><span> </span><span class="annot"><span class="annottext">(Term s (PAsData PScriptPurpose) -&gt; Term s PScriptPurpose)
+-&gt; Term s (PAsData PScriptPurpose) -&gt; Term s PScriptPurpose
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">forall (name :: Symbol) (b :: PType) (p :: PType) (s :: S)
+       (a :: PType) (as :: [PLabeledType]) (n :: Nat).
+(PDataFields p,
+ (as :: [PLabeledType]) ~ (PFields p :: [PLabeledType]),
+ (n :: Nat) ~ (PLabelIndex name as :: Nat), KnownNat n,
+ (a :: PType) ~ (PUnLabel (IndexList @PLabeledType n as) :: PType),
+ PFromDataable a b) =&gt;
+Term s (p :--&gt; b)
+</span><span class="hs-identifier hs-var">pfield</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;purpose&quot;</span></span><span> </span><span class="annot"><span class="annottext">Term s (PScriptContext :--&gt; PAsData PScriptPurpose)
+-&gt; Term s PScriptContext -&gt; Term s (PAsData PScriptPurpose)
+forall (s :: S) (a :: PType) (b :: PType).
+Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
+</span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s PScriptContext
+</span><a href="#local-6989586621679272536"><span class="hs-identifier hs-var">context</span></a></span><span>
+</span><span id="line-117"></span><span>      </span><span id="local-6989586621679272543"><span class="annot"><span class="annottext">inputs :: Term s (PBuiltinList PTxInInfo)
+</span><a href="#local-6989586621679272543"><span class="hs-identifier hs-var hs-var">inputs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Term s (PAsData (PBuiltinList PTxInInfo))
+-&gt; Term s (PBuiltinList PTxInInfo)
+forall (a :: PType) (s :: S).
+PIsData a =&gt;
+Term s (PAsData a) -&gt; Term s a
+</span><span class="hs-identifier hs-var">pfromData</span></span><span> </span><span class="annot"><span class="annottext">(Term s (PAsData (PBuiltinList PTxInInfo))
+ -&gt; Term s (PBuiltinList PTxInInfo))
+-&gt; Term s (PAsData (PBuiltinList PTxInInfo))
+-&gt; Term s (PBuiltinList PTxInInfo)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">forall (name :: Symbol) (b :: PType) (p :: PType) (s :: S)
+       (a :: PType) (as :: [PLabeledType]) (n :: Nat).
+(PDataFields p,
+ (as :: [PLabeledType]) ~ (PFields p :: [PLabeledType]),
+ (n :: Nat) ~ (PLabelIndex name as :: Nat), KnownNat n,
+ (a :: PType) ~ (PUnLabel (IndexList @PLabeledType n as) :: PType),
+ PFromDataable a b) =&gt;
+Term s (p :--&gt; b)
+</span><span class="hs-identifier hs-var">pfield</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;inputs&quot;</span></span><span> </span><span class="annot"><span class="annottext">Term s (PTxInfo :--&gt; PAsData (PBuiltinList PTxInInfo))
+-&gt; Term s PTxInfo -&gt; Term s (PAsData (PBuiltinList PTxInInfo))
+forall (s :: S) (a :: PType) (b :: PType).
+Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
+</span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s PTxInfo
+</span><a href="#local-6989586621679272539"><span class="hs-identifier hs-var">txInfo</span></a></span><span>
+</span><span id="line-118"></span><span>      </span><span id="local-6989586621679272544"><span class="annot"><span class="annottext">outputs :: Term s (PBuiltinList PTxOut)
+</span><a href="#local-6989586621679272544"><span class="hs-identifier hs-var hs-var">outputs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Term s (PAsData (PBuiltinList PTxOut))
+-&gt; Term s (PBuiltinList PTxOut)
+forall (a :: PType) (s :: S).
+PIsData a =&gt;
+Term s (PAsData a) -&gt; Term s a
+</span><span class="hs-identifier hs-var">pfromData</span></span><span> </span><span class="annot"><span class="annottext">(Term s (PAsData (PBuiltinList PTxOut))
+ -&gt; Term s (PBuiltinList PTxOut))
+-&gt; Term s (PAsData (PBuiltinList PTxOut))
+-&gt; Term s (PBuiltinList PTxOut)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">forall (name :: Symbol) (b :: PType) (p :: PType) (s :: S)
+       (a :: PType) (as :: [PLabeledType]) (n :: Nat).
+(PDataFields p,
+ (as :: [PLabeledType]) ~ (PFields p :: [PLabeledType]),
+ (n :: Nat) ~ (PLabelIndex name as :: Nat), KnownNat n,
+ (a :: PType) ~ (PUnLabel (IndexList @PLabeledType n as) :: PType),
+ PFromDataable a b) =&gt;
+Term s (p :--&gt; b)
+</span><span class="hs-identifier hs-var">pfield</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;outputs&quot;</span></span><span> </span><span class="annot"><span class="annottext">Term s (PTxInfo :--&gt; PAsData (PBuiltinList PTxOut))
+-&gt; Term s PTxInfo -&gt; Term s (PAsData (PBuiltinList PTxOut))
+forall (s :: S) (a :: PType) (b :: PType).
+Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
+</span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s PTxInfo
+</span><a href="#local-6989586621679272539"><span class="hs-identifier hs-var">txInfo</span></a></span><span>
+</span><span id="line-119"></span><span>
+</span><span id="line-120"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">PSpending</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="annot"><span class="annottext">forall (name :: Symbol) (b :: PType) (p :: PType) (s :: S)
+       (a :: PType) (as :: [PLabeledType]) (n :: Nat).
+(PDataFields p,
+ (as :: [PLabeledType]) ~ (PFields p :: [PLabeledType]),
+ (n :: Nat) ~ (PLabelIndex name as :: Nat), KnownNat n,
+ (a :: PType) ~ (PUnLabel (IndexList @PLabeledType n as) :: PType),
+ PFromDataable a b) =&gt;
+Term s (p :--&gt; b)
+</span><span class="hs-identifier hs-var">pfield</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;_0&quot;</span></span><span> </span><span class="hs-operator">#</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679272545"><span class="annot"><span class="annottext">Term s PTxOutRef
+</span><a href="#local-6989586621679272545"><span class="hs-identifier hs-var">yieldListInputRef</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Term s PScriptPurpose -&gt; TermCont @POpaque s (PScriptPurpose s)
+forall {r :: PType} (a :: PType) (s :: S).
+PlutusType a =&gt;
+Term s a -&gt; TermCont @r s (a s)
+</span><span class="hs-identifier hs-var">pmatchC</span></span><span> </span><span class="annot"><span class="annottext">Term s PScriptPurpose
+</span><a href="#local-6989586621679272542"><span class="hs-identifier hs-var">purpose</span></a></span><span>
+</span><span id="line-121"></span><span>  </span><span class="annot"><span class="annottext">Term s POpaque -&gt; TermCont @POpaque s (Term s POpaque)
+forall a. a -&gt; TermCont @POpaque s a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#pure"><span class="hs-identifier hs-var">pure</span></a></span><span> </span><span class="annot"><span class="annottext">(Term s POpaque -&gt; TermCont @POpaque s (Term s POpaque))
+-&gt; Term s POpaque -&gt; TermCont @POpaque s (Term s POpaque)
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span>
+</span><span id="line-122"></span><span>    </span><span class="annot"><span class="annottext">Term s PBool -&gt; Term s POpaque -&gt; Term s POpaque -&gt; Term s POpaque
+forall (s :: S) (a :: PType).
+Term s PBool -&gt; Term s a -&gt; Term s a -&gt; Term s a
+</span><span class="hs-identifier hs-var">pif</span></span><span>
+</span><span id="line-123"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Term s PString -&gt; Term s PBool -&gt; Term s PBool
+forall (s :: S). Term s PString -&gt; Term s PBool -&gt; Term s PBool
+</span><span class="hs-identifier hs-var">ptraceIfFalse</span></span><span>
+</span><span id="line-124"></span><span>          </span><span class="annot"><span class="annottext">Term s PString
+</span><span class="hs-string">&quot;mkYieldListValidatorWrapper failed&quot;</span></span><span>
+</span><span id="line-125"></span><span>          </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">[Term s PBool] -&gt; Term s PBool
+forall (s :: S). [Term s PBool] -&gt; Term s PBool
+</span><a href="Utils.html#pands"><span class="hs-identifier hs-var">pands</span></a></span><span>
+</span><span id="line-126"></span><span>              </span><span class="hs-special">[</span><span> </span><span class="hs-comment">-- For efficiency reasons we use this helper to make a couple of checks,</span><span>
+</span><span id="line-127"></span><span>                </span><span class="hs-comment">-- Namely, it ensures that there is one input at the yield list validator</span><span>
+</span><span id="line-128"></span><span>                </span><span class="hs-comment">-- with exactly one YieldListSTT.</span><span>
+</span><span id="line-129"></span><span>                </span><span class="hs-comment">-- It also checks that there are no other script inputs with a YieldListSTT.</span><span>
+</span><span id="line-130"></span><span>                </span><span class="hs-comment">-- (There is no need to check the wallet inputs as a YieldListSTT is never</span><span>
+</span><span id="line-131"></span><span>                </span><span class="hs-comment">--  sent to one in the first place.)</span><span>
+</span><span id="line-132"></span><span>                </span><span class="annot"><span class="annottext">Term s PString -&gt; Term s PBool -&gt; Term s PBool
+forall (s :: S). Term s PString -&gt; Term s PBool -&gt; Term s PBool
+</span><span class="hs-identifier hs-var">ptraceIfFalse</span></span><span>
+</span><span id="line-133"></span><span>                  </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">[Term s PString] -&gt; Term s PString
+forall a. Monoid a =&gt; [a] -&gt; a
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#mconcat"><span class="hs-identifier hs-var">mconcat</span></a></span><span>
+</span><span id="line-134"></span><span>                      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Term s PString
+</span><span class="hs-string">&quot;Must have one input at the yield list validator with exactly one YieldListSTT,&quot;</span></span><span>
+</span><span id="line-135"></span><span>                      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Term s PString
+</span><span class="hs-string">&quot; and no other inputs containing a YieldListSTT&quot;</span></span><span>
+</span><span id="line-136"></span><span>                      </span><span class="hs-special">]</span><span>
+</span><span id="line-137"></span><span>                  </span><span class="hs-special">)</span><span>
+</span><span id="line-138"></span><span>                  </span><span class="annot"><span class="annottext">(Term s PBool -&gt; Term s PBool) -&gt; Term s PBool -&gt; Term s PBool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">Term s (PBuiltinList PTxInInfo)
+-&gt; Term s (PCurrencySymbol :--&gt; (PTxOutRef :--&gt; PBool))
+forall (s :: S).
+Term s (PBuiltinList PTxInInfo)
+-&gt; Term s (PCurrencySymbol :--&gt; (PTxOutRef :--&gt; PBool))
+</span><a href="Utils.html#phasOneScriptInputAtValidatorWithExactlyOneToken"><span class="hs-identifier hs-var">phasOneScriptInputAtValidatorWithExactlyOneToken</span></a></span><span> </span><span class="annot"><span class="annottext">Term s (PBuiltinList PTxInInfo)
+</span><a href="#local-6989586621679272543"><span class="hs-identifier hs-var">inputs</span></a></span><span class="hs-cpp">
+                    # yieldListSymbol
+</span><span class="hs-cpp">                    # yieldListInputRef
+</span><span>              </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Term s PString -&gt; Term s PBool -&gt; Term s PBool
+forall (s :: S). Term s PString -&gt; Term s PBool -&gt; Term s PBool
+</span><span class="hs-identifier hs-var">ptraceIfFalse</span></span><span>
+</span><span id="line-142"></span><span>                  </span><span class="annot"><span class="annottext">Term s PString
+</span><span class="hs-string">&quot;Must be no YieldListSTT at any of the outputs&quot;</span></span><span>
+</span><span id="line-143"></span><span>                  </span><span class="annot"><span class="annottext">(Term s PBool -&gt; Term s PBool) -&gt; Term s PBool -&gt; Term s PBool
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">Term s (PBuiltinList PTxOut) -&gt; Term s (PCurrencySymbol :--&gt; PBool)
+forall (s :: S).
+Term s (PBuiltinList PTxOut) -&gt; Term s (PCurrencySymbol :--&gt; PBool)
+</span><a href="Utils.html#poutputsDoNotContainToken"><span class="hs-identifier hs-var">poutputsDoNotContainToken</span></a></span><span> </span><span class="annot"><span class="annottext">Term s (PBuiltinList PTxOut)
+</span><a href="#local-6989586621679272544"><span class="hs-identifier hs-var">outputs</span></a></span><span> </span><span class="annot"><span class="annottext">Term s (PCurrencySymbol :--&gt; PBool)
+-&gt; Term s PCurrencySymbol -&gt; Term s PBool
+forall (s :: S) (a :: PType) (b :: PType).
+Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
+</span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s PCurrencySymbol
+</span><a href="#local-6989586621679272533"><span class="hs-identifier hs-var">yieldListSymbol</span></a></span><span>
+</span><span id="line-144"></span><span>              </span><span class="hs-special">]</span><span>
+</span><span id="line-145"></span><span>          </span><span class="hs-special">)</span><span>
+</span><span id="line-146"></span><span>      </span><span class="hs-special">)</span><span>
+</span><span id="line-147"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Term s (PUnit @S) -&gt; Term s POpaque
+forall (s :: S) (a :: PType). Term s a -&gt; Term s POpaque
+</span><span class="hs-identifier hs-var">popaque</span></span><span> </span><span class="annot"><span class="annottext">(Term s (PUnit @S) -&gt; Term s POpaque)
+-&gt; Term s (PUnit @S) -&gt; Term s POpaque
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">PLifted (PUnit @S) -&gt; Term s (PUnit @S)
+forall (p :: PType) (s :: S). PLift p =&gt; PLifted p -&gt; Term s p
+</span><span class="hs-identifier hs-var">pconstant</span></span><span> </span><span class="hs-special">(</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-148"></span><span>      </span><span class="annot"><span class="annottext">Term s POpaque
+forall (s :: S) (a :: PType). Term s a
+</span><span class="hs-identifier hs-var">perror</span></span><span>
+</span><span id="line-149"></span></pre></body></html>

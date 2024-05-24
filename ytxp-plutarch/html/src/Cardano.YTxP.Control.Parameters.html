@@ -1,0 +1,672 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="annot"><span class="hs-comment">{- | Module: Cardano.YTxP.Control.Parameters
+Description: Data required to work with the compiled control scripts
+-}</span></span><span>
+</span><span id="line-4"></span><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Cardano.YTxP.Control.Parameters</span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-5"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Types</span></span><span>
+</span><span id="line-6"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#YieldListScripts"><span class="hs-identifier">YieldListScripts</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-7"></span><span>    </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldListValidator%3AYieldListScripts"><span class="hs-identifier">yieldListValidator</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>    </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldListMintingPolicy%3AYieldListScripts"><span class="hs-identifier">yieldListMintingPolicy</span></a></span><span>
+</span><span id="line-9"></span><span>  </span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-10"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#YieldingScripts"><span class="hs-identifier">YieldingScripts</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-11"></span><span>    </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingMintingPolicies%3AYieldingScripts"><span class="hs-identifier">yieldingMintingPolicies</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-12"></span><span>    </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingValidator%3AYieldingScripts"><span class="hs-identifier">yieldingValidator</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-13"></span><span>    </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingStakingValidators%3AYieldingScripts"><span class="hs-identifier">yieldingStakingValidators</span></a></span><span>
+</span><span id="line-14"></span><span>  </span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-15"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#ControlParameters"><span class="hs-identifier">ControlParameters</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldListScripts%3AControlParameters"><span class="hs-identifier">yieldListScripts</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingScripts%3AControlParameters"><span class="hs-identifier">yieldingScripts</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AcontrolParametersInitial%3AControlParameters"><span class="hs-identifier">controlParametersInitial</span></a></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-16"></span><span>
+</span><span id="line-17"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Parameter Generation (script compilation)</span></span><span>
+</span><span id="line-18"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#mkControlParameters"><span class="hs-identifier">mkControlParameters</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-19"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-20"></span><span>
+</span><span id="line-21"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.ParametersInitial.html"><span class="hs-identifier">Cardano.YTxP.Control.ParametersInitial</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-22"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.ParametersInitial.html#ControlParametersInitial"><span class="hs-identifier">ControlParametersInitial</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-23"></span><span>    </span><span class="annot"><a href="Cardano.YTxP.Control.ParametersInitial.html#ControlParametersInitial"><span class="hs-identifier">ControlParametersInitial</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-24"></span><span>    </span><span class="annot"><a href="Cardano.YTxP.Control.ParametersInitial.html#%24sel%3AcompilationConfig%3AControlParametersInitial"><span class="hs-identifier">compilationConfig</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-25"></span><span>    </span><span class="annot"><a href="Cardano.YTxP.Control.ParametersInitial.html#%24sel%3AmaxYieldListSize%3AControlParametersInitial"><span class="hs-identifier">maxYieldListSize</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-26"></span><span>    </span><span class="annot"><a href="Cardano.YTxP.Control.ParametersInitial.html#%24sel%3AmintingPoliciesNonceList%3AControlParametersInitial"><span class="hs-identifier">mintingPoliciesNonceList</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-27"></span><span>    </span><span class="annot"><a href="Cardano.YTxP.Control.ParametersInitial.html#%24sel%3AscriptToWrapYieldListMP%3AControlParametersInitial"><span class="hs-identifier">scriptToWrapYieldListMP</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-28"></span><span>    </span><span class="annot"><a href="Cardano.YTxP.Control.ParametersInitial.html#%24sel%3AscriptToWrapYieldListValidator%3AControlParametersInitial"><span class="hs-identifier">scriptToWrapYieldListValidator</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-29"></span><span>    </span><span class="annot"><a href="Cardano.YTxP.Control.ParametersInitial.html#%24sel%3AstakingValidatorsNonceList%3AControlParametersInitial"><span class="hs-identifier">stakingValidatorsNonceList</span></a></span><span>
+</span><span id="line-30"></span><span>  </span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-31"></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-32"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.MintingPolicy.html"><span class="hs-identifier">Cardano.YTxP.Control.YieldList.MintingPolicy</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-33"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.MintingPolicy.html#YieldListSTMPScript"><span class="hs-identifier">YieldListSTMPScript</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-34"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.MintingPolicy.html#compileYieldListSTMP"><span class="hs-identifier">compileYieldListSTMP</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-35"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.MintingPolicy.html#mkYieldListSTCS"><span class="hs-identifier">mkYieldListSTCS</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-36"></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-37"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html"><span class="hs-identifier">Cardano.YTxP.Control.YieldList.Validator</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-38"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#YieldListValidatorScript"><span class="hs-identifier">YieldListValidatorScript</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-39"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#compileYieldListValidator"><span class="hs-identifier">compileYieldListValidator</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-40"></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.MintingPolicy.html"><span class="hs-identifier">Cardano.YTxP.Control.Yielding.MintingPolicy</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-42"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.MintingPolicy.html#YieldingMPScript"><span class="hs-identifier">YieldingMPScript</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-43"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.MintingPolicy.html#compileYieldingMP"><span class="hs-identifier">compileYieldingMP</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-44"></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-45"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.StakingValidator.html"><span class="hs-identifier">Cardano.YTxP.Control.Yielding.StakingValidator</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-46"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.StakingValidator.html#YieldingStakingValidatorScript"><span class="hs-identifier">YieldingStakingValidatorScript</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-47"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.StakingValidator.html#compileYieldingStakingValidator"><span class="hs-identifier">compileYieldingStakingValidator</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-48"></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-49"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html"><span class="hs-identifier">Cardano.YTxP.Control.Yielding.Validator</span></a></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-50"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#YieldingValidatorScript"><span class="hs-identifier">YieldingValidatorScript</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-51"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#compileYieldingValidator"><span class="hs-identifier">compileYieldingValidator</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-52"></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Aeson</span></span><span> </span><span class="hs-special">(</span><span>
+</span><span id="line-54"></span><span>  </span><span class="annot"><span class="hs-identifier">FromJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">parseJSON</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-55"></span><span>  </span><span class="annot"><span class="hs-identifier">ToJSON</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">toEncoding</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">toJSON</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span>
+</span><span id="line-56"></span><span>  </span><span class="annot"><span class="hs-identifier">object</span></span><span class="hs-special">,</span><span>
+</span><span id="line-57"></span><span>  </span><span class="annot"><span class="hs-identifier">pairs</span></span><span class="hs-special">,</span><span>
+</span><span id="line-58"></span><span>  </span><span class="annot"><span class="hs-identifier">withObject</span></span><span class="hs-special">,</span><span>
+</span><span id="line-59"></span><span>  </span><span class="annot"><span class="hs-operator">(.:)</span></span><span class="hs-special">,</span><span>
+</span><span id="line-60"></span><span>  </span><span class="annot"><span class="hs-operator">(.=)</span></span><span class="hs-special">,</span><span>
+</span><span id="line-61"></span><span> </span><span class="hs-special">)</span><span>
+</span><span id="line-62"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Prettyprinter</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Pretty</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">pretty</span></span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">braces</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">punctuate</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">sep</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-operator">(&lt;+&gt;)</span></span><span class="hs-special">)</span><span>
+</span><span id="line-64"></span><span>
+</span><span id="line-65"></span><span class="annot"><span class="hs-comment">{- | Scripts that govern which transaction families can be &quot;yielded to&quot;
+
+@since 0.1.0
+-}</span></span><span>
+</span><span id="line-69"></span><span class="hs-keyword">data</span><span> </span><span id="YieldListScripts"><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#YieldListScripts"><span class="hs-identifier hs-var">YieldListScripts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="YieldListScripts"><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#YieldListScripts"><span class="hs-identifier hs-var">YieldListScripts</span></a></span></span><span>
+</span><span id="line-70"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="%24sel%3AyieldListValidator%3AYieldListScripts"><span class="annot"><span class="annottext">YieldListScripts -&gt; YieldListValidatorScript
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldListValidator%3AYieldListScripts"><span class="hs-identifier hs-var hs-var">yieldListValidator</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.Validator.html#YieldListValidatorScript"><span class="hs-identifier hs-type">YieldListValidatorScript</span></a></span><span>
+</span><span id="line-71"></span><span>  </span><span class="hs-comment">-- ^ The validator where we look for UTxO(s) that carry a yieldListSTT in</span><span>
+</span><span id="line-72"></span><span>  </span><span class="hs-comment">-- their values and a YieldList in their datum</span><span>
+</span><span id="line-73"></span><span>  </span><span class="hs-comment">-- @since 0.1.0</span><span>
+</span><span id="line-74"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="%24sel%3AyieldListMintingPolicy%3AYieldListScripts"><span class="annot"><span class="annottext">YieldListScripts -&gt; YieldListSTMPScript
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldListMintingPolicy%3AYieldListScripts"><span class="hs-identifier hs-var hs-var">yieldListMintingPolicy</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.YieldList.MintingPolicy.html#YieldListSTMPScript"><span class="hs-identifier hs-type">YieldListSTMPScript</span></a></span><span>
+</span><span id="line-75"></span><span>  </span><span class="hs-comment">-- ^ The minting policy for the yieldListSTT, which authenticates a</span><span>
+</span><span id="line-76"></span><span>  </span><span class="hs-comment">-- UTxO as carrying a YieldList. Note that these STTs will _usually_ be</span><span>
+</span><span id="line-77"></span><span>  </span><span class="hs-comment">-- at the yieldListValidator, but these is nothing intrinsically requiring this;</span><span>
+</span><span id="line-78"></span><span>  </span><span class="hs-comment">-- any UTxO carrying the STT will be looked at for a YieldList.</span><span>
+</span><span id="line-79"></span><span>  </span><span class="hs-comment">-- @since 0.1.0</span><span>
+</span><span id="line-80"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-81"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span>
+</span><span id="line-82"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-83"></span><span>      </span><span id="local-6989586621679274667"><span id="local-6989586621679274673"><span class="annot"><span class="annottext">YieldListScripts -&gt; YieldListScripts -&gt; Bool
+(YieldListScripts -&gt; YieldListScripts -&gt; Bool)
+-&gt; (YieldListScripts -&gt; YieldListScripts -&gt; Bool)
+-&gt; Eq YieldListScripts
+forall a. (a -&gt; a -&gt; Bool) -&gt; (a -&gt; a -&gt; Bool) -&gt; Eq a
+$c== :: YieldListScripts -&gt; YieldListScripts -&gt; Bool
+== :: YieldListScripts -&gt; YieldListScripts -&gt; Bool
+$c/= :: YieldListScripts -&gt; YieldListScripts -&gt; Bool
+/= :: YieldListScripts -&gt; YieldListScripts -&gt; Bool
+</span><a href="../../../ghc-9.6.5/html/libraries/ghc-prim-0.10.0/src/GHC.Classes.html#Eq"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Eq</span></a></span></span></span><span>
+</span><span id="line-84"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-85"></span><span>
+</span><span id="line-86"></span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-87"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679274679"><span class="annot"><span class="hs-identifier hs-type">Pretty</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#YieldListScripts"><span class="hs-identifier hs-type">YieldListScripts</span></a></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-88"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">pretty</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-89"></span><span>  </span><span id="local-6989586621679274692"><span class="annot"><span class="annottext">pretty :: forall ann. YieldListScripts -&gt; Doc ann
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">pretty</span></span></span><span> </span><span id="local-6989586621679274693"><span class="annot"><span class="annottext">YieldListScripts
+</span><a href="#local-6989586621679274693"><span class="hs-identifier hs-var">yls</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-90"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Doc ann
+</span><span class="hs-string">&quot;YieldListScripts&quot;</span></span><span> </span><span class="hs-operator">&lt;+&gt;</span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">(Doc ann -&gt; Doc ann)
+-&gt; ([Doc ann] -&gt; Doc ann) -&gt; [Doc ann] -&gt; Doc ann
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">Doc ann -&gt; Doc ann
+forall ann. Doc ann -&gt; Doc ann
+</span><span class="hs-identifier hs-var">braces</span></span><span> </span><span class="annot"><span class="annottext">(Doc ann -&gt; Doc ann)
+-&gt; ([Doc ann] -&gt; Doc ann) -&gt; [Doc ann] -&gt; Doc ann
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">[Doc ann] -&gt; Doc ann
+forall ann. [Doc ann] -&gt; Doc ann
+</span><span class="hs-identifier hs-var">sep</span></span><span> </span><span class="annot"><span class="annottext">([Doc ann] -&gt; Doc ann)
+-&gt; ([Doc ann] -&gt; [Doc ann]) -&gt; [Doc ann] -&gt; Doc ann
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">Doc ann -&gt; [Doc ann] -&gt; [Doc ann]
+forall ann. Doc ann -&gt; [Doc ann] -&gt; [Doc ann]
+</span><span class="hs-identifier hs-var">punctuate</span></span><span> </span><span class="annot"><span class="annottext">Doc ann
+</span><span class="hs-string">&quot;,&quot;</span></span><span> </span><span class="annot"><span class="annottext">([Doc ann] -&gt; Doc ann) -&gt; [Doc ann] -&gt; Doc ann
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span>
+</span><span id="line-91"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Doc ann
+</span><span class="hs-string">&quot;yieldListValidator: &quot;</span></span><span> </span><span class="annot"><span class="annottext">Doc ann -&gt; Doc ann -&gt; Doc ann
+forall ann. Doc ann -&gt; Doc ann -&gt; Doc ann
+</span><span class="hs-operator hs-var">&lt;+&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">YieldListValidatorScript -&gt; Doc ann
+forall a ann. Pretty a =&gt; a -&gt; Doc ann
+forall ann. YieldListValidatorScript -&gt; Doc ann
+</span><span class="hs-identifier hs-var">pretty</span></span><span> </span><span class="annot"><span class="annottext">(YieldListValidatorScript -&gt; Doc ann)
+-&gt; (YieldListScripts -&gt; YieldListValidatorScript)
+-&gt; YieldListScripts
+-&gt; Doc ann
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListScripts -&gt; YieldListValidatorScript
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldListValidator%3AYieldListScripts"><span class="hs-identifier hs-var">yieldListValidator</span></a></span><span> </span><span class="annot"><span class="annottext">(YieldListScripts -&gt; Doc ann) -&gt; YieldListScripts -&gt; Doc ann
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListScripts
+</span><a href="#local-6989586621679274693"><span class="hs-identifier hs-var">yls</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-92"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Doc ann
+</span><span class="hs-string">&quot;yieldListMintingPolicy: &quot;</span></span><span> </span><span class="annot"><span class="annottext">Doc ann -&gt; Doc ann -&gt; Doc ann
+forall ann. Doc ann -&gt; Doc ann -&gt; Doc ann
+</span><span class="hs-operator hs-var">&lt;+&gt;</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">YieldListSTMPScript -&gt; Doc ann
+forall a ann. Pretty a =&gt; a -&gt; Doc ann
+forall ann. YieldListSTMPScript -&gt; Doc ann
+</span><span class="hs-identifier hs-var">pretty</span></span><span> </span><span class="annot"><span class="annottext">(YieldListSTMPScript -&gt; Doc ann)
+-&gt; (YieldListScripts -&gt; YieldListSTMPScript)
+-&gt; YieldListScripts
+-&gt; Doc ann
+forall b c a. (b -&gt; c) -&gt; (a -&gt; b) -&gt; a -&gt; c
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#."><span class="hs-operator hs-var">.</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListScripts -&gt; YieldListSTMPScript
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldListMintingPolicy%3AYieldListScripts"><span class="hs-identifier hs-var">yieldListMintingPolicy</span></a></span><span> </span><span class="annot"><span class="annottext">(YieldListScripts -&gt; Doc ann) -&gt; YieldListScripts -&gt; Doc ann
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListScripts
+</span><a href="#local-6989586621679274693"><span class="hs-identifier hs-var">yls</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-93"></span><span>      </span><span class="hs-special">]</span><span>
+</span><span id="line-94"></span><span>
+</span><span id="line-95"></span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-96"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679274698"><span id="local-6989586621679274702"><span id="local-6989586621679274705"><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#YieldListScripts"><span class="hs-identifier hs-type">YieldListScripts</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-97"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">toJSON</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-98"></span><span>  </span><span id="local-6989586621679274720"><span class="annot"><span class="annottext">toJSON :: YieldListScripts -&gt; Value
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toJSON</span></span></span><span> </span><span id="local-6989586621679274721"><span class="annot"><span class="annottext">YieldListScripts
+</span><a href="#local-6989586621679274721"><span class="hs-identifier hs-var">yls</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-99"></span><span>    </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span>
+</span><span id="line-100"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldListValidator&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; YieldListValidatorScript -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">YieldListScripts -&gt; YieldListValidatorScript
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldListValidator%3AYieldListScripts"><span class="hs-identifier hs-var">yieldListValidator</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListScripts
+</span><a href="#local-6989586621679274721"><span class="hs-identifier hs-var">yls</span></a></span><span>
+</span><span id="line-101"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldListMintingPolicy&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; YieldListSTMPScript -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">YieldListScripts -&gt; YieldListSTMPScript
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldListMintingPolicy%3AYieldListScripts"><span class="hs-identifier hs-var">yieldListMintingPolicy</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListScripts
+</span><a href="#local-6989586621679274721"><span class="hs-identifier hs-var">yls</span></a></span><span>
+</span><span id="line-102"></span><span>      </span><span class="hs-special">]</span><span>
+</span><span id="line-103"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">toEncoding</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-104"></span><span>  </span><span id="local-6989586621679274731"><span class="annot"><span class="annottext">toEncoding :: YieldListScripts -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></span></span><span> </span><span id="local-6989586621679274732"><span class="annot"><span class="annottext">YieldListScripts
+</span><a href="#local-6989586621679274732"><span class="hs-identifier hs-var">yls</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-105"></span><span>    </span><span class="annot"><span class="annottext">Series -&gt; Encoding
+</span><span class="hs-identifier hs-var">pairs</span></span><span> </span><span class="annot"><span class="annottext">(Series -&gt; Encoding) -&gt; Series -&gt; Encoding
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span>
+</span><span id="line-106"></span><span>      </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldListValidator&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; YieldListValidatorScript -&gt; Series
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Series
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">YieldListScripts -&gt; YieldListValidatorScript
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldListValidator%3AYieldListScripts"><span class="hs-identifier hs-var">yieldListValidator</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListScripts
+</span><a href="#local-6989586621679274732"><span class="hs-identifier hs-var">yls</span></a></span><span>
+</span><span id="line-107"></span><span>        </span><span class="annot"><span class="annottext">Series -&gt; Series -&gt; Series
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldListMintingPolicy&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; YieldListSTMPScript -&gt; Series
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Series
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">YieldListScripts -&gt; YieldListSTMPScript
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldListMintingPolicy%3AYieldListScripts"><span class="hs-identifier hs-var">yieldListMintingPolicy</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListScripts
+</span><a href="#local-6989586621679274732"><span class="hs-identifier hs-var">yls</span></a></span><span>
+</span><span id="line-108"></span><span>
+</span><span id="line-109"></span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-110"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679274735"><span id="local-6989586621679274739"><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#YieldListScripts"><span class="hs-identifier hs-type">YieldListScripts</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-111"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">parseJSON</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-112"></span><span>  </span><span id="local-6989586621679274753"><span class="annot"><span class="annottext">parseJSON :: Value -&gt; Parser YieldListScripts
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">parseJSON</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; (Object -&gt; Parser YieldListScripts)
+-&gt; Value
+-&gt; Parser YieldListScripts
+forall a. String -&gt; (Object -&gt; Parser a) -&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">withObject</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;YieldListScripts&quot;</span></span><span> </span><span class="annot"><span class="annottext">((Object -&gt; Parser YieldListScripts)
+ -&gt; Value -&gt; Parser YieldListScripts)
+-&gt; (Object -&gt; Parser YieldListScripts)
+-&gt; Value
+-&gt; Parser YieldListScripts
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679274754"><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679274754"><span class="hs-identifier hs-var">obj</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-113"></span><span>    </span><span id="local-6989586621679274755"><span class="annot"><span class="annottext">YieldListValidatorScript
+</span><a href="#local-6989586621679274755"><span class="hs-identifier hs-var">ylv</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679274754"><span class="hs-identifier hs-var">obj</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser YieldListValidatorScript
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldListValidator&quot;</span></span><span>
+</span><span id="line-114"></span><span>    </span><span id="local-6989586621679274756"><span class="annot"><span class="annottext">YieldListSTMPScript
+</span><a href="#local-6989586621679274756"><span class="hs-identifier hs-var">ylmp</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679274754"><span class="hs-identifier hs-var">obj</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser YieldListSTMPScript
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldListMintingPolicy&quot;</span></span><span>
+</span><span id="line-115"></span><span>    </span><span class="annot"><span class="annottext">YieldListScripts -&gt; Parser YieldListScripts
+forall a. a -&gt; Parser a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#pure"><span class="hs-identifier hs-var">pure</span></a></span><span> </span><span class="annot"><span class="annottext">(YieldListScripts -&gt; Parser YieldListScripts)
+-&gt; YieldListScripts -&gt; Parser YieldListScripts
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListValidatorScript -&gt; YieldListSTMPScript -&gt; YieldListScripts
+</span><a href="Cardano.YTxP.Control.Parameters.html#YieldListScripts"><span class="hs-identifier hs-var">YieldListScripts</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListValidatorScript
+</span><a href="#local-6989586621679274755"><span class="hs-identifier hs-var">ylv</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListSTMPScript
+</span><a href="#local-6989586621679274756"><span class="hs-identifier hs-var">ylmp</span></a></span><span>
+</span><span id="line-116"></span><span>
+</span><span id="line-117"></span><span class="annot"><span class="hs-comment">{- | Scripts that yield to transaction families described by the datums guarded
+by the YieldListScripts.
+
+@since 0.1.0
+-}</span></span><span>
+</span><span id="line-122"></span><span class="hs-keyword">data</span><span> </span><span id="YieldingScripts"><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#YieldingScripts"><span class="hs-identifier hs-var">YieldingScripts</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="YieldingScripts"><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#YieldingScripts"><span class="hs-identifier hs-var">YieldingScripts</span></a></span></span><span>
+</span><span id="line-123"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="%24sel%3AyieldingMintingPolicies%3AYieldingScripts"><span class="annot"><span class="annottext">YieldingScripts -&gt; [YieldingMPScript]
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingMintingPolicies%3AYieldingScripts"><span class="hs-identifier hs-var hs-var">yieldingMintingPolicies</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.MintingPolicy.html#YieldingMPScript"><span class="hs-identifier hs-type">YieldingMPScript</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-124"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ @since 0.1.0</span></span><span>
+</span><span id="line-125"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="%24sel%3AyieldingValidator%3AYieldingScripts"><span class="annot"><span class="annottext">YieldingScripts -&gt; YieldingValidatorScript
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingValidator%3AYieldingScripts"><span class="hs-identifier hs-var hs-var">yieldingValidator</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Validator.html#YieldingValidatorScript"><span class="hs-identifier hs-type">YieldingValidatorScript</span></a></span><span>
+</span><span id="line-126"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ @since 0.1.0</span></span><span>
+</span><span id="line-127"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="%24sel%3AyieldingStakingValidators%3AYieldingScripts"><span class="annot"><span class="annottext">YieldingScripts -&gt; [YieldingStakingValidatorScript]
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingStakingValidators%3AYieldingScripts"><span class="hs-identifier hs-var hs-var">yieldingStakingValidators</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.StakingValidator.html#YieldingStakingValidatorScript"><span class="hs-identifier hs-type">YieldingStakingValidatorScript</span></a></span><span class="hs-special">]</span><span>
+</span><span id="line-128"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ @since 0.1.0</span></span><span>
+</span><span id="line-129"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-130"></span><span>
+</span><span id="line-131"></span><span class="hs-comment">-- \^ We have multiple of these, because each can only be delegated to a single</span><span>
+</span><span id="line-132"></span><span class="hs-comment">-- pool.</span><span>
+</span><span id="line-133"></span><span>
+</span><span id="line-134"></span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-135"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679274761"><span id="local-6989586621679274765"><span id="local-6989586621679274768"><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#YieldingScripts"><span class="hs-identifier hs-type">YieldingScripts</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-136"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">toJSON</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-137"></span><span>  </span><span id="local-6989586621679274787"><span class="annot"><span class="annottext">toJSON :: YieldingScripts -&gt; Value
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toJSON</span></span></span><span> </span><span id="local-6989586621679274788"><span class="annot"><span class="annottext">YieldingScripts
+</span><a href="#local-6989586621679274788"><span class="hs-identifier hs-var">ys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-138"></span><span>    </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span>
+</span><span id="line-139"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldingMintingPolicies&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; [YieldingMPScript] -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">YieldingScripts -&gt; [YieldingMPScript]
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingMintingPolicies%3AYieldingScripts"><span class="hs-identifier hs-var">yieldingMintingPolicies</span></a></span><span> </span><span class="annot"><span class="annottext">YieldingScripts
+</span><a href="#local-6989586621679274788"><span class="hs-identifier hs-var">ys</span></a></span><span>
+</span><span id="line-140"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldingValidator&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; YieldingValidatorScript -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">YieldingScripts -&gt; YieldingValidatorScript
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingValidator%3AYieldingScripts"><span class="hs-identifier hs-var">yieldingValidator</span></a></span><span> </span><span class="annot"><span class="annottext">YieldingScripts
+</span><a href="#local-6989586621679274788"><span class="hs-identifier hs-var">ys</span></a></span><span>
+</span><span id="line-141"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldingStakingValidators&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; [YieldingStakingValidatorScript] -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">YieldingScripts -&gt; [YieldingStakingValidatorScript]
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingStakingValidators%3AYieldingScripts"><span class="hs-identifier hs-var">yieldingStakingValidators</span></a></span><span> </span><span class="annot"><span class="annottext">YieldingScripts
+</span><a href="#local-6989586621679274788"><span class="hs-identifier hs-var">ys</span></a></span><span>
+</span><span id="line-142"></span><span>      </span><span class="hs-special">]</span><span>
+</span><span id="line-143"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">toEncoding</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-144"></span><span>  </span><span id="local-6989586621679274802"><span class="annot"><span class="annottext">toEncoding :: YieldingScripts -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></span></span><span> </span><span id="local-6989586621679274803"><span class="annot"><span class="annottext">YieldingScripts
+</span><a href="#local-6989586621679274803"><span class="hs-identifier hs-var">ys</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-145"></span><span>    </span><span class="annot"><span class="annottext">Series -&gt; Encoding
+</span><span class="hs-identifier hs-var">pairs</span></span><span> </span><span class="annot"><span class="annottext">(Series -&gt; Encoding) -&gt; Series -&gt; Encoding
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span>
+</span><span id="line-146"></span><span>      </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldingMintingPolicies&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; [YieldingMPScript] -&gt; Series
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Series
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">YieldingScripts -&gt; [YieldingMPScript]
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingMintingPolicies%3AYieldingScripts"><span class="hs-identifier hs-var">yieldingMintingPolicies</span></a></span><span> </span><span class="annot"><span class="annottext">YieldingScripts
+</span><a href="#local-6989586621679274803"><span class="hs-identifier hs-var">ys</span></a></span><span>
+</span><span id="line-147"></span><span>        </span><span class="annot"><span class="annottext">Series -&gt; Series -&gt; Series
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldingValidator&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; YieldingValidatorScript -&gt; Series
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Series
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">YieldingScripts -&gt; YieldingValidatorScript
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingValidator%3AYieldingScripts"><span class="hs-identifier hs-var">yieldingValidator</span></a></span><span> </span><span class="annot"><span class="annottext">YieldingScripts
+</span><a href="#local-6989586621679274803"><span class="hs-identifier hs-var">ys</span></a></span><span>
+</span><span id="line-148"></span><span>        </span><span class="annot"><span class="annottext">Series -&gt; Series -&gt; Series
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldingStakingValidators&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; [YieldingStakingValidatorScript] -&gt; Series
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Series
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">YieldingScripts -&gt; [YieldingStakingValidatorScript]
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingStakingValidators%3AYieldingScripts"><span class="hs-identifier hs-var">yieldingStakingValidators</span></a></span><span> </span><span class="annot"><span class="annottext">YieldingScripts
+</span><a href="#local-6989586621679274803"><span class="hs-identifier hs-var">ys</span></a></span><span>
+</span><span id="line-149"></span><span>
+</span><span id="line-150"></span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-151"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679274806"><span id="local-6989586621679274810"><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#YieldingScripts"><span class="hs-identifier hs-type">YieldingScripts</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-152"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">parseJSON</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-153"></span><span>  </span><span id="local-6989586621679274828"><span class="annot"><span class="annottext">parseJSON :: Value -&gt; Parser YieldingScripts
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">parseJSON</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; (Object -&gt; Parser YieldingScripts)
+-&gt; Value
+-&gt; Parser YieldingScripts
+forall a. String -&gt; (Object -&gt; Parser a) -&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">withObject</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;YieldingScripts&quot;</span></span><span> </span><span class="annot"><span class="annottext">((Object -&gt; Parser YieldingScripts)
+ -&gt; Value -&gt; Parser YieldingScripts)
+-&gt; (Object -&gt; Parser YieldingScripts)
+-&gt; Value
+-&gt; Parser YieldingScripts
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679274829"><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679274829"><span class="hs-identifier hs-var">obj</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-154"></span><span>    </span><span id="local-6989586621679274830"><span class="annot"><span class="annottext">[YieldingMPScript]
+</span><a href="#local-6989586621679274830"><span class="hs-identifier hs-var">ysmp</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679274829"><span class="hs-identifier hs-var">obj</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser [YieldingMPScript]
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldingMintingPolicies&quot;</span></span><span>
+</span><span id="line-155"></span><span>    </span><span id="local-6989586621679274831"><span class="annot"><span class="annottext">YieldingValidatorScript
+</span><a href="#local-6989586621679274831"><span class="hs-identifier hs-var">ysv</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679274829"><span class="hs-identifier hs-var">obj</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser YieldingValidatorScript
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldingValidator&quot;</span></span><span>
+</span><span id="line-156"></span><span>    </span><span id="local-6989586621679274832"><span class="annot"><span class="annottext">[YieldingStakingValidatorScript]
+</span><a href="#local-6989586621679274832"><span class="hs-identifier hs-var">ysvs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679274829"><span class="hs-identifier hs-var">obj</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser [YieldingStakingValidatorScript]
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldingStakingValidators&quot;</span></span><span>
+</span><span id="line-157"></span><span>    </span><span class="annot"><span class="annottext">YieldingScripts -&gt; Parser YieldingScripts
+forall a. a -&gt; Parser a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#pure"><span class="hs-identifier hs-var">pure</span></a></span><span> </span><span class="annot"><span class="annottext">(YieldingScripts -&gt; Parser YieldingScripts)
+-&gt; YieldingScripts -&gt; Parser YieldingScripts
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">[YieldingMPScript]
+-&gt; YieldingValidatorScript
+-&gt; [YieldingStakingValidatorScript]
+-&gt; YieldingScripts
+</span><a href="Cardano.YTxP.Control.Parameters.html#YieldingScripts"><span class="hs-identifier hs-var">YieldingScripts</span></a></span><span> </span><span class="annot"><span class="annottext">[YieldingMPScript]
+</span><a href="#local-6989586621679274830"><span class="hs-identifier hs-var">ysmp</span></a></span><span> </span><span class="annot"><span class="annottext">YieldingValidatorScript
+</span><a href="#local-6989586621679274831"><span class="hs-identifier hs-var">ysv</span></a></span><span> </span><span class="annot"><span class="annottext">[YieldingStakingValidatorScript]
+</span><a href="#local-6989586621679274832"><span class="hs-identifier hs-var">ysvs</span></a></span><span>
+</span><span id="line-158"></span><span>
+</span><span id="line-159"></span><span class="annot"><span class="hs-comment">{- | Contains the compiled scripts along with the parameters
+they were compiled against. This is useful for _library consumers_
+and should contain all of the information needed to work with the
+library.
+
+@since 0.1.0
+-}</span></span><span>
+</span><span id="line-166"></span><span class="hs-keyword">data</span><span> </span><span id="ControlParameters"><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#ControlParameters"><span class="hs-identifier hs-var">ControlParameters</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span id="ControlParameters"><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#ControlParameters"><span class="hs-identifier hs-var">ControlParameters</span></a></span></span><span>
+</span><span id="line-167"></span><span>  </span><span class="hs-special">{</span><span> </span><span id="%24sel%3AyieldListScripts%3AControlParameters"><span class="annot"><span class="annottext">ControlParameters -&gt; YieldListScripts
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldListScripts%3AControlParameters"><span class="hs-identifier hs-var hs-var">yieldListScripts</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#YieldListScripts"><span class="hs-identifier hs-type">YieldListScripts</span></a></span><span>
+</span><span id="line-168"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ @since 0.1.0</span></span><span>
+</span><span id="line-169"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="%24sel%3AyieldingScripts%3AControlParameters"><span class="annot"><span class="annottext">ControlParameters -&gt; YieldingScripts
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingScripts%3AControlParameters"><span class="hs-identifier hs-var hs-var">yieldingScripts</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#YieldingScripts"><span class="hs-identifier hs-type">YieldingScripts</span></a></span><span>
+</span><span id="line-170"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ @since 0.1.0</span></span><span>
+</span><span id="line-171"></span><span>  </span><span class="hs-special">,</span><span> </span><span id="%24sel%3AcontrolParametersInitial%3AControlParameters"><span class="annot"><span class="annottext">ControlParameters -&gt; ControlParametersInitial
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AcontrolParametersInitial%3AControlParameters"><span class="hs-identifier hs-var hs-var">controlParametersInitial</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.ParametersInitial.html#ControlParametersInitial"><span class="hs-identifier hs-type">ControlParametersInitial</span></a></span><span>
+</span><span id="line-172"></span><span>  </span><span class="annot"><span class="hs-comment">-- ^ @since 0.1.0</span></span><span>
+</span><span id="line-173"></span><span>  </span><span class="hs-special">}</span><span>
+</span><span id="line-174"></span><span>
+</span><span id="line-175"></span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-176"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679274837"><span id="local-6989586621679274841"><span id="local-6989586621679274844"><span class="annot"><span class="hs-identifier hs-type">ToJSON</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#ControlParameters"><span class="hs-identifier hs-type">ControlParameters</span></a></span></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-177"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">toJSON</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-178"></span><span>  </span><span id="local-6989586621679274858"><span class="annot"><span class="annottext">toJSON :: ControlParameters -&gt; Value
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toJSON</span></span></span><span> </span><span id="local-6989586621679274859"><span class="annot"><span class="annottext">ControlParameters
+</span><a href="#local-6989586621679274859"><span class="hs-identifier hs-var">cp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-179"></span><span>    </span><span class="annot"><span class="annottext">[Pair] -&gt; Value
+</span><span class="hs-identifier hs-var">object</span></span><span>
+</span><span id="line-180"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldListScripts&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; YieldListScripts -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">ControlParameters -&gt; YieldListScripts
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldListScripts%3AControlParameters"><span class="hs-identifier hs-var">yieldListScripts</span></a></span><span> </span><span class="annot"><span class="annottext">ControlParameters
+</span><a href="#local-6989586621679274859"><span class="hs-identifier hs-var">cp</span></a></span><span>
+</span><span id="line-181"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldingScripts&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; YieldingScripts -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">ControlParameters -&gt; YieldingScripts
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingScripts%3AControlParameters"><span class="hs-identifier hs-var">yieldingScripts</span></a></span><span> </span><span class="annot"><span class="annottext">ControlParameters
+</span><a href="#local-6989586621679274859"><span class="hs-identifier hs-var">cp</span></a></span><span>
+</span><span id="line-182"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;controlParametersInitial&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; ControlParametersInitial -&gt; Pair
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Pair
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">ControlParameters -&gt; ControlParametersInitial
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AcontrolParametersInitial%3AControlParameters"><span class="hs-identifier hs-var">controlParametersInitial</span></a></span><span> </span><span class="annot"><span class="annottext">ControlParameters
+</span><a href="#local-6989586621679274859"><span class="hs-identifier hs-var">cp</span></a></span><span>
+</span><span id="line-183"></span><span>      </span><span class="hs-special">]</span><span>
+</span><span id="line-184"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">toEncoding</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-185"></span><span>  </span><span id="local-6989586621679274871"><span class="annot"><span class="annottext">toEncoding :: ControlParameters -&gt; Encoding
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">toEncoding</span></span></span><span> </span><span id="local-6989586621679274872"><span class="annot"><span class="annottext">ControlParameters
+</span><a href="#local-6989586621679274872"><span class="hs-identifier hs-var">cp</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-186"></span><span>    </span><span class="annot"><span class="annottext">Series -&gt; Encoding
+</span><span class="hs-identifier hs-var">pairs</span></span><span> </span><span class="annot"><span class="annottext">(Series -&gt; Encoding) -&gt; Series -&gt; Encoding
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span>
+</span><span id="line-187"></span><span>      </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldListScripts&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; YieldListScripts -&gt; Series
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Series
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">ControlParameters -&gt; YieldListScripts
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldListScripts%3AControlParameters"><span class="hs-identifier hs-var">yieldListScripts</span></a></span><span> </span><span class="annot"><span class="annottext">ControlParameters
+</span><a href="#local-6989586621679274872"><span class="hs-identifier hs-var">cp</span></a></span><span>
+</span><span id="line-188"></span><span>        </span><span class="annot"><span class="annottext">Series -&gt; Series -&gt; Series
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldingScripts&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; YieldingScripts -&gt; Series
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Series
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">ControlParameters -&gt; YieldingScripts
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingScripts%3AControlParameters"><span class="hs-identifier hs-var">yieldingScripts</span></a></span><span> </span><span class="annot"><span class="annottext">ControlParameters
+</span><a href="#local-6989586621679274872"><span class="hs-identifier hs-var">cp</span></a></span><span>
+</span><span id="line-189"></span><span>        </span><span class="annot"><span class="annottext">Series -&gt; Series -&gt; Series
+forall a. Semigroup a =&gt; a -&gt; a -&gt; a
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%3C%3E"><span class="hs-operator hs-var">&lt;&gt;</span></a></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;controlParametersInitial&quot;</span></span><span> </span><span class="annot"><span class="annottext">Key -&gt; ControlParametersInitial -&gt; Series
+forall v. ToJSON v =&gt; Key -&gt; v -&gt; Series
+forall e kv v. (KeyValue e kv, ToJSON v) =&gt; Key -&gt; v -&gt; kv
+</span><span class="hs-operator hs-var">.=</span></span><span> </span><span class="annot"><span class="annottext">ControlParameters -&gt; ControlParametersInitial
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AcontrolParametersInitial%3AControlParameters"><span class="hs-identifier hs-var">controlParametersInitial</span></a></span><span> </span><span class="annot"><span class="annottext">ControlParameters
+</span><a href="#local-6989586621679274872"><span class="hs-identifier hs-var">cp</span></a></span><span>
+</span><span id="line-190"></span><span>
+</span><span id="line-191"></span><span class="annot"><span class="hs-comment">-- | @since 0.1.0</span></span><span>
+</span><span id="line-192"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679274875"><span id="local-6989586621679274879"><span class="annot"><span class="hs-identifier hs-type">FromJSON</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#ControlParameters"><span class="hs-identifier hs-type">ControlParameters</span></a></span></span></span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-193"></span><span>  </span><span class="hs-pragma">{-# INLINEABLE</span><span> </span><span class="annot"><span class="hs-pragma hs-type">parseJSON</span></span><span> </span><span class="hs-pragma">#-}</span><span>
+</span><span id="line-194"></span><span>  </span><span id="local-6989586621679274892"><span class="annot"><span class="annottext">parseJSON :: Value -&gt; Parser ControlParameters
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var">parseJSON</span></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">String
+-&gt; (Object -&gt; Parser ControlParameters)
+-&gt; Value
+-&gt; Parser ControlParameters
+forall a. String -&gt; (Object -&gt; Parser a) -&gt; Value -&gt; Parser a
+</span><span class="hs-identifier hs-var">withObject</span></span><span> </span><span class="annot"><span class="annottext">String
+</span><span class="hs-string">&quot;ControlParameters&quot;</span></span><span> </span><span class="annot"><span class="annottext">((Object -&gt; Parser ControlParameters)
+ -&gt; Value -&gt; Parser ControlParameters)
+-&gt; (Object -&gt; Parser ControlParameters)
+-&gt; Value
+-&gt; Parser ControlParameters
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="hs-glyph">\</span><span id="local-6989586621679274893"><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679274893"><span class="hs-identifier hs-var">obj</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-keyword">do</span><span>
+</span><span id="line-195"></span><span>    </span><span id="local-6989586621679274894"><span class="annot"><span class="annottext">YieldListScripts
+</span><a href="#local-6989586621679274894"><span class="hs-identifier hs-var">yls</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679274893"><span class="hs-identifier hs-var">obj</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser YieldListScripts
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldListScripts&quot;</span></span><span>
+</span><span id="line-196"></span><span>    </span><span id="local-6989586621679274895"><span class="annot"><span class="annottext">YieldingScripts
+</span><a href="#local-6989586621679274895"><span class="hs-identifier hs-var">ys</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679274893"><span class="hs-identifier hs-var">obj</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser YieldingScripts
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;yieldingScripts&quot;</span></span><span>
+</span><span id="line-197"></span><span>    </span><span id="local-6989586621679274896"><span class="annot"><span class="annottext">ControlParametersInitial
+</span><a href="#local-6989586621679274896"><span class="hs-identifier hs-var">cpi</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Object
+</span><a href="#local-6989586621679274893"><span class="hs-identifier hs-var">obj</span></a></span><span> </span><span class="annot"><span class="annottext">Object -&gt; Key -&gt; Parser ControlParametersInitial
+forall a. FromJSON a =&gt; Object -&gt; Key -&gt; Parser a
+</span><span class="hs-operator hs-var">.:</span></span><span> </span><span class="annot"><span class="annottext">Key
+</span><span class="hs-string">&quot;controlParametersInitial&quot;</span></span><span>
+</span><span id="line-198"></span><span>    </span><span class="annot"><span class="annottext">ControlParameters -&gt; Parser ControlParameters
+forall a. a -&gt; Parser a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#pure"><span class="hs-identifier hs-var">pure</span></a></span><span> </span><span class="annot"><span class="annottext">(ControlParameters -&gt; Parser ControlParameters)
+-&gt; ControlParameters -&gt; Parser ControlParameters
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListScripts
+-&gt; YieldingScripts -&gt; ControlParametersInitial -&gt; ControlParameters
+</span><a href="Cardano.YTxP.Control.Parameters.html#ControlParameters"><span class="hs-identifier hs-var">ControlParameters</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListScripts
+</span><a href="#local-6989586621679274894"><span class="hs-identifier hs-var">yls</span></a></span><span> </span><span class="annot"><span class="annottext">YieldingScripts
+</span><a href="#local-6989586621679274895"><span class="hs-identifier hs-var">ys</span></a></span><span> </span><span class="annot"><span class="annottext">ControlParametersInitial
+</span><a href="#local-6989586621679274896"><span class="hs-identifier hs-var">cpi</span></a></span><span>
+</span><span id="line-199"></span><span>
+</span><span id="line-200"></span><span class="annot"><span class="hs-comment">{- | Compile all scripts, threading through the appropriate parameters and
+script hashes
+-}</span></span><span>
+</span><span id="line-203"></span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#mkControlParameters"><span class="hs-identifier hs-type">mkControlParameters</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-204"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.ParametersInitial.html#ControlParametersInitial"><span class="hs-identifier hs-type">ControlParametersInitial</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-205"></span><span>  </span><span class="annot"><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/Data.Either.html#Either"><span class="hs-identifier hs-type">Either</span></a></span><span>
+</span><span id="line-206"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span>
+</span><span id="line-207"></span><span>    </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#ControlParameters"><span class="hs-identifier hs-type">ControlParameters</span></a></span><span>
+</span><span id="line-208"></span><span id="mkControlParameters"><span class="annot"><span class="annottext">mkControlParameters :: ControlParametersInitial -&gt; Either Text ControlParameters
+</span><a href="Cardano.YTxP.Control.Parameters.html#mkControlParameters"><span class="hs-identifier hs-var hs-var">mkControlParameters</span></a></span></span><span>
+</span><span id="line-209"></span><span>  </span><span id="local-6989586621679274897"><span class="annot"><span class="annottext">cpi :: ControlParametersInitial
+</span><a href="#local-6989586621679274897"><span class="hs-identifier hs-var">cpi</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><a href="Cardano.YTxP.Control.ParametersInitial.html#ControlParametersInitial"><span class="hs-identifier hs-type">ControlParametersInitial</span></a></span><span>
+</span><span id="line-210"></span><span>    </span><span class="hs-special">{</span><span> </span><span id="local-6989586621679274898"><span class="annot"><span class="annottext">Natural
+$sel:maxYieldListSize:ControlParametersInitial :: ControlParametersInitial -&gt; Natural
+maxYieldListSize :: Natural
+</span><a href="Cardano.YTxP.Control.ParametersInitial.html#%24sel%3AmaxYieldListSize%3AControlParametersInitial"><span class="hs-identifier hs-var hs-var">maxYieldListSize</span></a></span></span><span>
+</span><span id="line-211"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679274899"><span class="annot"><span class="annottext">[Natural]
+$sel:stakingValidatorsNonceList:ControlParametersInitial :: ControlParametersInitial -&gt; [Natural]
+stakingValidatorsNonceList :: [Natural]
+</span><a href="Cardano.YTxP.Control.ParametersInitial.html#%24sel%3AstakingValidatorsNonceList%3AControlParametersInitial"><span class="hs-identifier hs-var hs-var">stakingValidatorsNonceList</span></a></span></span><span>
+</span><span id="line-212"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679274900"><span class="annot"><span class="annottext">[Natural]
+$sel:mintingPoliciesNonceList:ControlParametersInitial :: ControlParametersInitial -&gt; [Natural]
+mintingPoliciesNonceList :: [Natural]
+</span><a href="Cardano.YTxP.Control.ParametersInitial.html#%24sel%3AmintingPoliciesNonceList%3AControlParametersInitial"><span class="hs-identifier hs-var hs-var">mintingPoliciesNonceList</span></a></span></span><span>
+</span><span id="line-213"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679274901"><span class="annot"><span class="annottext">forall (s :: S). Term s (PData :--&gt; (PScriptContext :--&gt; POpaque))
+$sel:scriptToWrapYieldListMP:ControlParametersInitial :: ControlParametersInitial
+-&gt; forall (s :: S).
+   Term s (PData :--&gt; (PScriptContext :--&gt; POpaque))
+scriptToWrapYieldListMP :: forall (s :: S). Term s (PData :--&gt; (PScriptContext :--&gt; POpaque))
+</span><a href="Cardano.YTxP.Control.ParametersInitial.html#%24sel%3AscriptToWrapYieldListMP%3AControlParametersInitial"><span class="hs-identifier hs-var hs-var">scriptToWrapYieldListMP</span></a></span></span><span>
+</span><span id="line-214"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679274902"><span class="annot"><span class="annottext">forall (s :: S).
+Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+$sel:scriptToWrapYieldListValidator:ControlParametersInitial :: ControlParametersInitial
+-&gt; forall (s :: S).
+   Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+scriptToWrapYieldListValidator :: forall (s :: S).
+Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+</span><a href="Cardano.YTxP.Control.ParametersInitial.html#%24sel%3AscriptToWrapYieldListValidator%3AControlParametersInitial"><span class="hs-identifier hs-var hs-var">scriptToWrapYieldListValidator</span></a></span></span><span>
+</span><span id="line-215"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679274903"><span class="annot"><span class="annottext">Config
+$sel:compilationConfig:ControlParametersInitial :: ControlParametersInitial -&gt; Config
+compilationConfig :: Config
+</span><a href="Cardano.YTxP.Control.ParametersInitial.html#%24sel%3AcompilationConfig%3AControlParametersInitial"><span class="hs-identifier hs-var hs-var">compilationConfig</span></a></span></span><span>
+</span><span id="line-216"></span><span>    </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-217"></span><span>    </span><span class="hs-keyword">do</span><span>
+</span><span id="line-218"></span><span>      </span><span class="hs-comment">------------------------------------------------------------</span><span>
+</span><span id="line-219"></span><span>      </span><span class="hs-comment">-- Compile the yield list scripts first. We need their</span><span>
+</span><span id="line-220"></span><span>      </span><span class="hs-comment">-- hashes in order to parameterize the yielding scripts.</span><span>
+</span><span id="line-221"></span><span>      </span><span id="local-6989586621679274904"><span class="annot"><span class="annottext">YieldListSTMPScript
+</span><a href="#local-6989586621679274904"><span class="hs-identifier hs-var">yieldListSTMP</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-222"></span><span>        </span><span class="annot"><span class="annottext">Config
+-&gt; Natural
+-&gt; (forall (s :: S).
+    Term s (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+-&gt; Either Text YieldListSTMPScript
+</span><a href="Cardano.YTxP.Control.YieldList.MintingPolicy.html#compileYieldListSTMP"><span class="hs-identifier hs-var">compileYieldListSTMP</span></a></span><span> </span><span class="annot"><span class="annottext">Config
+</span><a href="#local-6989586621679274903"><span class="hs-identifier hs-var">compilationConfig</span></a></span><span> </span><span class="annot"><span class="annottext">Natural
+</span><a href="#local-6989586621679274898"><span class="hs-identifier hs-var">maxYieldListSize</span></a></span><span> </span><span class="annot"><span class="annottext">Term s (PData :--&gt; (PScriptContext :--&gt; POpaque))
+forall (s :: S). Term s (PData :--&gt; (PScriptContext :--&gt; POpaque))
+</span><a href="#local-6989586621679274901"><span class="hs-identifier hs-var">scriptToWrapYieldListMP</span></a></span><span>
+</span><span id="line-223"></span><span>      </span><span id="local-6989586621679274905"><span class="annot"><span class="annottext">YieldListValidatorScript
+</span><a href="#local-6989586621679274905"><span class="hs-identifier hs-var">yieldListVal</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-224"></span><span>        </span><span class="annot"><span class="annottext">Config
+-&gt; (forall (s :: S).
+    Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
+-&gt; Either Text YieldListValidatorScript
+</span><a href="Cardano.YTxP.Control.YieldList.Validator.html#compileYieldListValidator"><span class="hs-identifier hs-var">compileYieldListValidator</span></a></span><span> </span><span class="annot"><span class="annottext">Config
+</span><a href="#local-6989586621679274903"><span class="hs-identifier hs-var">compilationConfig</span></a></span><span> </span><span class="annot"><span class="annottext">Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+forall (s :: S).
+Term s (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
+</span><a href="#local-6989586621679274902"><span class="hs-identifier hs-var">scriptToWrapYieldListValidator</span></a></span><span>
+</span><span id="line-225"></span><span>
+</span><span id="line-226"></span><span>      </span><span class="hs-keyword">let</span><span>
+</span><span id="line-227"></span><span>        </span><span id="local-6989586621679274906"><span class="annot"><span class="annottext">ylstcs :: YieldListSTCS
+</span><a href="#local-6989586621679274906"><span class="hs-identifier hs-var hs-var">ylstcs</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">YieldListSTMPScript -&gt; YieldListSTCS
+</span><a href="Cardano.YTxP.Control.YieldList.MintingPolicy.html#mkYieldListSTCS"><span class="hs-identifier hs-var">mkYieldListSTCS</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListSTMPScript
+</span><a href="#local-6989586621679274904"><span class="hs-identifier hs-var">yieldListSTMP</span></a></span><span>
+</span><span id="line-228"></span><span>
+</span><span id="line-229"></span><span>      </span><span class="hs-comment">------------------------------------------------------------</span><span>
+</span><span id="line-230"></span><span>      </span><span class="hs-comment">-- Now compile the yielding scripts</span><span>
+</span><span id="line-231"></span><span>      </span><span id="local-6989586621679274907"><span class="annot"><span class="annottext">YieldingValidatorScript
+</span><a href="#local-6989586621679274907"><span class="hs-identifier hs-var">yieldingVal</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Config -&gt; YieldListSTCS -&gt; Either Text YieldingValidatorScript
+</span><a href="Cardano.YTxP.Control.Yielding.Validator.html#compileYieldingValidator"><span class="hs-identifier hs-var">compileYieldingValidator</span></a></span><span> </span><span class="annot"><span class="annottext">Config
+</span><a href="#local-6989586621679274903"><span class="hs-identifier hs-var">compilationConfig</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListSTCS
+</span><a href="#local-6989586621679274906"><span class="hs-identifier hs-var">ylstcs</span></a></span><span>
+</span><span id="line-232"></span><span>
+</span><span id="line-233"></span><span>      </span><span class="hs-comment">-- Compile the staking validators, pulling any @Left@s (containing compilation</span><span>
+</span><span id="line-234"></span><span>      </span><span class="hs-comment">-- error messages) through the list</span><span>
+</span><span id="line-235"></span><span>      </span><span id="local-6989586621679274908"><span class="annot"><span class="annottext">[YieldingStakingValidatorScript]
+</span><a href="#local-6989586621679274908"><span class="hs-identifier hs-var">yieldingStakingVals</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-236"></span><span>        </span><span class="annot"><span class="annottext">(Natural -&gt; Either Text YieldingStakingValidatorScript)
+-&gt; [Natural] -&gt; Either Text [YieldingStakingValidatorScript]
+forall (t :: Type -&gt; Type) (m :: Type -&gt; Type) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+forall (m :: Type -&gt; Type) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; [a] -&gt; m [b]
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/Data.Traversable.html#mapM"><span class="hs-identifier hs-var">mapM</span></a></span><span>
+</span><span id="line-237"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Config
+-&gt; YieldListSTCS
+-&gt; Natural
+-&gt; Either Text YieldingStakingValidatorScript
+</span><a href="Cardano.YTxP.Control.Yielding.StakingValidator.html#compileYieldingStakingValidator"><span class="hs-identifier hs-var">compileYieldingStakingValidator</span></a></span><span> </span><span class="annot"><span class="annottext">Config
+</span><a href="#local-6989586621679274903"><span class="hs-identifier hs-var">compilationConfig</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListSTCS
+</span><a href="#local-6989586621679274906"><span class="hs-identifier hs-var">ylstcs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-238"></span><span>          </span><span class="annot"><span class="annottext">[Natural]
+</span><a href="#local-6989586621679274899"><span class="hs-identifier hs-var">stakingValidatorsNonceList</span></a></span><span>
+</span><span id="line-239"></span><span>
+</span><span id="line-240"></span><span>      </span><span id="local-6989586621679274910"><span class="annot"><span class="annottext">[YieldingMPScript]
+</span><a href="#local-6989586621679274910"><span class="hs-identifier hs-var">yieldingMPs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-241"></span><span>        </span><span class="annot"><span class="annottext">(Natural -&gt; Either Text YieldingMPScript)
+-&gt; [Natural] -&gt; Either Text [YieldingMPScript]
+forall (t :: Type -&gt; Type) (m :: Type -&gt; Type) a b.
+(Traversable t, Monad m) =&gt;
+(a -&gt; m b) -&gt; t a -&gt; m (t b)
+forall (m :: Type -&gt; Type) a b.
+Monad m =&gt;
+(a -&gt; m b) -&gt; [a] -&gt; m [b]
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/Data.Traversable.html#mapM"><span class="hs-identifier hs-var">mapM</span></a></span><span>
+</span><span id="line-242"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Config -&gt; YieldListSTCS -&gt; Natural -&gt; Either Text YieldingMPScript
+</span><a href="Cardano.YTxP.Control.Yielding.MintingPolicy.html#compileYieldingMP"><span class="hs-identifier hs-var">compileYieldingMP</span></a></span><span> </span><span class="annot"><span class="annottext">Config
+</span><a href="#local-6989586621679274903"><span class="hs-identifier hs-var">compilationConfig</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListSTCS
+</span><a href="#local-6989586621679274906"><span class="hs-identifier hs-var">ylstcs</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-243"></span><span>          </span><span class="annot"><span class="annottext">[Natural]
+</span><a href="#local-6989586621679274900"><span class="hs-identifier hs-var">mintingPoliciesNonceList</span></a></span><span>
+</span><span id="line-244"></span><span>
+</span><span id="line-245"></span><span>      </span><span class="annot"><span class="annottext">ControlParameters -&gt; Either Text ControlParameters
+forall a. a -&gt; Either Text a
+forall (f :: Type -&gt; Type) a. Applicative f =&gt; a -&gt; f a
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#pure"><span class="hs-identifier hs-var">pure</span></a></span><span> </span><span class="annot"><span class="annottext">(ControlParameters -&gt; Either Text ControlParameters)
+-&gt; ControlParameters -&gt; Either Text ControlParameters
+forall a b. (a -&gt; b) -&gt; a -&gt; b
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span>
+</span><span id="line-246"></span><span>        </span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#ControlParameters"><span class="hs-identifier hs-type">ControlParameters</span></a></span><span>
+</span><span id="line-247"></span><span>          </span><span class="hs-special">{</span><span> </span><span class="annot"><span class="annottext">$sel:yieldListScripts:ControlParameters :: YieldListScripts
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldListScripts%3AControlParameters"><span class="hs-identifier hs-var">yieldListScripts</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-248"></span><span>              </span><span class="annot"><span class="annottext">YieldListValidatorScript -&gt; YieldListSTMPScript -&gt; YieldListScripts
+</span><a href="Cardano.YTxP.Control.Parameters.html#YieldListScripts"><span class="hs-identifier hs-var">YieldListScripts</span></a></span><span>
+</span><span id="line-249"></span><span>                </span><span class="annot"><span class="annottext">YieldListValidatorScript
+</span><a href="#local-6989586621679274905"><span class="hs-identifier hs-var">yieldListVal</span></a></span><span>
+</span><span id="line-250"></span><span>                </span><span class="annot"><span class="annottext">YieldListSTMPScript
+</span><a href="#local-6989586621679274904"><span class="hs-identifier hs-var">yieldListSTMP</span></a></span><span>
+</span><span id="line-251"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">$sel:yieldingScripts:ControlParameters :: YieldingScripts
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AyieldingScripts%3AControlParameters"><span class="hs-identifier hs-var">yieldingScripts</span></a></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-252"></span><span>              </span><span class="annot"><span class="annottext">[YieldingMPScript]
+-&gt; YieldingValidatorScript
+-&gt; [YieldingStakingValidatorScript]
+-&gt; YieldingScripts
+</span><a href="Cardano.YTxP.Control.Parameters.html#YieldingScripts"><span class="hs-identifier hs-var">YieldingScripts</span></a></span><span>
+</span><span id="line-253"></span><span>                </span><span class="annot"><span class="annottext">[YieldingMPScript]
+</span><a href="#local-6989586621679274910"><span class="hs-identifier hs-var">yieldingMPs</span></a></span><span>
+</span><span id="line-254"></span><span>                </span><span class="annot"><span class="annottext">YieldingValidatorScript
+</span><a href="#local-6989586621679274907"><span class="hs-identifier hs-var">yieldingVal</span></a></span><span>
+</span><span id="line-255"></span><span>                </span><span class="annot"><span class="annottext">[YieldingStakingValidatorScript]
+</span><a href="#local-6989586621679274908"><span class="hs-identifier hs-var">yieldingStakingVals</span></a></span><span>
+</span><span id="line-256"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">$sel:controlParametersInitial:ControlParameters :: ControlParametersInitial
+</span><a href="Cardano.YTxP.Control.Parameters.html#%24sel%3AcontrolParametersInitial%3AControlParameters"><span class="hs-identifier hs-var">controlParametersInitial</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">ControlParametersInitial
+</span><a href="#local-6989586621679274897"><span class="hs-identifier hs-var">cpi</span></a></span><span>
+</span><span id="line-257"></span><span>          </span><span class="hs-special">}</span><span>
+</span><span id="line-258"></span></pre></body></html>
