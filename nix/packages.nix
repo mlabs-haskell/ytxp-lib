@@ -35,7 +35,7 @@
         serve-docs = pkgs.writeShellApplication {
           name = "serve-docs";
           runtimeInputs = [ ];
-          text = "${lib.getExe pkgs.python3} -m http.server -d ${config.packages.doc}/share/doc 8284";
+          text = "${lib.getExe pkgs.python3} -m http.server -d ${config.packages.docs}/share/doc 8284";
         };
       };
       inherit (flake) devShells;

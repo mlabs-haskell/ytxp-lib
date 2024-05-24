@@ -333,6 +333,30 @@
         "type": "github"
       }
     },
+    "hercules-ci-effects": {
+      "inputs": {
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1714676393,
+        "narHash": "sha256-OA2LZPTCHyH0PcsNkjeTLvgsn4JmsV2VTvXQacHeUZU=",
+        "owner": "mlabs-haskell",
+        "repo": "hercules-ci-effects",
+        "rev": "5ad8f9613b735cb4f8222f07ae45ca37bfe76a23",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mlabs-haskell",
+        "ref": "push-cache-effect",
+        "repo": "hercules-ci-effects",
+        "type": "github"
+      }
+    },
     "hls-1.10": {
       "flake": false,
       "locked": {
@@ -843,6 +867,7 @@
         "flake-parts": "flake-parts",
         "git-hooks": "git-hooks",
         "haskellNix": "haskellNix",
+        "hercules-ci-effects": "hercules-ci-effects",
         "iohk-nix": "iohk-nix",
         "nixpkgs": [
           "haskellNix",
