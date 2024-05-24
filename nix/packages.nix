@@ -28,8 +28,8 @@
             "ytxp-plutarch"
           ];
           prologue = ''
-            = Plutarch Documentation
-            Documentation of Plutarch /and/ Documentation of Plutus libraries.
+            = YTxP Documentation
+            Documentation of the onchain implementation of the YTxP library
           '';
         };
         serve-docs = pkgs.writeShellApplication {
