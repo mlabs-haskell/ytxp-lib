@@ -143,7 +143,7 @@ build_write-config:
 # Test
 .PHONY: test_serialization
 test_serialization:
-	$(CABAL_YTXP_PLUTARCH) test -j serialization
+	$(CABAL_YTXP_PLUTARCH) test -j ytxp-lib-test
 
 ################################################################################
 # Test
