@@ -6,8 +6,17 @@ import Cardano.YTxP.SDK.SdkParameters (
   -- TODO rename
   AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
  )
+import Data.Either (fromRight)
 import Data.String (IsString)
-import Plutarch.Context (Builder, MintingBuilder, SpendingBuilder, buildMinting, mintSingletonWith, mkOutRefIndices, referenceInput, script, withMinting, withRefTxId, withReferenceScript, withSpendingUTXO, withValue)
+import Plutarch (
+  Config (Config, tracingMode),
+  Script,
+  TracingMode (DetTracing),
+  compile,
+ )
+import Plutarch.Context (Builder, MintingBuilder, SpendingBuilder, buildMinting, mintSingletonWith, mkOutRefIndices, referenceInput, script, withMinting, withReferenceScript, withSpendingUTXO, withValue)
+import Plutarch.Evaluate (evalScript)
+import Plutarch.Extra.Script (applyArguments)
 import Plutarch.Test.Precompiled (
   tryFromPTerm,
   (@>),
@@ -18,8 +27,25 @@ import PlutusLedgerApi.V2 (
   ScriptHash,
   singleton,
  )
+import PlutusTx (Data)
 import PlutusTx qualified
 import Test.Tasty (TestTree, defaultMain, testGroup)
+import Test.Tasty.HUnit (testCase, (@?=))
+
+-- TODO: this is a draft, the script is recompiled every time
+failsWithExpectedTrace :: ClosedTerm a -> [Data] -> String -> TestTree
+failsWithExpectedTrace term args expectedTrace =
+  case evalScript appliedScript of
+    (Left _, _, trace) -> testCase "The script failed, the trace is the expected one" $ show trace @?= expectedTrace
+    (Right _, _, _) -> error "A failure is expected"
+  where
+    -- NOTE: we always compile the script with tracingMode = DetTracing
+    debugScript :: Script
+    debugScript =
+      fromRight
+        (error "Couldn't compile the script")
+        (compile (Config {tracingMode = DetTracing}) term)
+    appliedScript = applyArguments debugScript args
 
 main :: IO ()
 main = do
@@ -27,7 +53,11 @@ main = do
     testGroup
       "test suite"
       [ yieldingHelperTest
+      , yieldingHelperTestFails
       ]
+
+yieldingHelperTestFails :: TestTree
+yieldingHelperTestFails = failsWithExpectedTrace (yieldingHelper $ YieldListSTCS authorisedScriptSTCS) [PlutusTx.toData testRedeemer, PlutusTx.toData mintFromAuthorisedScript] "HERE WE PUT THE EXPECTED TRACE"
 
 yieldingHelperTest :: TestTree
 yieldingHelperTest = tryFromPTerm "yielding helper" (yieldingHelper $ AuthorisedScriptsSTCS authorisedScriptSTCS) $ do
@@ -52,8 +82,7 @@ commonContext rest =
       [ referenceInput $
           script authorisedScriptValidator
             <> withValue (singleton authorisedScriptSTCS "" 1)
-            <> withReferenceScript authorisedScript
-            <> withRefTxId "eeff"
+            <> withReferenceScript "22222222222222222222222222222222222222222222222222222221"
       , rest
       ]
 

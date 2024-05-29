@@ -29,6 +29,7 @@ usage:
 	@echo ""
 	# Test
 	@echo "    test                                                        -- Run test"
+	@echo "    test_dev                                                    -- Run test ignoring warning"
 	@echo ""
 	# Check Typos
 	@echo "    typos_check                                                 -- Check typos"
@@ -149,6 +150,9 @@ build_write-config:
 test:
 	$(CABAL_YTXP_PLUTARCH) test -j ytxp-lib-test
 
+.PHONY: test_dev
+test_dev:
+	$(CABAL_YTXP_PLUTARCH) test -j -fdev ytxp-lib-test
 ################################################################################
 # Test
 .PHONY: typos_check

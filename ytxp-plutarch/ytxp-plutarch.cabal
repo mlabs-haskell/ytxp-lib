@@ -194,6 +194,7 @@ test-suite ytxp-lib-test
   build-depends:
     , aeson
     , bytestring
+    , liqwid-plutarch-extra
     , plutarch
     , plutarch-context-builder
     , plutarch-unit
@@ -202,6 +203,7 @@ test-suite ytxp-lib-test
     , prettyprinter
     , QuickCheck
     , tasty-golden
+    , tasty-hunit
     , tasty-quickcheck
     , text
     , ytxp-sdk
