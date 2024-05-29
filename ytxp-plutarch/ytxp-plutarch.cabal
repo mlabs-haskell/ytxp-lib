@@ -197,6 +197,10 @@ test-suite ytxp-lib-test
     , aeson
     , bytestring
     , plutarch
+    , plutarch-context-builder
+    , plutarch-unit
+    , plutus-ledger-api
+    , plutus-tx
     , prettyprinter
     , QuickCheck
     , tasty-golden

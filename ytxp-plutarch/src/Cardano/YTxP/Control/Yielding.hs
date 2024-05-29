@@ -4,6 +4,10 @@ module Cardano.YTxP.Control.Yielding (
   YieldingRedeemer (YieldingRedeemer),
   getAuthorisedScriptHash,
   PAuthorisedScriptPurpose (PMinting, PSpending, PRewarding),
+  AuthorisedScriptIndex (AuthorisedScriptIndex),
+  AuthorisedScriptPurpose (Minting, Spending, Rewarding),
+  AuthorisedScriptProofIndex (AuthorisedScriptProofIndex),
+  PYieldingRedeemer,
 )
 where
 
@@ -15,10 +19,16 @@ import PlutusTx qualified
 
 -- TODO/QUESTION: copied from YieldList, is this import safe?
 
-import Cardano.YTxP.Control.Vendored (EnumIsData (EnumIsData), PlutusTypeEnumData)
+import Cardano.YTxP.Control.Vendored (DerivePConstantViaEnum (DerivePConstantEnum), EnumIsData (EnumIsData), PlutusTypeEnumData)
 import Plutarch.Api.V1.Maybe (PMaybeData (PDJust, PDNothing))
 import Plutarch.Api.V2 (PScriptHash, PTxInInfo, PValue)
-import Plutarch.DataRepr (PDataFields)
+import Plutarch.DataRepr (DerivePConstantViaData (DerivePConstantViaData), PDataFields)
+import Plutarch.Lift (
+  DerivePConstantViaNewtype (DerivePConstantViaNewtype),
+  PConstantDecl,
+  PLifted,
+  PUnsafeLiftDecl,
+ )
 import Utils (pmember)
 
 -- | Represents an index into a authorised reference script in a TxInReferenceInput list
@@ -34,31 +44,43 @@ instance DerivePlutusType PAuthorisedScriptIndex where
 
 instance PTryFrom PData (PAsData PAuthorisedScriptIndex)
 
+instance PUnsafeLiftDecl PAuthorisedScriptIndex where
+  type PLifted PAuthorisedScriptIndex = AuthorisedScriptIndex
+
+deriving via
+  (DerivePConstantViaNewtype AuthorisedScriptIndex PAuthorisedScriptIndex PInteger)
+  instance
+    (PConstantDecl AuthorisedScriptIndex)
+
 {- The type of yielded to scripts
 -}
 data AuthorisedScriptPurpose = Minting | Spending | Rewarding
-  deriving stock (Enum)
+  deriving stock (Show, Generic, Enum, Bounded)
   deriving
     (PlutusTx.ToData, PlutusTx.FromData, PlutusTx.UnsafeFromData)
     via (EnumIsData AuthorisedScriptPurpose)
 
 data PAuthorisedScriptPurpose (s :: S) = PMinting | PSpending | PRewarding
   deriving stock (Generic, Enum, Bounded)
-  deriving anyclass (PlutusType, PIsData)
+  deriving anyclass (PlutusType, PIsData, PEq)
 
 instance DerivePlutusType PAuthorisedScriptPurpose where
   type DPTStrat _ = PlutusTypeEnumData
 
 instance PTryFrom PData (PAsData PAuthorisedScriptPurpose)
 
+instance PUnsafeLiftDecl PAuthorisedScriptPurpose where
+  type PLifted PAuthorisedScriptPurpose = AuthorisedScriptPurpose
+
+deriving via
+  (DerivePConstantViaEnum AuthorisedScriptPurpose PAuthorisedScriptPurpose)
+  instance
+    (PConstantDecl AuthorisedScriptPurpose)
+
 {- Index for the yielding redeemer
 -}
-data AuthorisedScriptProofIndex = AuthorisedScriptProofIndex
-  { authorisedScriptPurpose :: AuthorisedScriptPurpose
-  , proofIndex :: Integer
-  }
-
-PlutusTx.makeIsDataIndexed ''AuthorisedScriptProofIndex [('AuthorisedScriptProofIndex, 0)]
+newtype AuthorisedScriptProofIndex = AuthorisedScriptProofIndex (AuthorisedScriptPurpose, Integer)
+  deriving newtype (PlutusTx.ToData, PlutusTx.FromData, PlutusTx.UnsafeFromData)
 
 newtype PAuthorisedScriptProofIndex (s :: S)
   = PAuthorisedScriptProofIndex
@@ -73,6 +95,15 @@ instance DerivePlutusType PAuthorisedScriptProofIndex where
   type DPTStrat _ = PlutusTypeNewtype
 
 instance PTryFrom PData (PAsData PAuthorisedScriptProofIndex)
+
+instance PUnsafeLiftDecl PAuthorisedScriptProofIndex where
+  type PLifted PAuthorisedScriptProofIndex = AuthorisedScriptProofIndex
+
+-- TODO: why is this not deriving newtype with AsData?
+deriving via
+  (DerivePConstantViaNewtype AuthorisedScriptProofIndex PAuthorisedScriptProofIndex (PBuiltinPair PAuthorisedScriptPurpose PInteger))
+  instance
+    (PConstantDecl AuthorisedScriptProofIndex)
 
 {- | The redeemer passed to the yielding minting policy, validator,
 and staking validators
@@ -103,6 +134,14 @@ instance DerivePlutusType PYieldingRedeemer where
   type DPTStrat _ = PlutusTypeData
 
 instance PTryFrom PData (PAsData PYieldingRedeemer)
+
+instance PUnsafeLiftDecl PYieldingRedeemer where
+  type PLifted PYieldingRedeemer = YieldingRedeemer
+
+deriving via
+  (DerivePConstantViaData YieldingRedeemer PYieldingRedeemer)
+  instance
+    (PConstantDecl YieldingRedeemer)
 
 {- | Given a list of reference inputs and a Yielding Redeemer, dig out the authorised script hash
  by:

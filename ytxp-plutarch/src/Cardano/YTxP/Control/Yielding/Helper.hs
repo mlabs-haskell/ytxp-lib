@@ -14,13 +14,11 @@ import Plutarch.Api.V2 (
  )
 import Utils (pscriptHashToCurrencySymbol)
 
--- -   Look at the UTxO at the `n` th entry in the `txInfoReferenceInputs`, where `n` is equal to `yieldListInputIndex`.
---     -   Call this UTxO `yieldListUTxO`.
---     -   Check that this UTxO is carrying exactly one token with the `yieldListSTCS`. Blow up if not.
--- -   "Unsafely" deserialize the datum of the `yieldListUTxO` to a value `yieldList :: YieldList`
--- -   Grab the correct `YieldToHash` by looking at the `n` th entry of `yieldList`, where `n` is equal to
---     `yieldListIndex`. Call this hash `AuthorisedScriptHash`.
--- -   Obtain evidence that the a script with `AuthorisedScriptHash` was triggered via the `checkYieldList` function.
+-- -   Look at the UTxO at the `n` th entry in the `txInfoReferenceInputs`, where `n` is equal to `authorisedScriptIndex`.
+--     -   Call this UTxO `authorisedScriptUTxO`.
+--     -   Check that this UTxO is carrying exactly one token with the `authorisedScriptSTCS`. Blow up if not.
+--     -   Obtain the hash of the reference script from the authorisedScriptUTxO. Call this hash `AuthorisedScriptHash`.
+-- -   Obtain evidence that the a script with `AuthorisedScriptHash` was triggered.
 --     If not, blow up. In practice, this will involve either:
 --     -   Looking at the `txInfoWithdrawls` field for a staking validator being triggered with the correct StakingCredential
 --     -   Looking at the `txInfoInputs` field for a UTxO being spent at the correct address
@@ -40,7 +38,7 @@ yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
       authorisedScriptIndex = pfromData $ psndBuiltin # authorisedScriptProofIndex
 
   pure $
-    popaque $
+    pcheck $
       pmatch authorisedScriptPurpose $ \case
         PMinting ->
           let txInfoMints = pfromData $ pfield @"mint" # txInfo
@@ -73,3 +71,13 @@ yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
                       ptraceError "Staking credential at specified index is not a script credential"
                 PStakingPtr _ ->
                   ptraceError "No staking validator found"
+
+pcheck ::
+  forall (s :: S).
+  Term s PBool ->
+  Term s POpaque
+pcheck b =
+  pif
+    b
+    (popaque $ pconstant ())
+    perror
