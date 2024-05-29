@@ -9,47 +9,6 @@
 @version 0.1.0
 
 
-module Cardano.YTxP.Control.ParametersInitial
-
--- | Parameters available to the YieldListValidator and YieldListMP during
---   compilation (therefore not containing any script hashes).
---   
---   This is a GADT because the nonces must be serializable (and thus
---   haskell types) as well as able to be applied to plutarch scripts (and
---   thus PTypes).
---   
---   To load the <tt>scriptToWrap</tt> arguments, see
---   <tt>unsafeTermFromScript</tt> from Cardano.YTxP.Control.Utils
-data ControlParametersInitial
-ControlParametersInitial :: !Natural -> [Natural] -> [Natural] -> (forall (s :: S). Term s (PData :--> (PScriptContext :--> POpaque))) -> (forall (s :: S). Term s (PData :--> (PData :--> (PScriptContext :--> POpaque)))) -> Config -> ControlParametersInitial
-
--- | If the yield list exceeds this size, blow up during STT minting @since
---   0.1.0
-[$sel:maxYieldListSize:ControlParametersInitial] :: ControlParametersInitial -> !Natural
-
--- | A list of nonces for the yielding staking validators. One staking
---   validator is compiled for each nonce. @since 0.1.0
-[$sel:stakingValidatorsNonceList:ControlParametersInitial] :: ControlParametersInitial -> [Natural]
-
--- | A list of nonces for the yielding minting policies. One minting policy
---   is compiled for each nonce. @since 0.1.0
-[$sel:mintingPoliciesNonceList:ControlParametersInitial] :: ControlParametersInitial -> [Natural]
-
--- | The V2 script that the yield list MP will wrap. This might be an admin
---   signature script, multisig script, etc. @since 0.1.0
-[$sel:scriptToWrapYieldListMP:ControlParametersInitial] :: ControlParametersInitial -> forall (s :: S). Term s (PData :--> (PScriptContext :--> POpaque))
-
--- | The V2 script that the yield list validator will wrap.
-[$sel:scriptToWrapYieldListValidator:ControlParametersInitial] :: ControlParametersInitial -> forall (s :: S). Term s (PData :--> (PData :--> (PScriptContext :--> POpaque)))
-
--- | Plutarch compilation config
-[$sel:compilationConfig:ControlParametersInitial] :: ControlParametersInitial -> Config
-instance GHC.Classes.Eq Cardano.YTxP.Control.ParametersInitial.ControlParametersInitial
-instance Prettyprinter.Internal.Pretty Cardano.YTxP.Control.ParametersInitial.ControlParametersInitial
-instance Data.Aeson.Types.ToJSON.ToJSON Cardano.YTxP.Control.ParametersInitial.ControlParametersInitial
-instance Data.Aeson.Types.FromJSON.FromJSON Cardano.YTxP.Control.ParametersInitial.ControlParametersInitial
-
-
 -- | have some scripts fully implemented yet.
 module Cardano.YTxP.Control.Stubs
 
@@ -149,10 +108,6 @@ data PlutusTypeDataList
 --   
 --   Vendored from LPE TODO: Licensing info
 applyScript :: Script -> Script -> Script
-
--- | Get the sum of all values belonging to a particular CurrencySymbol.
---   Modified version of LPE function with same purpose.
-psymbolValueOf :: forall (keys :: KeyGuarantees) (amounts :: AmountGuarantees) (s :: S). Term s (PCurrencySymbol :--> (PValue keys amounts :--> PInteger))
 instance Plutarch.Internal.PlutusType.PlutusTypeStrat Cardano.YTxP.Control.Vendored.PlutusTypeDataList
 instance forall (p :: Plutarch.Internal.S -> GHC.Types.Type). (Plutarch.Internal.Generic.PGeneric p, (Plutarch.Internal.Generic.PCode p :: [[Plutarch.Internal.PType]]) GHC.Types.~ ((':) @[Plutarch.Internal.S -> GHC.Types.Type] ((':) @(Plutarch.Internal.S -> GHC.Types.Type) (Cardano.YTxP.Control.Vendored.GetPRecord p) ('[] @(Plutarch.Internal.S -> GHC.Types.Type))) ('[] @[Plutarch.Internal.S -> GHC.Types.Type]) :: [[Plutarch.Internal.PType]]), Cardano.YTxP.Control.Vendored.MatchTypes (Cardano.YTxP.Control.Vendored.UD (Cardano.YTxP.Control.Vendored.GetRecordTypes (Generics.SOP.Universe.Code (Plutarch.Lift.PLifted p)))) (Cardano.YTxP.Control.Vendored.PUnlabel (Cardano.YTxP.Control.Vendored.GetPRecord' (Plutarch.Internal.Generic.PCode p)))) => Cardano.YTxP.Control.Vendored.IsPlutusTypeDataList p
 instance forall h (p :: Plutarch.Internal.S -> GHC.Types.Type). (PlutusTx.IsData.Class.FromData h, PlutusTx.IsData.Class.ToData h, Plutarch.Lift.PLift p) => Plutarch.Lift.PConstantDecl (Cardano.YTxP.Control.Vendored.DerivePConstantViaDataList h p)
@@ -166,225 +121,94 @@ instance forall a. GHC.Enum.Enum a => PlutusTx.IsData.Class.ToData (Cardano.YTxP
 instance forall a. GHC.Enum.Enum a => PlutusTx.IsData.Class.FromData (Cardano.YTxP.Control.Vendored.EnumIsData a)
 instance forall a. GHC.Enum.Enum a => PlutusTx.IsData.Class.UnsafeFromData (Cardano.YTxP.Control.Vendored.EnumIsData a)
 
-
-module Cardano.YTxP.Control.YieldList
-
--- | A single hash that a yielding script can yield to A yielded to script
---   can be a validator, minting policy or a stake validator
-data YieldedToHash
-YieldedToValidator :: CustomScriptHash -> YieldedToHash
-YieldedToMP :: CustomScriptHash -> YieldedToHash
-YieldedToSV :: CustomScriptHash -> YieldedToHash
-
--- | We use this <a>CustomScriptHash</a> instead of <tt>ScriptHash</tt> in
---   order to ensure that the hash is of length 28.
-data CustomScriptHash
-
--- | Note(Nigel): This will likely not compile under `plutus-tx` due to the
---   use of <a>error</a> from the Haskell <tt>Prelude</tt>. We use
---   <a>error</a> from Prelude here as using <tt>traceError</tt> doesn't
---   give back the error message. See the following issue for more details:
---   <a>https://github.com/IntersectMBO/plutus/issues/3003</a>
-tryMkCustomScriptHash :: BuiltinByteString -> CustomScriptHash
-data PYieldedToHash (s :: S)
-PYieldedToValidator :: Term s (PDataRecord '["scriptHash" ':= PScriptHash]) -> PYieldedToHash (s :: S)
-PYieldedToMP :: Term s (PDataRecord '["scriptHash" ':= PScriptHash]) -> PYieldedToHash (s :: S)
-PYieldedToSV :: Term s (PDataRecord '["scriptHash" ':= PScriptHash]) -> PYieldedToHash (s :: S)
-
--- | Redeemer for <tt>mkYieldListMPWrapper</tt>.
-data YieldListMPWrapperRedeemer
-
--- | Plutarch-level version of <a>YieldListMPWrapperRedeemer</a>.
-data PYieldListMPWrapperRedeemer (s :: S)
-PMint :: PYieldListMPWrapperRedeemer (s :: S)
-PBurn :: PYieldListMPWrapperRedeemer (s :: S)
-
--- | The <a>YieldListDatum</a> holds a collection of hashes that
---   YieldingScripts can yield to. The length of the datum is checked upon
---   creation in <tt>mkYieldListSTMPWrapper</tt> to ensure that the length
---   of the list does not exceed the max list length passed as a parameter
---   to that script.
-newtype YieldListDatum
-YieldListDatum :: [YieldedToHash] -> YieldListDatum
-newtype PYieldListDatum (s :: S)
-PYieldListDatum :: Term s (PDataRecord '["yieldedToScripts" ':= PBuiltinList (PAsData PYieldedToHash)]) -> PYieldListDatum (s :: S)
-getYieldedToHashByIndex :: Term s (PYieldListDatum :--> (PInteger :--> PYieldedToHash))
-instance Plutarch.Builtin.PIsData Cardano.YTxP.Control.YieldList.PYieldedToHash
-instance Plutarch.Internal.PlutusType.PlutusType Cardano.YTxP.Control.YieldList.PYieldedToHash
-instance forall (s :: Plutarch.Internal.S). GHC.Generics.Generic (Cardano.YTxP.Control.YieldList.PYieldedToHash s)
-instance PlutusTx.IsData.Class.FromData Cardano.YTxP.Control.YieldList.YieldListMPWrapperRedeemer
-instance PlutusTx.IsData.Class.ToData Cardano.YTxP.Control.YieldList.YieldListMPWrapperRedeemer
-instance GHC.Enum.Bounded Cardano.YTxP.Control.YieldList.YieldListMPWrapperRedeemer
-instance GHC.Enum.Enum Cardano.YTxP.Control.YieldList.YieldListMPWrapperRedeemer
-instance GHC.Generics.Generic Cardano.YTxP.Control.YieldList.YieldListMPWrapperRedeemer
-instance GHC.Show.Show Cardano.YTxP.Control.YieldList.YieldListMPWrapperRedeemer
-instance Plutarch.Bool.PEq Cardano.YTxP.Control.YieldList.PYieldListMPWrapperRedeemer
-instance Plutarch.Builtin.PIsData Cardano.YTxP.Control.YieldList.PYieldListMPWrapperRedeemer
-instance Plutarch.Internal.PlutusType.PlutusType Cardano.YTxP.Control.YieldList.PYieldListMPWrapperRedeemer
-instance forall (s :: Plutarch.Internal.S). GHC.Enum.Bounded (Cardano.YTxP.Control.YieldList.PYieldListMPWrapperRedeemer s)
-instance forall (s :: Plutarch.Internal.S). GHC.Enum.Enum (Cardano.YTxP.Control.YieldList.PYieldListMPWrapperRedeemer s)
-instance forall (s :: Plutarch.Internal.S). GHC.Generics.Generic (Cardano.YTxP.Control.YieldList.PYieldListMPWrapperRedeemer s)
-instance PlutusTx.IsData.Class.FromData Cardano.YTxP.Control.YieldList.YieldListDatum
-instance PlutusTx.IsData.Class.ToData Cardano.YTxP.Control.YieldList.YieldListDatum
-instance Generics.SOP.Universe.Generic Cardano.YTxP.Control.YieldList.YieldListDatum
-instance GHC.Generics.Generic Cardano.YTxP.Control.YieldList.YieldListDatum
-instance GHC.Classes.Eq Cardano.YTxP.Control.YieldList.YieldListDatum
-instance GHC.Show.Show Cardano.YTxP.Control.YieldList.YieldListDatum
-instance Plutarch.DataRepr.Internal.Field.PDataFields Cardano.YTxP.Control.YieldList.PYieldListDatum
-instance Plutarch.Bool.PEq Cardano.YTxP.Control.YieldList.PYieldListDatum
-instance Plutarch.Builtin.PIsData Cardano.YTxP.Control.YieldList.PYieldListDatum
-instance Plutarch.Internal.PlutusType.PlutusType Cardano.YTxP.Control.YieldList.PYieldListDatum
-instance forall (s :: Plutarch.Internal.S). GHC.Generics.Generic (Cardano.YTxP.Control.YieldList.PYieldListDatum s)
-instance Plutarch.Lift.PConstantDecl Cardano.YTxP.Control.YieldList.YieldedToHash
-instance Plutarch.Lift.PConstantDecl Cardano.YTxP.Control.YieldList.YieldListMPWrapperRedeemer
-instance Plutarch.Lift.PConstantDecl Cardano.YTxP.Control.YieldList.YieldListDatum
-instance Plutarch.Internal.PlutusType.DerivePlutusType Cardano.YTxP.Control.YieldList.PYieldListDatum
-instance Plutarch.Lift.PUnsafeLiftDecl Cardano.YTxP.Control.YieldList.PYieldListDatum
-instance Plutarch.TryFrom.PTryFrom Plutarch.Builtin.PData (Plutarch.Builtin.PAsData Cardano.YTxP.Control.YieldList.PYieldListDatum)
-instance Plutarch.TryFrom.PTryFrom Plutarch.Builtin.PData (Plutarch.Builtin.PAsData Cardano.YTxP.Control.YieldList.PYieldListMPWrapperRedeemer)
-instance Plutarch.Internal.PlutusType.DerivePlutusType Cardano.YTxP.Control.YieldList.PYieldListMPWrapperRedeemer
-instance Plutarch.Lift.PUnsafeLiftDecl Cardano.YTxP.Control.YieldList.PYieldListMPWrapperRedeemer
-instance Plutarch.Internal.PlutusType.DerivePlutusType Cardano.YTxP.Control.YieldList.PYieldedToHash
-instance Plutarch.TryFrom.PTryFrom Plutarch.Builtin.PData (Plutarch.Builtin.PAsData Cardano.YTxP.Control.YieldList.PYieldedToHash)
-instance Plutarch.Lift.PUnsafeLiftDecl Cardano.YTxP.Control.YieldList.PYieldedToHash
-instance PlutusTx.IsData.Class.ToData Cardano.YTxP.Control.YieldList.YieldedToHash
-instance PlutusTx.IsData.Class.FromData Cardano.YTxP.Control.YieldList.YieldedToHash
-instance PlutusTx.IsData.Class.UnsafeFromData Cardano.YTxP.Control.YieldList.YieldedToHash
-instance GHC.Classes.Eq Cardano.YTxP.Control.YieldList.CustomScriptHash
-instance GHC.Show.Show Cardano.YTxP.Control.YieldList.CustomScriptHash
-instance GHC.Classes.Eq Cardano.YTxP.Control.YieldList.YieldedToHash
-instance GHC.Generics.Generic Cardano.YTxP.Control.YieldList.YieldedToHash
-instance GHC.Show.Show Cardano.YTxP.Control.YieldList.YieldedToHash
-instance PlutusTx.IsData.Class.UnsafeFromData Cardano.YTxP.Control.YieldList.CustomScriptHash
-instance PlutusTx.IsData.Class.ToData Cardano.YTxP.Control.YieldList.CustomScriptHash
-instance PlutusTx.IsData.Class.FromData Cardano.YTxP.Control.YieldList.CustomScriptHash
-
 module Utils
-
--- | Check that there is only token of given <a>PCurrencySymbol</a> and
---   <a>PTokenName</a> with given amount contained in the given PValue.
---   
---   Note: We use this function when checking the <tt>mint</tt> field of
---   <tt>TxInfo</tt>, as when checking <tt>mint</tt> we need to check that
---   the length is equal to two to account for the additional 'zero Ada'
---   entry automatically included in the <tt>mint</tt> field:
---   (PCurrencySymbol 0x,PMap [(PTokenName 0x,0)])])
-pmintFieldHasTokenOfCurrencySymbolTokenNameAndAmount :: forall (keys :: KeyGuarantees) (amounts :: AmountGuarantees) (s :: S). Term s (PValue keys amounts :--> (PCurrencySymbol :--> (PTokenName :--> (PInteger :--> PBool))))
-phasOneScriptInputAtValidatorWithExactlyOneToken :: Term s (PBuiltinList PTxInInfo) -> Term s (PCurrencySymbol :--> (PTxOutRef :--> PBool))
-
--- | Check that: - there is exactly one script output with exactly one
---   token with the given <a>PCurrencySymbol</a> and <a>PTokenName</a> -
---   there is no other script output with one or more of these tokens (We
---   do this in order to use this helper to ensure that there are no other
---   script outputs containing one ore more of this token) - there is no
---   wallet output that contains one of these tokens - if there is exactly
---   one script output with exactly one of these tokens, we check that it
---   contains no other tokens aside from Ada - finally check that the
---   output also contains a valid (according to the spec)
---   <a>POutputDatum</a>, ensuring the length of the yield list does not
---   exceed the provided <tt>maxYieldListSize</tt> parameter.
-phasOnlyOneValidScriptOutputWithToken :: Natural -> Term s (PBuiltinList PTxOut) -> Term s (PCurrencySymbol :--> PBool)
-
--- | Check that there is exactly one input, and that one input carries
---   exactly one yield list token.
-phasOnlyOneInputWithExactlyOneTokenWithSymbol :: Term s (PBuiltinList PTxInInfo) -> Term s (PCurrencySymbol :--> PBool)
-phasNoScriptInputWithToken :: Term s (PBuiltinList PTxInInfo) -> Term s (PCurrencySymbol :--> PBool)
-
--- | Check that none of the given outputs contain a token with the given
---   <a>PCurrencySymbol</a>
-poutputsDoNotContainToken :: Term s (PBuiltinList PTxOut) -> Term s (PCurrencySymbol :--> PBool)
-
--- | Empty token name
-pemptyTokenName :: Term s PTokenName
-
--- | Like Haskell's <a>and</a> but for Plutarch terms <a>Bool</a> has the
---   same function but does not export it.
-pands :: [Term s PBool] -> Term s PBool
 
 -- | Convert a <tt>ScriptHash</tt> to a <tt>CurrencySymbol</tt>, which has
 --   the same representation
 pscriptHashToCurrencySymbol :: Term s PScriptHash -> Term s PCurrencySymbol
-
--- | Extract the datum from a <a>POutputDatum</a>, expecting it to be an
---   inline datum.
-punsafeFromInlineDatum :: forall (s :: S) (a :: S -> Type). Term s (POutputDatum :--> a)
 pmember :: PIsData k => Term s (k :--> (PMap any k v :--> PBool))
 
-module Cardano.YTxP.Control.YieldList.Validator
-
-data YieldListValidatorScript
-compileYieldListValidator :: Config -> (forall (s :: S). Term s (PData :--> (PData :--> (PScriptContext :--> POpaque)))) -> Either Text YieldListValidatorScript
-
--- | Opaque, semantic newtype for the YieldList state thread currency
---   symbol
-data YieldListValidatorCredential
-mkYieldListValidatorWrapperCredential :: YieldListValidatorScript -> YieldListValidatorCredential
-instance Prettyprinter.Internal.Pretty Cardano.YTxP.Control.YieldList.Validator.YieldListValidatorScript
-instance GHC.Classes.Eq Cardano.YTxP.Control.YieldList.Validator.YieldListValidatorScript
-instance Data.Aeson.Types.FromJSON.FromJSON Cardano.YTxP.Control.YieldList.Validator.YieldListValidatorScript
-instance Data.Aeson.Types.ToJSON.ToJSON Cardano.YTxP.Control.YieldList.Validator.YieldListValidatorScript
-
-module Cardano.YTxP.Control.YieldList.MintingPolicy
-
-data YieldListSTMPScript
-compileYieldListSTMP :: Config -> Natural -> (forall (s :: S). Term s (PData :--> (PScriptContext :--> POpaque))) -> Either Text YieldListSTMPScript
-
--- | Opaque, semantic newtype for the YieldList state thread currency
---   symbol
-data YieldListSTCS
-mkYieldListSTCS :: YieldListSTMPScript -> YieldListSTCS
-
--- | Checks that the given <a>PValue</a> contains the YieldListSTT TODO
---   (OPTIMIZE): make partial (<tt>has</tt>/<tt>lacks</tt>) variants and
---   use those instead
-pcontainsYieldListSTT :: YieldListSTCS -> Term s (PValue anyKey anyAmount :--> PBool)
-instance Prettyprinter.Internal.Pretty Cardano.YTxP.Control.YieldList.MintingPolicy.YieldListSTMPScript
-instance GHC.Classes.Eq Cardano.YTxP.Control.YieldList.MintingPolicy.YieldListSTMPScript
-instance Data.Aeson.Types.FromJSON.FromJSON Cardano.YTxP.Control.YieldList.MintingPolicy.YieldListSTMPScript
-instance Data.Aeson.Types.ToJSON.ToJSON Cardano.YTxP.Control.YieldList.MintingPolicy.YieldListSTMPScript
-
 module Cardano.YTxP.Control.Yielding
-
--- | Represents an index into a YieldList
-data YieldListIndex
-
--- | Represents an index into reference inputs of a transaction. The UTxO
---   at this index must contain a YieldListSTT; otherwise, we blow up
-data YieldListRefInputIndex
 
 -- | The redeemer passed to the yielding minting policy, validator, and
 --   staking validators
 data YieldingRedeemer
-YieldingRedeemer :: YieldListIndex -> YieldListScriptToYieldIndex -> YieldListRefInputIndex -> YieldingRedeemer
+YieldingRedeemer :: AuthorisedScriptIndex -> AuthorisedScriptProofIndex -> YieldingRedeemer
 
 -- | Given a list of reference inputs and a Yielding Redeemer, dig out the
---   YieldList by: - Indexing the reference inputs according to the
---   redeemer - Checking the fetched reference input for the correct
---   YieldListSTCS - Decoding its datum (unsafely; the presence of the
---   YieldListSTCS ensure it is authentic and well-formed) - Looking in the
---   datum at the index in the redeemer and returning the YieldedToHash
-getYieldedToHash :: YieldListSTCS -> Term s (PBuiltinList PTxInInfo :--> (PYieldingRedeemer :--> PYieldedToHash))
-instance Plutarch.Builtin.PIsData Cardano.YTxP.Control.Yielding.PYieldListIndex
-instance Plutarch.Internal.PlutusType.PlutusType Cardano.YTxP.Control.Yielding.PYieldListIndex
-instance forall (s :: Plutarch.Internal.S). GHC.Generics.Generic (Cardano.YTxP.Control.Yielding.PYieldListIndex s)
-instance Plutarch.Builtin.PIsData Cardano.YTxP.Control.Yielding.PYieldListScriptToYieldIndex
-instance Plutarch.Internal.PlutusType.PlutusType Cardano.YTxP.Control.Yielding.PYieldListScriptToYieldIndex
-instance forall (s :: Plutarch.Internal.S). GHC.Generics.Generic (Cardano.YTxP.Control.Yielding.PYieldListScriptToYieldIndex s)
-instance Plutarch.Builtin.PIsData Cardano.YTxP.Control.Yielding.PYieldListRefInputIndex
-instance Plutarch.Internal.PlutusType.PlutusType Cardano.YTxP.Control.Yielding.PYieldListRefInputIndex
-instance forall (s :: Plutarch.Internal.S). GHC.Generics.Generic (Cardano.YTxP.Control.Yielding.PYieldListRefInputIndex s)
+--   authorised script hash by:
+--   
+--   <ul>
+--   <li>Indexing the reference inputs according to the redeemer</li>
+--   <li>Checking the fetched reference input for the correct
+--   YieldListSTCS</li>
+--   <li>Returning the AuthorisedScriptHash</li>
+--   </ul>
+getAuthorisedScriptHash :: YieldListSTCS -> Term s (PBuiltinList PTxInInfo :--> (PYieldingRedeemer :--> PScriptHash))
+data PAuthorisedScriptPurpose (s :: S)
+PMinting :: PAuthorisedScriptPurpose (s :: S)
+PSpending :: PAuthorisedScriptPurpose (s :: S)
+PRewarding :: PAuthorisedScriptPurpose (s :: S)
+
+-- | Represents an index into a authorised reference script in a
+--   TxInReferenceInput list
+newtype AuthorisedScriptIndex
+AuthorisedScriptIndex :: Integer -> AuthorisedScriptIndex
+data AuthorisedScriptPurpose
+Minting :: AuthorisedScriptPurpose
+Spending :: AuthorisedScriptPurpose
+Rewarding :: AuthorisedScriptPurpose
+newtype AuthorisedScriptProofIndex
+AuthorisedScriptProofIndex :: (AuthorisedScriptPurpose, Integer) -> AuthorisedScriptProofIndex
+data PYieldingRedeemer (s :: S)
 instance Plutarch.DataRepr.Internal.Field.PDataFields Cardano.YTxP.Control.Yielding.PYieldingRedeemer
 instance Plutarch.Builtin.PIsData Cardano.YTxP.Control.Yielding.PYieldingRedeemer
 instance Plutarch.Internal.PlutusType.PlutusType Cardano.YTxP.Control.Yielding.PYieldingRedeemer
 instance forall (s :: Plutarch.Internal.S). GHC.Generics.Generic (Cardano.YTxP.Control.Yielding.PYieldingRedeemer s)
+instance Plutarch.Lift.PConstantDecl Cardano.YTxP.Control.Yielding.YieldingRedeemer
 instance Plutarch.Internal.PlutusType.DerivePlutusType Cardano.YTxP.Control.Yielding.PYieldingRedeemer
 instance Plutarch.TryFrom.PTryFrom Plutarch.Builtin.PData (Plutarch.Builtin.PAsData Cardano.YTxP.Control.Yielding.PYieldingRedeemer)
-instance Plutarch.Internal.PlutusType.DerivePlutusType Cardano.YTxP.Control.Yielding.PYieldListRefInputIndex
-instance Plutarch.TryFrom.PTryFrom Plutarch.Builtin.PData (Plutarch.Builtin.PAsData Cardano.YTxP.Control.Yielding.PYieldListRefInputIndex)
-instance Plutarch.Internal.PlutusType.DerivePlutusType Cardano.YTxP.Control.Yielding.PYieldListScriptToYieldIndex
-instance Plutarch.TryFrom.PTryFrom Plutarch.Builtin.PData (Plutarch.Builtin.PAsData Cardano.YTxP.Control.Yielding.PYieldListScriptToYieldIndex)
-instance Plutarch.Internal.PlutusType.DerivePlutusType Cardano.YTxP.Control.Yielding.PYieldListIndex
-instance Plutarch.TryFrom.PTryFrom Plutarch.Builtin.PData (Plutarch.Builtin.PAsData Cardano.YTxP.Control.Yielding.PYieldListIndex)
+instance Plutarch.Lift.PUnsafeLiftDecl Cardano.YTxP.Control.Yielding.PYieldingRedeemer
+instance PlutusTx.IsData.Class.ToData Cardano.YTxP.Control.Yielding.YieldingRedeemer
+instance PlutusTx.IsData.Class.FromData Cardano.YTxP.Control.Yielding.YieldingRedeemer
+instance PlutusTx.IsData.Class.UnsafeFromData Cardano.YTxP.Control.Yielding.YieldingRedeemer
+instance PlutusTx.IsData.Class.UnsafeFromData Cardano.YTxP.Control.Yielding.AuthorisedScriptIndex
+instance PlutusTx.IsData.Class.FromData Cardano.YTxP.Control.Yielding.AuthorisedScriptIndex
+instance PlutusTx.IsData.Class.ToData Cardano.YTxP.Control.Yielding.AuthorisedScriptIndex
+instance Plutarch.Builtin.PIsData Cardano.YTxP.Control.Yielding.PAuthorisedScriptIndex
+instance Plutarch.Internal.PlutusType.PlutusType Cardano.YTxP.Control.Yielding.PAuthorisedScriptIndex
+instance forall (s :: Plutarch.Internal.S). GHC.Generics.Generic (Cardano.YTxP.Control.Yielding.PAuthorisedScriptIndex s)
+instance PlutusTx.IsData.Class.UnsafeFromData Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
+instance PlutusTx.IsData.Class.FromData Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
+instance PlutusTx.IsData.Class.ToData Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
+instance GHC.Enum.Bounded Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
+instance GHC.Enum.Enum Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
+instance GHC.Generics.Generic Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
+instance GHC.Show.Show Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
+instance Plutarch.Bool.PEq Cardano.YTxP.Control.Yielding.PAuthorisedScriptPurpose
+instance Plutarch.Builtin.PIsData Cardano.YTxP.Control.Yielding.PAuthorisedScriptPurpose
+instance Plutarch.Internal.PlutusType.PlutusType Cardano.YTxP.Control.Yielding.PAuthorisedScriptPurpose
+instance forall (s :: Plutarch.Internal.S). GHC.Enum.Bounded (Cardano.YTxP.Control.Yielding.PAuthorisedScriptPurpose s)
+instance forall (s :: Plutarch.Internal.S). GHC.Enum.Enum (Cardano.YTxP.Control.Yielding.PAuthorisedScriptPurpose s)
+instance forall (s :: Plutarch.Internal.S). GHC.Generics.Generic (Cardano.YTxP.Control.Yielding.PAuthorisedScriptPurpose s)
+instance PlutusTx.IsData.Class.UnsafeFromData Cardano.YTxP.Control.Yielding.AuthorisedScriptProofIndex
+instance PlutusTx.IsData.Class.FromData Cardano.YTxP.Control.Yielding.AuthorisedScriptProofIndex
+instance PlutusTx.IsData.Class.ToData Cardano.YTxP.Control.Yielding.AuthorisedScriptProofIndex
+instance Plutarch.Builtin.PIsData Cardano.YTxP.Control.Yielding.PAuthorisedScriptProofIndex
+instance Plutarch.Internal.PlutusType.PlutusType Cardano.YTxP.Control.Yielding.PAuthorisedScriptProofIndex
+instance forall (s :: Plutarch.Internal.S). GHC.Generics.Generic (Cardano.YTxP.Control.Yielding.PAuthorisedScriptProofIndex s)
+instance Plutarch.Lift.PConstantDecl Cardano.YTxP.Control.Yielding.AuthorisedScriptIndex
+instance Plutarch.Lift.PConstantDecl Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
+instance Plutarch.Lift.PConstantDecl Cardano.YTxP.Control.Yielding.AuthorisedScriptProofIndex
+instance Plutarch.Internal.PlutusType.DerivePlutusType Cardano.YTxP.Control.Yielding.PAuthorisedScriptProofIndex
+instance Plutarch.TryFrom.PTryFrom Plutarch.Builtin.PData (Plutarch.Builtin.PAsData Cardano.YTxP.Control.Yielding.PAuthorisedScriptProofIndex)
+instance Plutarch.Lift.PUnsafeLiftDecl Cardano.YTxP.Control.Yielding.PAuthorisedScriptProofIndex
+instance Plutarch.Internal.PlutusType.DerivePlutusType Cardano.YTxP.Control.Yielding.PAuthorisedScriptPurpose
+instance Plutarch.TryFrom.PTryFrom Plutarch.Builtin.PData (Plutarch.Builtin.PAsData Cardano.YTxP.Control.Yielding.PAuthorisedScriptPurpose)
+instance Plutarch.Lift.PUnsafeLiftDecl Cardano.YTxP.Control.Yielding.PAuthorisedScriptPurpose
+instance Plutarch.Internal.PlutusType.DerivePlutusType Cardano.YTxP.Control.Yielding.PAuthorisedScriptIndex
+instance Plutarch.TryFrom.PTryFrom Plutarch.Builtin.PData (Plutarch.Builtin.PAsData Cardano.YTxP.Control.Yielding.PAuthorisedScriptIndex)
+instance Plutarch.Lift.PUnsafeLiftDecl Cardano.YTxP.Control.Yielding.PAuthorisedScriptIndex
 
 
 -- | This module export a helper function that produces a two argument
@@ -394,64 +218,22 @@ module Cardano.YTxP.Control.Yielding.Helper
 yieldingHelper :: forall (s :: S). YieldListSTCS -> Term s (PData :--> (PScriptContext :--> POpaque))
 
 module Cardano.YTxP.Control.Yielding.Validator
-
-data YieldingValidatorScript
-compileYieldingValidator :: Config -> YieldListSTCS -> Either Text YieldingValidatorScript
-
--- | Opaque, semantic newtype for the YieldList state thread currency
---   symbol
-data YieldingValidatorCredential
-mkYieldingValidatorCredential :: YieldingValidatorScript -> YieldingValidatorCredential
-instance Data.Aeson.Types.FromJSON.FromJSON Cardano.YTxP.Control.Yielding.Validator.YieldingValidatorScript
-instance Data.Aeson.Types.ToJSON.ToJSON Cardano.YTxP.Control.Yielding.Validator.YieldingValidatorScript
+compileYieldingValidator :: Config -> YieldListSTCS -> Either Text (HexStringScript "YieldingValidator")
 
 module Cardano.YTxP.Control.Yielding.StakingValidator
-
--- | A yielding staking validator together with its nonce.
-data YieldingStakingValidatorScript
 
 -- | Compile a yielding staking validator that has been nonced. The nonce
 --   is required because each staking validator can only be delegated to a
 --   single pool; the inclusion of the nonce will change the script hash.
-compileYieldingStakingValidator :: Config -> YieldListSTCS -> Natural -> Either Text YieldingStakingValidatorScript
-instance Data.Aeson.Types.ToJSON.ToJSON Cardano.YTxP.Control.Yielding.StakingValidator.YieldingStakingValidatorScript
-instance Data.Aeson.Types.FromJSON.FromJSON Cardano.YTxP.Control.Yielding.StakingValidator.YieldingStakingValidatorScript
+compileYieldingSV :: Config -> YieldListSTCS -> Natural -> Either Text (HexStringScript "YieldingSV")
 
 module Cardano.YTxP.Control.Yielding.MintingPolicy
-
-data YieldingMPScript
-compileYieldingMP :: Config -> YieldListSTCS -> Natural -> Either Text YieldingMPScript
-
--- | Opaque, semantic newtype for the YieldList state thread currency
---   symbol
-data YieldingMPCS
-mkYieldingMPCS :: YieldingMPScript -> YieldingMPCS
-instance Data.Aeson.Types.ToJSON.ToJSON Cardano.YTxP.Control.Yielding.MintingPolicy.YieldingMPScript
-instance Data.Aeson.Types.FromJSON.FromJSON Cardano.YTxP.Control.Yielding.MintingPolicy.YieldingMPScript
+compileYieldingMP :: Config -> YieldListSTCS -> Natural -> Either Text (HexStringScript "YieldingMP")
 
 
 module Cardano.YTxP.Control.Parameters
-
--- | Scripts that govern which transaction families can be "yielded to"
-data YieldListScripts
-
--- | Scripts that yield to transaction families described by the datums
---   guarded by the YieldListScripts.
-data YieldingScripts
-
--- | Contains the compiled scripts along with the parameters they were
---   compiled against. This is useful for _library consumers_ and should
---   contain all of the information needed to work with the library.
-data ControlParameters
+data () => YieldingScripts
 
 -- | Compile all scripts, threading through the appropriate parameters and
 --   script hashes
-mkControlParameters :: ControlParametersInitial -> Either Text ControlParameters
-instance GHC.Classes.Eq Cardano.YTxP.Control.Parameters.YieldListScripts
-instance Data.Aeson.Types.ToJSON.ToJSON Cardano.YTxP.Control.Parameters.ControlParameters
-instance Data.Aeson.Types.FromJSON.FromJSON Cardano.YTxP.Control.Parameters.ControlParameters
-instance Data.Aeson.Types.ToJSON.ToJSON Cardano.YTxP.Control.Parameters.YieldingScripts
-instance Data.Aeson.Types.FromJSON.FromJSON Cardano.YTxP.Control.Parameters.YieldingScripts
-instance Prettyprinter.Internal.Pretty Cardano.YTxP.Control.Parameters.YieldListScripts
-instance Data.Aeson.Types.ToJSON.ToJSON Cardano.YTxP.Control.Parameters.YieldListScripts
-instance Data.Aeson.Types.FromJSON.FromJSON Cardano.YTxP.Control.Parameters.YieldListScripts
+mkControlParameters :: SdkParameters -> Either Text ControlParameters
