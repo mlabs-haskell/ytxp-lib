@@ -8,12 +8,12 @@ The types given should be considered suggestions, and implementors are welcome t
 
 ## Redeemers
 
-### YieldedToProofIndex
+### AuthorisedScriptProofIndex
 
 ```hs
-data ScriptPurpose = Minting | Spending | Delegating | Rewarding
+data AuthorisedScriptScriptPurpose = Minting | Spending | Delegating | Rewarding
 
-type YieldedToProofIndex = (ScriptPurpose, Integer)
+type AuthorisedScriptProofIndex = (ScriptPurpose, Integer)
 ```
 
 ## Control Parameters

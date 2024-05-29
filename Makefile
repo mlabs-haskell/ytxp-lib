@@ -21,6 +21,7 @@ usage:
 	@echo ""
 	# Build
 	@echo "    build_all                                                   -- Build all"
+	@echo "    build_all_dev                                               -- Build all (-fdev)"
 	@echo "    build_ytxp-plutarch                                         -- Build ytxp-plutarch"
 	@echo "    build_testlib                                               -- Build testlib"
 	@echo "    build_pprelude                                              -- Build pprelude"
@@ -123,6 +124,9 @@ CABAL_YTXP_PLUTARCH := cd ytxp-plutarch && cabal
 build_all:
 	$(CABAL_YTXP_PLUTARCH) build -j all
 
+.PHONY: build_all_dev
+build_all_dev:
+	$(CABAL_YTXP_PLUTARCH) build -j -fdev all
 .PHONY: build_ytxp-plutarch
 build_ytxp-plutarch:
 	$(CABAL_YTXP_PLUTARCH) build -j ytxp-plutarch
@@ -143,17 +147,17 @@ build_write-config:
 # Test
 .PHONY: test_serialization
 test_serialization:
-	$(CABAL_YTXP_PLUTARCH) test -j serialization
+	$(CABAL_YTXP_PLUTARCH) test -j ytxp-lib-test
 
 ################################################################################
 # Test
 .PHONY: typos_check
 typos_check :
-	typos -c ../../.typos.toml ../../
+	typos -c ./typos.toml ./
 
 .PHONY: typos_fix
 typos_fix:
-	typos -w -c ../../.typos.toml ../../
+	typos -w -c ./typos.toml ./
 
 ################################################################################
 # Docs

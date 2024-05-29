@@ -112,11 +112,12 @@ library pprelude
   build-depends:
     , aeson
     , base
+    , base16-bytestring
     , bytestring
     , plutarch
     , plutus-core
-    , prettyprinter
     , text
+    , ytxp-sdk
 
   exposed-modules:  PPrelude
   hs-source-dirs:   src
@@ -141,14 +142,7 @@ library testlib
     , ytxp-plutarch
 
   hs-source-dirs:  testlib
-  exposed-modules:
-    Test.Laws
-    Test.Unit.Addresses
-    Test.Unit.Datums
-    Test.Unit.Spec
-    Test.Unit.Transaction
-    Test.Unit.Values
-    Test.Utils
+  exposed-modules: Test.Unit.Spec
 
 library
   import:          common-language
@@ -162,13 +156,12 @@ library
     , plutus-ledger-api
     , plutus-tx
     , pprelude
-    , prettyprinter
     , text
+    , ytxp-sdk
 
   hs-source-dirs:  src
   exposed-modules:
     Cardano.YTxP.Control.Parameters
-    Cardano.YTxP.Control.ParametersInitial
     Cardano.YTxP.Control.Stubs
     Cardano.YTxP.Control.Vendored
     Cardano.YTxP.Control.Yielding
@@ -176,9 +169,6 @@ library
     Cardano.YTxP.Control.Yielding.MintingPolicy
     Cardano.YTxP.Control.Yielding.StakingValidator
     Cardano.YTxP.Control.Yielding.Validator
-    Cardano.YTxP.Control.YieldList
-    Cardano.YTxP.Control.YieldList.MintingPolicy
-    Cardano.YTxP.Control.YieldList.Validator
     Utils
 
 -- Executables
@@ -199,7 +189,7 @@ executable write-config
 
 -- Tests
 
-test-suite serialization
+test-suite ytxp-lib-test
   import:         common-language, common-test
   type:           exitcode-stdio-1.0
   main-is:        Main.hs
@@ -207,9 +197,15 @@ test-suite serialization
     , aeson
     , bytestring
     , plutarch
+    , plutarch-context-builder
+    , plutarch-unit
+    , plutus-ledger-api
+    , plutus-tx
+    , prettyprinter
     , QuickCheck
     , tasty-golden
     , tasty-quickcheck
     , text
+    , ytxp-sdk
 
-  hs-source-dirs: test/serialization
+  hs-source-dirs: test

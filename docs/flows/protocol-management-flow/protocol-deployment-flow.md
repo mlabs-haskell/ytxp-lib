@@ -10,4 +10,4 @@ A sequence of the following transactions (in order):
     and the yielded-to staking validators (the ones that encode the TxF business logic)
 - Staking Validator Delegating
     You <span class="underline">should</span> delegate all _relevant_ staking validators during this step.
-    Note that "withdraw-0" `YieldedTo` scripts don't need to be delegated -- registering is enough.
+    Note that "withdraw-0" `AuthorisedScript` scripts don't need to be delegated -- registering is enough.

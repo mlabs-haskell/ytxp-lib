@@ -21,7 +21,7 @@
     in
     {
       packages = with flake.packages; {
-        inherit "ytxp-plutarch:lib:ytxp-plutarch" "ytxp-plutarch:test:serialization" "ytxp-plutarch:exe:write-config";
+        inherit "ytxp-plutarch:lib:ytxp-plutarch" "ytxp-plutarch:test:ytxp-lib-test" "ytxp-plutarch:exe:write-config";
         docs = import combine-haddock { inherit pkgs lib; } {
           cabalProject = pkgs.ytxp-plutarch;
           targetPackages = [

@@ -1,93 +1,129 @@
 {-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
 module Cardano.YTxP.Control.Yielding (
-  YieldListIndex,
-  YieldListRefInputIndex,
   YieldingRedeemer (YieldingRedeemer),
-  getYieldedToHash,
+  getAuthorisedScriptHash,
+  PAuthorisedScriptPurpose (PMinting, PSpending, PRewarding),
+  AuthorisedScriptIndex (AuthorisedScriptIndex),
+  AuthorisedScriptPurpose (Minting, Spending, Rewarding),
+  AuthorisedScriptProofIndex (AuthorisedScriptProofIndex),
+  PYieldingRedeemer,
 )
 where
 
-import Cardano.YTxP.Control.YieldList (PYieldedToHash, getYieldedToHashByIndex)
-import Cardano.YTxP.Control.YieldList.MintingPolicy (
-  YieldListSTCS,
-  pcontainsYieldListSTT,
+import Cardano.YTxP.SDK.SdkParameters (
+  -- TODO rename
+  YieldListSTCS (YieldListSTCS),
  )
-import Plutarch.Api.V2 (PTxInInfo)
-import Plutarch.DataRepr (PDataFields)
-import Utils (punsafeFromInlineDatum)
+import PlutusTx qualified
 
--- | Represents an index into a YieldList
-newtype YieldListIndex = YieldListIndex Integer -- FIXME Int/Integer/Positive
+-- TODO/QUESTION: copied from YieldList, is this import safe?
 
-newtype PYieldListIndex (s :: S) = PYieldListIndex (Term s PInteger)
+import Cardano.YTxP.Control.Vendored (DerivePConstantViaEnum (DerivePConstantEnum), EnumIsData (EnumIsData), PlutusTypeEnumData)
+import Plutarch.Api.V1.Maybe (PMaybeData (PDJust, PDNothing))
+import Plutarch.Api.V2 (PScriptHash, PTxInInfo, PValue)
+import Plutarch.DataRepr (DerivePConstantViaData (DerivePConstantViaData), PDataFields)
+import Plutarch.Lift (
+  DerivePConstantViaNewtype (DerivePConstantViaNewtype),
+  PConstantDecl,
+  PLifted,
+  PUnsafeLiftDecl,
+ )
+import Utils (pmember)
+
+-- | Represents an index into a authorised reference script in a TxInReferenceInput list
+newtype AuthorisedScriptIndex = AuthorisedScriptIndex Integer
+  deriving newtype (PlutusTx.ToData, PlutusTx.FromData, PlutusTx.UnsafeFromData)
+
+newtype PAuthorisedScriptIndex (s :: S) = PAuthorisedScriptIndex (Term s PInteger)
   deriving stock (Generic)
   deriving anyclass (PlutusType, PIsData)
 
-instance DerivePlutusType PYieldListIndex where
+instance DerivePlutusType PAuthorisedScriptIndex where
   type DPTStrat _ = PlutusTypeNewtype
 
-instance PTryFrom PData (PAsData PYieldListIndex)
+instance PTryFrom PData (PAsData PAuthorisedScriptIndex)
 
-{- | Represents an index into a transaction.
-What is being indexed depends by the yielding script pointed by the YieldListIndex.
-  In case it a validator, this is an index into the transaction inputs for the input that triggers the yielded to validator
-  In case it a minting policy, this is an index into the transaction mint for the asset class minted by the yielded to minting policy
-  In case it a staking validator, this is an index into the transaction wdrl for the staking validator triggered by the yielded to staking validator
+instance PUnsafeLiftDecl PAuthorisedScriptIndex where
+  type PLifted PAuthorisedScriptIndex = AuthorisedScriptIndex
+
+deriving via
+  (DerivePConstantViaNewtype AuthorisedScriptIndex PAuthorisedScriptIndex PInteger)
+  instance
+    (PConstantDecl AuthorisedScriptIndex)
+
+{- The type of yielded to scripts
 -}
-newtype YieldListScriptToYieldIndex = YieldListScriptToYieldIndex Integer -- FIXME Int/Integer/Positive
+data AuthorisedScriptPurpose = Minting | Spending | Rewarding
+  deriving stock (Show, Generic, Enum, Bounded)
+  deriving
+    (PlutusTx.ToData, PlutusTx.FromData, PlutusTx.UnsafeFromData)
+    via (EnumIsData AuthorisedScriptPurpose)
 
-newtype PYieldListScriptToYieldIndex (s :: S)
-  = PYieldListScriptToYieldIndex (Term s PInteger)
-  deriving stock (Generic)
-  deriving anyclass (PlutusType, PIsData)
+data PAuthorisedScriptPurpose (s :: S) = PMinting | PSpending | PRewarding
+  deriving stock (Generic, Enum, Bounded)
+  deriving anyclass (PlutusType, PIsData, PEq)
 
-instance DerivePlutusType PYieldListScriptToYieldIndex where
-  type DPTStrat _ = PlutusTypeNewtype
+instance DerivePlutusType PAuthorisedScriptPurpose where
+  type DPTStrat _ = PlutusTypeEnumData
 
-instance PTryFrom PData (PAsData PYieldListScriptToYieldIndex)
+instance PTryFrom PData (PAsData PAuthorisedScriptPurpose)
 
-{- | Represents an index into reference inputs of a transaction.
-The UTxO at this index must contain a YieldListSTT; otherwise, we blow up
+instance PUnsafeLiftDecl PAuthorisedScriptPurpose where
+  type PLifted PAuthorisedScriptPurpose = AuthorisedScriptPurpose
+
+deriving via
+  (DerivePConstantViaEnum AuthorisedScriptPurpose PAuthorisedScriptPurpose)
+  instance
+    (PConstantDecl AuthorisedScriptPurpose)
+
+{- Index for the yielding redeemer
 -}
-newtype YieldListRefInputIndex = YieldListRefInputIndex Integer -- FIXME Int/Integer/Positive
+newtype AuthorisedScriptProofIndex = AuthorisedScriptProofIndex (AuthorisedScriptPurpose, Integer)
+  deriving newtype (PlutusTx.ToData, PlutusTx.FromData, PlutusTx.UnsafeFromData)
 
-newtype PYieldListRefInputIndex (s :: S) = PYieldListRefInputIndex (Term s PInteger)
+newtype PAuthorisedScriptProofIndex (s :: S)
+  = PAuthorisedScriptProofIndex
+      ( Term
+          s
+          (PBuiltinPair (PAsData PAuthorisedScriptPurpose) (PAsData PInteger))
+      )
   deriving stock (Generic)
   deriving anyclass (PlutusType, PIsData)
 
-instance DerivePlutusType PYieldListRefInputIndex where
+instance DerivePlutusType PAuthorisedScriptProofIndex where
   type DPTStrat _ = PlutusTypeNewtype
 
-instance PTryFrom PData (PAsData PYieldListRefInputIndex)
+instance PTryFrom PData (PAsData PAuthorisedScriptProofIndex)
+
+instance PUnsafeLiftDecl PAuthorisedScriptProofIndex where
+  type PLifted PAuthorisedScriptProofIndex = AuthorisedScriptProofIndex
+
+-- TODO: why is this not deriving newtype with AsData?
+deriving via
+  (DerivePConstantViaNewtype AuthorisedScriptProofIndex PAuthorisedScriptProofIndex (PBuiltinPair PAuthorisedScriptPurpose PInteger))
+  instance
+    (PConstantDecl AuthorisedScriptProofIndex)
 
 {- | The redeemer passed to the yielding minting policy, validator,
 and staking validators
 -}
 data YieldingRedeemer = YieldingRedeemer
-  { yieldListIndex :: YieldListIndex
-  -- ^ The index into the YieldList itself. Used to prevent yielding scripts from
-  -- needing to inspect each entry for equality; we _only_ look at this index,
-  -- check equality, and blow up if it doesn't match.
-  , yieldListScriptToYieldIndex :: YieldListScriptToYieldIndex
-  -- ^ The index into the transaction for the script pointed to by the yieldListIndex.
-  -- This allows us to avoid having to loop through inputs/mints/withdrawls to find the
-  -- script we want to ensure is run.
-  , yieldListRefInputIndex :: YieldListRefInputIndex
-  -- ^ The index into the reference inputs of the transaction where the correct
-  -- YieldList UTxO will be found. We use this to prevent yielding scripts from
-  -- needing to inspect each reference UTxO for equality; we only look at this
-  -- index, and blow up if it doesn't contain the correct STT.
+  { authorisedScriptIndex :: AuthorisedScriptIndex
+  -- ^ Integer The index of the TxInReferenceInput that contains the authorised reference script.
+  , authorisedScriptProofIndex :: AuthorisedScriptProofIndex
+  -- ^ A tuple containing yielded to script type and the index at which to find proof: this allows us to avoid having to loop through inputs/mints/withdrawls to find the script we want to ensure is run.
   }
+
+PlutusTx.makeIsDataIndexed ''YieldingRedeemer [('YieldingRedeemer, 0)]
 
 newtype PYieldingRedeemer (s :: S)
   = PYieldingRedeemer
       ( Term
           s
           ( PDataRecord
-              '[ "yieldListIndex" ':= PYieldListIndex
-               , "yieldListScriptToYieldIndex" ':= PYieldListScriptToYieldIndex
-               , "yieldListRefInputIndex" ':= PYieldListRefInputIndex
+              '[ "authorisedScriptIndex" ':= PAuthorisedScriptIndex
+               , "authorisedScriptProofIndex" ':= PAuthorisedScriptProofIndex
                ]
           )
       )
@@ -99,40 +135,56 @@ instance DerivePlutusType PYieldingRedeemer where
 
 instance PTryFrom PData (PAsData PYieldingRedeemer)
 
-{- | Given a list of reference inputs and a Yielding Redeemer, dig out the
-YieldList by:
+instance PUnsafeLiftDecl PYieldingRedeemer where
+  type PLifted PYieldingRedeemer = YieldingRedeemer
+
+deriving via
+  (DerivePConstantViaData YieldingRedeemer PYieldingRedeemer)
+  instance
+    (PConstantDecl YieldingRedeemer)
+
+{- | Given a list of reference inputs and a Yielding Redeemer, dig out the authorised script hash
+ by:
+
 - Indexing the reference inputs according to the redeemer
 - Checking the fetched reference input for the correct YieldListSTCS
-- Decoding its datum (unsafely; the presence of the YieldListSTCS ensure it is authentic and well-formed)
-- Looking in the datum at the index in the redeemer and returning the YieldedToHash
+- Returning the AuthorisedScriptHash
 -}
-getYieldedToHash ::
+getAuthorisedScriptHash ::
   YieldListSTCS ->
   Term
     s
     ( PBuiltinList PTxInInfo
         :--> PYieldingRedeemer
-        :--> PYieldedToHash
+        :--> PScriptHash
     )
-getYieldedToHash yieldListSTCS = phoistAcyclic $
+getAuthorisedScriptHash yieldListSTCS = phoistAcyclic $
   plam $
     \txInfoRefInputs redeemer -> unTermCont $ do
       -- TODO (OPTIMIZE): these values only get used once, can be a `let`
       yieldingRedeemer <-
-        pletFieldsC @'["yieldListIndex", "yieldListRefInputIndex"] redeemer
+        pletFieldsC @'["authorisedScriptIndex"] redeemer
 
-      let yieldListUTxO =
+      let autorisedScriptRefUTxO =
             txInfoRefInputs
-              #!! pto (pfromData $ getField @"yieldListRefInputIndex" yieldingRedeemer)
-          output = pfield @"resolved" # yieldListUTxO
+              #!! pto (pfromData $ getField @"authorisedScriptIndex" yieldingRedeemer)
+          output = pfield @"resolved" # autorisedScriptRefUTxO
           value = pfield @"value" # output
 
       pure $
         pif
-          (pcontainsYieldListSTT yieldListSTCS # value)
-          ( let datum = pfromData $ pfield @"datum" # output
-                ylDatum = punsafeFromInlineDatum # datum
-                ylIndex = pfromData $ getField @"yieldListIndex" yieldingRedeemer
-             in getYieldedToHashByIndex # ylDatum # pto ylIndex
+          (pcontainsAuthorisedScriptSTT yieldListSTCS # value)
+          ( pmatch (pfield @"referenceScript" # output) $ \case
+              PDJust ((pfield @"_0" #) -> autorisedScript) -> autorisedScript
+              PDNothing _ -> (ptraceError "getAuthorisedScriptHash: Reference input does not contain reference script")
           )
-          (ptraceError "getYieldedToHash: Reference input does not contain YieldListSTCS")
+          (ptraceError "getAuthorisedScriptHash: Reference input does not contain YieldListSTCS")
+
+{- | Checks that the given 'PValue' contains the YieldListSTT
+TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead
+-}
+pcontainsAuthorisedScriptSTT ::
+  YieldListSTCS -> Term s (PValue anyKey anyAmount :--> PBool)
+pcontainsAuthorisedScriptSTT (YieldListSTCS symbol) =
+  plam $ \value ->
+    pmember # pconstant symbol # pto value

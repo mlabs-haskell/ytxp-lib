@@ -3,11 +3,8 @@ we use to implement the logic for yielding validator, minting policy and staking
 -}
 module Cardano.YTxP.Control.Yielding.Helper (yieldingHelper) where
 
-import Cardano.YTxP.Control.YieldList (
-  PYieldedToHash (PYieldedToMP, PYieldedToSV, PYieldedToValidator),
- )
-import Cardano.YTxP.Control.YieldList.MintingPolicy (YieldListSTCS)
-import Cardano.YTxP.Control.Yielding (getYieldedToHash)
+import Cardano.YTxP.Control.Yielding (PAuthorisedScriptPurpose (PMinting, PRewarding, PSpending), getAuthorisedScriptHash)
+import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
 import Plutarch.Api.V1.Address (
   PCredential (PPubKeyCredential, PScriptCredential),
  )
@@ -17,13 +14,11 @@ import Plutarch.Api.V2 (
  )
 import Utils (pscriptHashToCurrencySymbol)
 
--- -   Look at the UTxO at the `n` th entry in the `txInfoReferenceInputs`, where `n` is equal to `yieldListInputIndex`.
---     -   Call this UTxO `yieldListUTxO`.
---     -   Check that this UTxO is carrying exactly one token with the `yieldListSTCS`. Blow up if not.
--- -   "Unsafely" deserialize the datum of the `yieldListUTxO` to a value `yieldList :: YieldList`
--- -   Grab the correct `YieldToHash` by looking at the `n` th entry of `yieldList`, where `n` is equal to
---     `yieldListIndex`. Call this hash `yieldToHash`.
--- -   Obtain evidence that the a script with `yieldToHash` was triggered via the `checkYieldList` function.
+-- -   Look at the UTxO at the `n` th entry in the `txInfoReferenceInputs`, where `n` is equal to `authorisedScriptIndex`.
+--     -   Call this UTxO `authorisedScriptUTxO`.
+--     -   Check that this UTxO is carrying exactly one token with the `authorisedScriptSTCS`. Blow up if not.
+--     -   Obtain the hash of the reference script from the authorisedScriptUTxO. Call this hash `AuthorisedScriptHash`.
+-- -   Obtain evidence that the a script with `AuthorisedScriptHash` was triggered.
 --     If not, blow up. In practice, this will involve either:
 --     -   Looking at the `txInfoWithdrawls` field for a staking validator being triggered with the correct StakingCredential
 --     -   Looking at the `txInfoInputs` field for a UTxO being spent at the correct address
@@ -37,40 +32,52 @@ yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
   txInfo <- pletC $ pfromData $ pfield @"txInfo" # ctx
   let txInfoRefInputs = pfromData $ pfield @"referenceInputs" # txInfo
   yieldingRedeemer <- pfromData . fst <$> ptryFromC redeemer
-  let yieldToHash = getYieldedToHash ylstcs # txInfoRefInputs # yieldingRedeemer
-      yieldToIndex = pto $ pfromData $ pfield @"yieldListScriptToYieldIndex" # yieldingRedeemer
+  let authorisedScriptHash = getAuthorisedScriptHash ylstcs # txInfoRefInputs # yieldingRedeemer
+      authorisedScriptProofIndex = pto $ pfromData $ pfield @"authorisedScriptProofIndex" # yieldingRedeemer
+      authorisedScriptPurpose = pfromData $ pfstBuiltin # authorisedScriptProofIndex
+      authorisedScriptIndex = pfromData $ psndBuiltin # authorisedScriptProofIndex
 
   pure $
-    popaque $
-      pmatch yieldToHash $ \case
-        PYieldedToValidator ((pfield @"scriptHash" #) -> yieldToHash') ->
+    pcheck $
+      pmatch authorisedScriptPurpose $ \case
+        PMinting ->
+          let txInfoMints = pfromData $ pfield @"mint" # txInfo
+              authorisedScriptMint = pto (pto txInfoMints) #!! authorisedScriptIndex
+              currencySymbol = pscriptHashToCurrencySymbol authorisedScriptHash
+           in ptraceIfFalse "Minting policy does not match expected yielded to minting policy" $
+                pfromData (pfstBuiltin # authorisedScriptMint) #== currencySymbol
+        PSpending ->
           let txInfoInputs = pfromData $ pfield @"inputs" # txInfo
-              yieldToInput = txInfoInputs #!! yieldToIndex
-              out = pfield @"resolved" # yieldToInput
+              authorisedScriptInput = txInfoInputs #!! authorisedScriptIndex
+              out = pfield @"resolved" # authorisedScriptInput
               address = pfield @"address" # pfromData out
               credential = pfield @"credential" # pfromData address
            in pmatch (pfromData credential) $ \case
                 PScriptCredential ((pfield @"_0" #) -> hash) ->
                   ptraceIfFalse "Input does not match expected yielded to validator" $
-                    hash #== yieldToHash'
+                    hash #== authorisedScriptHash
                 PPubKeyCredential _ ->
                   ptraceError "Input at specified index is not a script input"
-        PYieldedToMP ((pfield @"scriptHash" #) -> yieldToHash') ->
-          let txInfoMints = pfromData $ pfield @"mint" # txInfo
-              yieldToMint = pto (pto txInfoMints) #!! yieldToIndex
-              currencySymbol = pscriptHashToCurrencySymbol yieldToHash'
-           in ptraceIfFalse "Minting policy does not match expected yielded to minting policy" $
-                pfromData (pfstBuiltin # yieldToMint) #== currencySymbol
-        PYieldedToSV ((pfield @"scriptHash" #) -> yieldToHash') ->
+        PRewarding ->
           let txInfoWithdrawals = pfromData $ pfield @"wdrl" # txInfo
-              yieldToWithdrawal = pto txInfoWithdrawals #!! yieldToIndex
-           in pmatch (pfromData $ pfstBuiltin # yieldToWithdrawal) $ \case
+              authorisedScriptWithdrawal = pto txInfoWithdrawals #!! authorisedScriptIndex
+           in pmatch (pfromData $ pfstBuiltin # authorisedScriptWithdrawal) $ \case
                 PStakingHash ((pfield @"_0" #) -> credential) ->
                   pmatch credential $ \case
                     PScriptCredential ((pfield @"_0" #) -> hash) ->
                       ptraceIfFalse "Withdrawal does not match expected yielded to staking validator" $
-                        hash #== yieldToHash'
+                        hash #== authorisedScriptHash
                     PPubKeyCredential _ ->
                       ptraceError "Staking credential at specified index is not a script credential"
                 PStakingPtr _ ->
                   ptraceError "No staking validator found"
+
+pcheck ::
+  forall (s :: S).
+  Term s PBool ->
+  Term s POpaque
+pcheck b =
+  pif
+    b
+    (popaque $ pconstant ())
+    perror
