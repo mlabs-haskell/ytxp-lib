@@ -12,7 +12,6 @@ module Cardano.YTxP.Control.Vendored (
   PlutusTypeEnumData,
   PlutusTypeDataList,
   applyScript,
-  psymbolValueOf,
 ) where
 
 import Data.Coerce (coerce)
@@ -32,8 +31,6 @@ import Generics.SOP (
   unI,
  )
 import Generics.SOP qualified as SOP
-import Plutarch.Api.V1.Value (PCurrencySymbol, PValue)
-import Plutarch.Api.V2 (AmountGuarantees, KeyGuarantees)
 import Plutarch.Internal.Generic (PCode, PGeneric, gpfrom, gpto)
 import Plutarch.Internal.PlutusType (
   PlutusTypeStrat (
@@ -47,7 +44,6 @@ import Plutarch.Lift (
   PConstantDecl (PConstantRepr, PConstanted, pconstantFromRepr, pconstantToRepr),
   PLifted,
  )
-import Plutarch.List (pfoldl')
 import Plutarch.Script (Script (Script))
 import PlutusLedgerApi.V1 (BuiltinData (BuiltinData))
 import PlutusTx (
@@ -82,37 +78,6 @@ applyScript f a =
   where
     (Script Program {_progTerm = fTerm, _progVer = fVer}) = f
     (Script Program {_progTerm = aTerm, _progVer = aVer}) = a
-
-{- | Get the sum of all values belonging to a particular CurrencySymbol.
-Modified version of LPE function with same purpose.
--}
-psymbolValueOf ::
-  forall
-    (keys :: KeyGuarantees)
-    (amounts :: AmountGuarantees)
-    (s :: S).
-  Term s (PCurrencySymbol :--> PValue keys amounts :--> PInteger)
-psymbolValueOf = phoistAcyclic $
-  plam $ \policyId value ->
-    let valueMap = pto (pto value)
-        go = pfix #$ plam $ \self valueMap' ->
-          pelimList
-            ( \symbolAndTokens rest ->
-                pif
-                  (pfromData (pfstBuiltin # symbolAndTokens) #== policyId)
-                  ( let tokens = pto (pto (pfromData (psndBuiltin # symbolAndTokens)))
-                     in pfoldl'
-                          ( \acc tokenAndAmount ->
-                              pfromData (psndBuiltin # tokenAndAmount) + acc
-                          )
-                          # 0
-                          # tokens
-                  )
-                  (self # rest)
-            )
-            0
-            valueMap'
-     in go # valueMap
 
 --------------------------------------------------------------------------------
 -- PEnumData

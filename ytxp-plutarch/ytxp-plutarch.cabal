@@ -142,14 +142,7 @@ library testlib
     , ytxp-plutarch
 
   hs-source-dirs:  testlib
-  exposed-modules:
-    Test.Laws
-    Test.Unit.Addresses
-    Test.Unit.Datums
-    Test.Unit.Spec
-    Test.Unit.Transaction
-    Test.Unit.Values
-    Test.Utils
+  exposed-modules: Test.Unit.Spec
 
 library
   import:          common-language
