@@ -3,11 +3,10 @@ module Cardano.YTxP.Control.Yielding.Validator (
 ) where
 
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
-import Cardano.YTxP.SDK.ControlParameters (HexStringScript (..))
+import Cardano.YTxP.SDK.ControlParameters (HexStringScript (HexStringScript))
 import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
-import Data.Aeson (FromJSON, ToJSON)
 import Data.Text (Text)
-import Plutarch (Config, Script, compile)
+import Plutarch (Config, compile)
 import Plutarch.Api.V2 (PScriptContext)
 import Plutarch.Script (serialiseScript)
 

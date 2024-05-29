@@ -22,17 +22,8 @@ import Cardano.YTxP.Control.Yielding.StakingValidator (
 import Cardano.YTxP.Control.Yielding.Validator (
   compileYieldingValidator,
  )
-import Cardano.YTxP.SDK.ControlParameters (ControlParameters (..), YieldingScripts (..), hexTextToSbs, sbsToHexText)
+import Cardano.YTxP.SDK.ControlParameters (ControlParameters (ControlParameters, sdkParameters, yieldingScripts), YieldingScripts (YieldingScripts, yieldingMintingPolicies, yieldingStakingValidators, yieldingValidator))
 import Cardano.YTxP.SDK.SdkParameters (Config (tracing), SdkParameters (SdkParameters, authorisedScriptsSTCS, compilationConfig, mintingPoliciesNonceList, stakingValidatorsNonceList), TracingMode (DetTracing, DoTracing, DoTracingAndBinds, NoTracing))
-import Data.Aeson (
-  FromJSON (parseJSON),
-  ToJSON (toEncoding, toJSON),
-  object,
-  pairs,
-  withObject,
-  (.:),
-  (.=),
- )
 import Data.Text (Text)
 import Plutarch qualified
 

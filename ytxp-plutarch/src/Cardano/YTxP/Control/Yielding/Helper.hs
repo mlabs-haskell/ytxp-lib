@@ -3,7 +3,7 @@ we use to implement the logic for yielding validator, minting policy and staking
 -}
 module Cardano.YTxP.Control.Yielding.Helper (yieldingHelper) where
 
-import Cardano.YTxP.Control.Yielding (getAuthorisedScriptHash)
+import Cardano.YTxP.Control.Yielding (PAuthorisedScriptPurpose (PMinting, PRewarding, PSpending), getAuthorisedScriptHash)
 import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
 import Plutarch.Api.V1.Address (
   PCredential (PPubKeyCredential, PScriptCredential),
@@ -35,30 +35,32 @@ yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
   let txInfoRefInputs = pfromData $ pfield @"referenceInputs" # txInfo
   yieldingRedeemer <- pfromData . fst <$> ptryFromC redeemer
   let authorisedScriptHash = getAuthorisedScriptHash ylstcs # txInfoRefInputs # yieldingRedeemer
-      authorisedScriptIndex = pto $ pfromData $ pfield @"yieldListScriptToYieldIndex" # yieldingRedeemer
+      authorisedScriptProofIndex = pto $ pfromData $ pfield @"authorisedScriptProofIndex" # yieldingRedeemer
+      authorisedScriptPurpose = pfromData $ pfstBuiltin # authorisedScriptProofIndex
+      authorisedScriptIndex = pfromData $ psndBuiltin # authorisedScriptProofIndex
 
   pure $
     popaque $
-      pmatch authorisedScriptHash $ \case
-        PAuthorisedScriptValidator ((pfield @"scriptHash" #) -> authorisedScriptHash') ->
+      pmatch authorisedScriptPurpose $ \case
+        PMinting ->
+          let txInfoMints = pfromData $ pfield @"mint" # txInfo
+              authorisedScriptMint = pto (pto txInfoMints) #!! authorisedScriptIndex
+              currencySymbol = pscriptHashToCurrencySymbol authorisedScriptHash
+           in ptraceIfFalse "Minting policy does not match expected yielded to minting policy" $
+                pfromData (pfstBuiltin # authorisedScriptMint) #== currencySymbol
+        PSpending ->
           let txInfoInputs = pfromData $ pfield @"inputs" # txInfo
               authorisedScriptInput = txInfoInputs #!! authorisedScriptIndex
-              out = pfield @"resolved" #aAuthorisedScriptInput
+              out = pfield @"resolved" # authorisedScriptInput
               address = pfield @"address" # pfromData out
               credential = pfield @"credential" # pfromData address
            in pmatch (pfromData credential) $ \case
                 PScriptCredential ((pfield @"_0" #) -> hash) ->
                   ptraceIfFalse "Input does not match expected yielded to validator" $
-                    hash #== authorisedScriptHash'
+                    hash #== authorisedScriptHash
                 PPubKeyCredential _ ->
                   ptraceError "Input at specified index is not a script input"
-        PAuthorisedScriptMP ((pfield @"scriptHash" #) -> authorisedScriptHash') ->
-          let txInfoMints = pfromData $ pfield @"mint" # txInfo
-              authorisedScriptMint = pto (pto txInfoMints) #!! authorisedScriptIndex
-              currencySymbol = pscriptHashToCurrencySymbol authorisedScriptHash'
-           in ptraceIfFalse "Minting policy does not match expected yielded to minting policy" $
-                pfromData (pfstBuiltin # authorisedScriptMint) #== currencySymbol
-        PAuthorisedScriptSV ((pfield @"scriptHash" #) -> authorisedScriptHash') ->
+        PRewarding ->
           let txInfoWithdrawals = pfromData $ pfield @"wdrl" # txInfo
               authorisedScriptWithdrawal = pto txInfoWithdrawals #!! authorisedScriptIndex
            in pmatch (pfromData $ pfstBuiltin # authorisedScriptWithdrawal) $ \case
@@ -66,7 +68,7 @@ yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
                   pmatch credential $ \case
                     PScriptCredential ((pfield @"_0" #) -> hash) ->
                       ptraceIfFalse "Withdrawal does not match expected yielded to staking validator" $
-                        hash #== authorisedScriptHash'
+                        hash #== authorisedScriptHash
                     PPubKeyCredential _ ->
                       ptraceError "Staking credential at specified index is not a script credential"
                 PStakingPtr _ ->

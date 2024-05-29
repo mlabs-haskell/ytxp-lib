@@ -21,6 +21,7 @@ usage:
 	@echo ""
 	# Build
 	@echo "    build_all                                                   -- Build all"
+	@echo "    build_all_dev                                               -- Build all (-fdev)"
 	@echo "    build_ytxp-plutarch                                         -- Build ytxp-plutarch"
 	@echo "    build_testlib                                               -- Build testlib"
 	@echo "    build_pprelude                                              -- Build pprelude"
@@ -123,6 +124,9 @@ CABAL_YTXP_PLUTARCH := cd ytxp-plutarch && cabal
 build_all:
 	$(CABAL_YTXP_PLUTARCH) build -j all
 
+.PHONY: build_all_dev
+build_all_dev:
+	$(CABAL_YTXP_PLUTARCH) build -j -fdev all
 .PHONY: build_ytxp-plutarch
 build_ytxp-plutarch:
 	$(CABAL_YTXP_PLUTARCH) build -j ytxp-plutarch

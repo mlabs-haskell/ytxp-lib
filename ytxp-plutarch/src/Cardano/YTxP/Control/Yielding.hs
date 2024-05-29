@@ -2,7 +2,8 @@
 
 module Cardano.YTxP.Control.Yielding (
   YieldingRedeemer (YieldingRedeemer),
-  -- getAuthorisedScriptHash,
+  getAuthorisedScriptHash,
+  PAuthorisedScriptPurpose (PMinting, PSpending, PRewarding),
 )
 where
 
@@ -11,21 +12,14 @@ import Cardano.YTxP.SDK.SdkParameters (
   YieldListSTCS (YieldListSTCS),
  )
 import PlutusTx qualified
-import PlutusTx.Builtins qualified as Builtins
 
 -- TODO/QUESTION: copied from YieldList, is this import safe?
 
 import Cardano.YTxP.Control.Vendored (EnumIsData (EnumIsData), PlutusTypeEnumData)
+import Plutarch.Api.V1.Maybe (PMaybeData (PDJust, PDNothing))
 import Plutarch.Api.V2 (PScriptHash, PTxInInfo, PValue)
 import Plutarch.DataRepr (PDataFields)
-import Plutarch.Lift (
-  DerivePConstantViaNewtype (DerivePConstantViaNewtype),
-  PConstantDecl,
-  PLifted,
-  PUnsafeLiftDecl,
- )
-import PlutusTx.Builtins.Internal qualified as BI
-import Utils (pmember, punsafeFromInlineDatum)
+import Utils (pmember)
 
 -- | Represents an index into a authorised reference script in a TxInReferenceInput list
 newtype AuthorisedScriptIndex = AuthorisedScriptIndex Integer
@@ -42,13 +36,13 @@ instance PTryFrom PData (PAsData PAuthorisedScriptIndex)
 
 {- The type of yielded to scripts
 -}
-data AuthorisedScriptPurpose = Minting | Spending | Delegating | Rewarding
+data AuthorisedScriptPurpose = Minting | Spending | Rewarding
   deriving stock (Enum)
   deriving
     (PlutusTx.ToData, PlutusTx.FromData, PlutusTx.UnsafeFromData)
     via (EnumIsData AuthorisedScriptPurpose)
 
-data PAuthorisedScriptPurpose (s :: S) = PMinting | PSpending | PDelegating | PRewarding
+data PAuthorisedScriptPurpose (s :: S) = PMinting | PSpending | PRewarding
   deriving stock (Generic, Enum, Bounded)
   deriving anyclass (PlutusType, PIsData)
 
@@ -73,7 +67,7 @@ newtype PAuthorisedScriptProofIndex (s :: S)
           (PBuiltinPair (PAsData PAuthorisedScriptPurpose) (PAsData PInteger))
       )
   deriving stock (Generic)
-  deriving anyclass (PlutusType)
+  deriving anyclass (PlutusType, PIsData)
 
 instance DerivePlutusType PAuthorisedScriptProofIndex where
   type DPTStrat _ = PlutusTypeNewtype
@@ -110,54 +104,48 @@ instance DerivePlutusType PYieldingRedeemer where
 
 instance PTryFrom PData (PAsData PYieldingRedeemer)
 
-{- | Given a list of reference inputs and a Yielding Redeemer, dig out the
-YieldList by:
-
-TODO: change into `checkAuthorisedScriptHash` the function needs to index the ref tx ins and
-check that the utxo at the supplied `AuthorisedScriptIndex` contains the AuthorisedScriptSTCS
+{- | Given a list of reference inputs and a Yielding Redeemer, dig out the authorised script hash
+ by:
 
 - Indexing the reference inputs according to the redeemer
 - Checking the fetched reference input for the correct YieldListSTCS
-- Decoding its datum (unsafely; the presence of the YieldListSTCS ensure it is authentic and well-formed)
-- Looking in the datum at the index in the redeemer and returning the AuthorisedScriptHash
+- Returning the AuthorisedScriptHash
 -}
+getAuthorisedScriptHash ::
+  YieldListSTCS ->
+  Term
+    s
+    ( PBuiltinList PTxInInfo
+        :--> PYieldingRedeemer
+        :--> PScriptHash
+    )
+getAuthorisedScriptHash yieldListSTCS = phoistAcyclic $
+  plam $
+    \txInfoRefInputs redeemer -> unTermCont $ do
+      -- TODO (OPTIMIZE): these values only get used once, can be a `let`
+      yieldingRedeemer <-
+        pletFieldsC @'["authorisedScriptIndex"] redeemer
 
--- getAuthorisedScriptHash ::
---   YieldListSTCS ->
---   Term
---     s
---     ( PBuiltinList PTxInInfo
---         :--> PYieldingRedeemer
---         :--> PBool
---     )
--- getAuthorisedScriptHash yieldListSTCS = phoistAcyclic
---   plam
---   $ \txInfoRefInputs redeemer -> unTermCont $ do
---     -- TODO (OPTIMIZE): these values only get used once, can be a `let`
---     yieldingRedeemer <-
---       pletFieldsC @'["yieldListIndex", "yieldListRefInputIndex"] redeemer
+      let autorisedScriptRefUTxO =
+            txInfoRefInputs
+              #!! pto (pfromData $ getField @"authorisedScriptIndex" yieldingRedeemer)
+          output = pfield @"resolved" # autorisedScriptRefUTxO
+          value = pfield @"value" # output
 
---     let yieldListUTxO =
---           txInfoRefInputs
---             #!! pto (pfromData $ getField @"yieldListRefInputIndex" yieldingRedeemer)
---         output = pfield @"resolved" # yieldListUTxO
---         value = pfield @"value" # output
-
---     pure $
---       pif
---         (pcontainsYieldListSTT yieldListSTCS # value)
---         ( let datum = pfromData $ pfield @"datum" # output
---               ylDatum = punsafeFromInlineDatum # datum
---               ylIndex = pfromData $ getField @"yieldListIndex" yieldingRedeemer
---            in pconstant False -- getAuthorisedScriptHashByIndex # ylDatum # pto ylIndex
---         )
---         (ptraceError "getAuthorisedScriptHash: Reference input does not contain YieldListSTCS")
+      pure $
+        pif
+          (pcontainsAuthorisedScriptSTT yieldListSTCS # value)
+          ( pmatch (pfield @"referenceScript" # output) $ \case
+              PDJust ((pfield @"_0" #) -> autorisedScript) -> autorisedScript
+              PDNothing _ -> (ptraceError "getAuthorisedScriptHash: Reference input does not contain reference script")
+          )
+          (ptraceError "getAuthorisedScriptHash: Reference input does not contain YieldListSTCS")
 
 {- | Checks that the given 'PValue' contains the YieldListSTT
 TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead
 -}
-pcontainsYieldListSTT ::
+pcontainsAuthorisedScriptSTT ::
   YieldListSTCS -> Term s (PValue anyKey anyAmount :--> PBool)
-pcontainsYieldListSTT (YieldListSTCS symbol) =
+pcontainsAuthorisedScriptSTT (YieldListSTCS symbol) =
   plam $ \value ->
     pmember # pconstant symbol # pto value
