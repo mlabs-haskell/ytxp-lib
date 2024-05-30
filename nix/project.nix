@@ -12,7 +12,7 @@ final: _prev: {
     sha256map = {
       "https://github.com/Plutonomicon/plutarch-plutus"."7efbb9fc9f358cfbfd89ff245d85632a17ff3fb3" = "sha256-S7UQrcBO+6G77O4OAAMfQNrChuGzfTr9ARovjAcP7eg=";
       "https://github.com/input-output-hk/xsy-liqwid-libs"."01dcaf60ee5386f0975aed908d6f92ab0e9b34e0" = "sha256-RK3yytUxIFbceU+m6MxvXyYRrWvDnhx7xmO3UcOzgKc=";
-      "https://github.com/mlabs-haskell/ytxp-sdk"."4dac6c9ec95af8ff734e42a289d562253d6e1d6f" = "sha256-u4MFBU6swgnGjWNmWUQVb0/fD0yMRVQn+i870VVu1NE=";
+      "https://github.com/mlabs-haskell/ytxp-sdk"."d53079f5f6c9e1da5f64dd8b95738b64dfe119d0" = "sha256-JyXNI4sz+NEXhk5rC/MbQwgBT+zaFYpAXDZo81yfxx0=";
     };
   };
 }
