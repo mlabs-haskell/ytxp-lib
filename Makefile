@@ -28,7 +28,7 @@ usage:
 	@echo "    build_write-config                                          -- Build write-config"
 	@echo ""
 	# Test
-	@echo "    test_serialization                                          -- Test serialization"
+	@echo "    test                                                        -- Run test"
 	@echo ""
 	# Check Typos
 	@echo "    typos_check                                                 -- Check typos"
@@ -145,8 +145,8 @@ build_write-config:
 
 ################################################################################
 # Test
-.PHONY: test_serialization
-test_serialization:
+.PHONY: test
+test:
 	$(CABAL_YTXP_PLUTARCH) test -j ytxp-lib-test
 
 ################################################################################
