@@ -4,7 +4,7 @@ module Cardano.YTxP.Control.Yielding.Validator (
 
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
 import Cardano.YTxP.SDK.ControlParameters (HexStringScript (HexStringScript))
-import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
+import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS)
 import Data.Text (Text)
 import Plutarch (Config, compile)
 import Plutarch.Api.V2 (PScriptContext)
@@ -15,7 +15,7 @@ import Plutarch.Script (serialiseScript)
 
 compileYieldingValidator ::
   Config ->
-  YieldListSTCS ->
+  AuthorisedScriptsSTCS ->
   Either
     Text
     (HexStringScript "YieldingValidator")

@@ -24,7 +24,7 @@ import Cardano.YTxP.SDK.Redeemers (
   YieldingRedeemer,
  )
 import Cardano.YTxP.SDK.SdkParameters (
-  YieldListSTCS (YieldListSTCS),
+  AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
  )
 import Plutarch.Api.V1.Maybe (PMaybeData (PDJust, PDNothing))
 import Plutarch.Api.V2 (PScriptHash, PTxInInfo, PValue)
@@ -141,18 +141,18 @@ deriving via
  by:
 
 - Indexing the reference inputs according to the redeemer
-- Checking the fetched reference input for the correct YieldListSTCS
+- Checking the fetched reference input for the correct AuthorisedScriptsSTCS
 - Returning the AuthorisedScriptHash
 -}
 getAuthorisedScriptHash ::
-  YieldListSTCS ->
+  AuthorisedScriptsSTCS ->
   Term
     s
     ( PBuiltinList PTxInInfo
         :--> PYieldingRedeemer
         :--> PScriptHash
     )
-getAuthorisedScriptHash yieldListSTCS = phoistAcyclic $
+getAuthorisedScriptHash authorisedScriptsSTCS = phoistAcyclic $
   plam $
     \txInfoRefInputs redeemer -> unTermCont $ do
       -- TODO (OPTIMIZE): these values only get used once, can be a `let`
@@ -167,18 +167,18 @@ getAuthorisedScriptHash yieldListSTCS = phoistAcyclic $
 
       pure $
         pif
-          (pcontainsAuthorisedScriptSTT yieldListSTCS # value)
+          (pcontainsAuthorisedScriptSTT authorisedScriptsSTCS # value)
           ( pmatch (pfield @"referenceScript" # output) $ \case
               PDJust ((pfield @"_0" #) -> autorisedScript) -> autorisedScript
               PDNothing _ -> (ptraceError "getAuthorisedScriptHash: Reference input does not contain reference script")
           )
-          (ptraceError "getAuthorisedScriptHash: Reference input does not contain YieldListSTCS")
+          (ptraceError "getAuthorisedScriptHash: Reference input does not contain AuthorisedScriptsSTCS")
 
 {- | Checks that the given 'PValue' contains the YieldListSTT
 TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead
 -}
 pcontainsAuthorisedScriptSTT ::
-  YieldListSTCS -> Term s (PValue anyKey anyAmount :--> PBool)
-pcontainsAuthorisedScriptSTT (YieldListSTCS symbol) =
+  AuthorisedScriptsSTCS -> Term s (PValue anyKey anyAmount :--> PBool)
+pcontainsAuthorisedScriptSTT (AuthorisedScriptsSTCS symbol) =
   plam $ \value ->
     pmember # pconstant symbol # pto value

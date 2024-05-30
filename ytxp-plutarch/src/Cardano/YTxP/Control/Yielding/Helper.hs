@@ -4,7 +4,7 @@ we use to implement the logic for yielding validator, minting policy and staking
 module Cardano.YTxP.Control.Yielding.Helper (yieldingHelper) where
 
 import Cardano.YTxP.Control.Yielding (PAuthorisedScriptPurpose (PMinting, PRewarding, PSpending), getAuthorisedScriptHash)
-import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
+import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS)
 import Plutarch.Api.V1.Address (
   PCredential (PPubKeyCredential, PScriptCredential),
  )
@@ -26,7 +26,7 @@ import Utils (pscriptHashToCurrencySymbol)
 
 yieldingHelper ::
   forall (s :: S).
-  YieldListSTCS ->
+  AuthorisedScriptsSTCS ->
   Term s (PData :--> PScriptContext :--> POpaque)
 yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
   txInfo <- pletC $ pfromData $ pfield @"txInfo" # ctx
