@@ -1,6 +1,7 @@
 module Utils (
   pscriptHashToCurrencySymbol,
   pmember,
+  pcheck,
 )
 where
 
@@ -28,3 +29,13 @@ pmember = phoistAcyclic $
       )
       (const $ pconstant False)
       # pto m
+
+pcheck ::
+  forall (s :: S).
+  Term s PBool ->
+  Term s POpaque
+pcheck b =
+  pif
+    b
+    (popaque $ pconstant ())
+    perror

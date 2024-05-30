@@ -4,7 +4,7 @@ we use to implement the logic for yielding validator, minting policy and staking
 module Cardano.YTxP.Control.Yielding.Helper (yieldingHelper) where
 
 import Cardano.YTxP.Control.Yielding (PAuthorisedScriptPurpose (PMinting, PRewarding, PSpending), getAuthorisedScriptHash)
-import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
+import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS)
 import Plutarch.Api.V1.Address (
   PCredential (PPubKeyCredential, PScriptCredential),
  )
@@ -12,7 +12,7 @@ import Plutarch.Api.V2 (
   PScriptContext,
   PStakingCredential (PStakingHash, PStakingPtr),
  )
-import Utils (pscriptHashToCurrencySymbol)
+import Utils (pcheck, pscriptHashToCurrencySymbol)
 
 -- -   Look at the UTxO at the `n` th entry in the `txInfoReferenceInputs`, where `n` is equal to `authorisedScriptIndex`.
 --     -   Call this UTxO `authorisedScriptUTxO`.
@@ -26,7 +26,7 @@ import Utils (pscriptHashToCurrencySymbol)
 
 yieldingHelper ::
   forall (s :: S).
-  YieldListSTCS ->
+  AuthorisedScriptsSTCS ->
   Term s (PData :--> PScriptContext :--> POpaque)
 yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
   txInfo <- pletC $ pfromData $ pfield @"txInfo" # ctx
@@ -71,13 +71,3 @@ yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
                       ptraceError "Staking credential at specified index is not a script credential"
                 PStakingPtr _ ->
                   ptraceError "No staking validator found"
-
-pcheck ::
-  forall (s :: S).
-  Term s PBool ->
-  Term s POpaque
-pcheck b =
-  pif
-    b
-    (popaque $ pconstant ())
-    perror

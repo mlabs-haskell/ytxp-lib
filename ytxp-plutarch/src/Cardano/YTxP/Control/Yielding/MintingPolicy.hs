@@ -4,7 +4,7 @@ module Cardano.YTxP.Control.Yielding.MintingPolicy (
 
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
 import Cardano.YTxP.SDK.ControlParameters (HexStringScript (HexStringScript))
-import Cardano.YTxP.SDK.SdkParameters (YieldListSTCS)
+import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS)
 import Data.Text (Text)
 import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
@@ -16,7 +16,7 @@ import Plutarch.Script (serialiseScript)
 
 compileYieldingMP ::
   Config ->
-  YieldListSTCS ->
+  AuthorisedScriptsSTCS ->
   Natural ->
   Either
     Text

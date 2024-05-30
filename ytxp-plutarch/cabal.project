@@ -31,7 +31,7 @@ source-repository-package
 source-repository-package
     type: git
     location: https://github.com/mlabs-haskell/ytxp-sdk
-    tag: d4e52d53eab5d4c8b62efd72a35f3d4dc5b6bc43
+    tag: d53079f5f6c9e1da5f64dd8b95738b64dfe119d0
     subdir:
       ytxp-sdk
 
