@@ -12,7 +12,7 @@ import Plutarch.Api.V2 (
   PScriptContext,
   PStakingCredential (PStakingHash, PStakingPtr),
  )
-import Utils (pscriptHashToCurrencySymbol)
+import Utils (pcheck, pscriptHashToCurrencySymbol)
 
 -- -   Look at the UTxO at the `n` th entry in the `txInfoReferenceInputs`, where `n` is equal to `authorisedScriptIndex`.
 --     -   Call this UTxO `authorisedScriptUTxO`.
@@ -71,13 +71,3 @@ yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
                       ptraceError "Staking credential at specified index is not a script credential"
                 PStakingPtr _ ->
                   ptraceError "No staking validator found"
-
-pcheck ::
-  forall (s :: S).
-  Term s PBool ->
-  Term s POpaque
-pcheck b =
-  pif
-    b
-    (popaque $ pconstant ())
-    perror
