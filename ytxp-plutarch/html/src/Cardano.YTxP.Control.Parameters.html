@@ -37,44 +37,44 @@ script hashes
 </span><span id="line-37"></span><span>    </span><span class="annot"><span class="hs-identifier hs-type">ControlParameters</span></span><span>
 </span><span id="line-38"></span><span id="mkControlParameters"><span class="annot"><span class="annottext">mkControlParameters :: SdkParameters -&gt; Either Text ControlParameters
 </span><a href="Cardano.YTxP.Control.Parameters.html#mkControlParameters"><span class="hs-identifier hs-var hs-var">mkControlParameters</span></a></span></span><span>
-</span><span id="line-39"></span><span>  </span><span id="local-6989586621679210080"><span class="annot"><span class="annottext">cpi :: SdkParameters
-</span><a href="#local-6989586621679210080"><span class="hs-identifier hs-var">cpi</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">SdkParameters</span></span><span>
-</span><span id="line-40"></span><span>    </span><span class="hs-special">{</span><span> </span><span id="local-6989586621679210081"><span class="annot"><span class="annottext">[Natural]
+</span><span id="line-39"></span><span>  </span><span id="local-6989586621679204795"><span class="annot"><span class="annottext">cpi :: SdkParameters
+</span><a href="#local-6989586621679204795"><span class="hs-identifier hs-var">cpi</span></a></span></span><span class="hs-glyph">@</span><span class="annot"><span class="hs-identifier hs-type">SdkParameters</span></span><span>
+</span><span id="line-40"></span><span>    </span><span class="hs-special">{</span><span> </span><span id="local-6989586621679204796"><span class="annot"><span class="annottext">[Natural]
 $sel:stakingValidatorsNonceList:SdkParameters :: SdkParameters -&gt; [Natural]
 stakingValidatorsNonceList :: [Natural]
 </span><span class="hs-identifier hs-var hs-var">stakingValidatorsNonceList</span></span></span><span>
-</span><span id="line-41"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679210082"><span class="annot"><span class="annottext">[Natural]
+</span><span id="line-41"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679204797"><span class="annot"><span class="annottext">[Natural]
 $sel:mintingPoliciesNonceList:SdkParameters :: SdkParameters -&gt; [Natural]
 mintingPoliciesNonceList :: [Natural]
 </span><span class="hs-identifier hs-var hs-var">mintingPoliciesNonceList</span></span></span><span>
-</span><span id="line-42"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679210083"><span class="annot"><span class="annottext">YieldListSTCS
-$sel:authorisedScriptsSTCS:SdkParameters :: SdkParameters -&gt; YieldListSTCS
-authorisedScriptsSTCS :: YieldListSTCS
+</span><span id="line-42"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679204798"><span class="annot"><span class="annottext">AuthorisedScriptsSTCS
+$sel:authorisedScriptsSTCS:SdkParameters :: SdkParameters -&gt; AuthorisedScriptsSTCS
+authorisedScriptsSTCS :: AuthorisedScriptsSTCS
 </span><span class="hs-identifier hs-var hs-var">authorisedScriptsSTCS</span></span></span><span>
-</span><span id="line-43"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679210084"><span class="annot"><span class="annottext">Config
+</span><span id="line-43"></span><span>    </span><span class="hs-special">,</span><span> </span><span id="local-6989586621679204799"><span class="annot"><span class="annottext">Config
 $sel:compilationConfig:SdkParameters :: SdkParameters -&gt; Config
 compilationConfig :: Config
 </span><span class="hs-identifier hs-var hs-var">compilationConfig</span></span></span><span>
 </span><span id="line-44"></span><span>    </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-45"></span><span>    </span><span class="hs-keyword">do</span><span>
-</span><span id="line-46"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679210085"><span class="annot"><span class="annottext">pcompilationConfig :: Config
-</span><a href="#local-6989586621679210085"><span class="hs-identifier hs-var hs-var">pcompilationConfig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Config -&gt; Config
+</span><span id="line-46"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679204800"><span class="annot"><span class="annottext">pcompilationConfig :: Config
+</span><a href="#local-6989586621679204800"><span class="hs-identifier hs-var hs-var">pcompilationConfig</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Config -&gt; Config
 </span><a href="Cardano.YTxP.Control.Parameters.html#toPlutarchConfig"><span class="hs-identifier hs-var">toPlutarchConfig</span></a></span><span> </span><span class="annot"><span class="annottext">Config
-</span><a href="#local-6989586621679210084"><span class="hs-identifier hs-var">compilationConfig</span></a></span><span>
+</span><a href="#local-6989586621679204799"><span class="hs-identifier hs-var">compilationConfig</span></a></span><span>
 </span><span id="line-47"></span><span>      </span><span class="hs-comment">------------------------------------------------------------</span><span>
 </span><span id="line-48"></span><span>      </span><span class="hs-comment">-- Now compile the yielding scripts</span><span>
-</span><span id="line-49"></span><span>      </span><span id="local-6989586621679210087"><span class="annot"><span class="annottext">HexStringScript &quot;YieldingValidator&quot;
-</span><a href="#local-6989586621679210087"><span class="hs-identifier hs-var">yieldingVal</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Config
--&gt; YieldListSTCS
+</span><span id="line-49"></span><span>      </span><span id="local-6989586621679204802"><span class="annot"><span class="annottext">HexStringScript &quot;YieldingValidator&quot;
+</span><a href="#local-6989586621679204802"><span class="hs-identifier hs-var">yieldingVal</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="annot"><span class="annottext">Config
+-&gt; AuthorisedScriptsSTCS
 -&gt; Either Text (HexStringScript &quot;YieldingValidator&quot;)
 </span><a href="Cardano.YTxP.Control.Yielding.Validator.html#compileYieldingValidator"><span class="hs-identifier hs-var">compileYieldingValidator</span></a></span><span> </span><span class="annot"><span class="annottext">Config
-</span><a href="#local-6989586621679210085"><span class="hs-identifier hs-var">pcompilationConfig</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListSTCS
-</span><a href="#local-6989586621679210083"><span class="hs-identifier hs-var">authorisedScriptsSTCS</span></a></span><span>
+</span><a href="#local-6989586621679204800"><span class="hs-identifier hs-var">pcompilationConfig</span></a></span><span> </span><span class="annot"><span class="annottext">AuthorisedScriptsSTCS
+</span><a href="#local-6989586621679204798"><span class="hs-identifier hs-var">authorisedScriptsSTCS</span></a></span><span>
 </span><span id="line-50"></span><span>
 </span><span id="line-51"></span><span>      </span><span class="hs-comment">-- Compile the staking validators, pulling any @Left@s (containing compilation</span><span>
 </span><span id="line-52"></span><span>      </span><span class="hs-comment">-- error messages) through the list</span><span>
-</span><span id="line-53"></span><span>      </span><span id="local-6989586621679210088"><span class="annot"><span class="annottext">[HexStringScript &quot;YieldingSV&quot;]
-</span><a href="#local-6989586621679210088"><span class="hs-identifier hs-var">yieldingSVs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-53"></span><span>      </span><span id="local-6989586621679204803"><span class="annot"><span class="annottext">[HexStringScript &quot;YieldingSV&quot;]
+</span><a href="#local-6989586621679204803"><span class="hs-identifier hs-var">yieldingSVs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
 </span><span id="line-54"></span><span>        </span><span class="annot"><span class="annottext">(Natural -&gt; Either Text (HexStringScript &quot;YieldingSV&quot;))
 -&gt; [Natural] -&gt; Either Text [HexStringScript &quot;YieldingSV&quot;]
 forall (t :: Type -&gt; Type) (m :: Type -&gt; Type) a b.
@@ -85,17 +85,17 @@ Monad m =&gt;
 (a -&gt; m b) -&gt; [a] -&gt; m [b]
 </span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/Data.Traversable.html#mapM"><span class="hs-identifier hs-var">mapM</span></a></span><span>
 </span><span id="line-55"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Config
--&gt; YieldListSTCS
+-&gt; AuthorisedScriptsSTCS
 -&gt; Natural
 -&gt; Either Text (HexStringScript &quot;YieldingSV&quot;)
 </span><a href="Cardano.YTxP.Control.Yielding.StakingValidator.html#compileYieldingSV"><span class="hs-identifier hs-var">compileYieldingSV</span></a></span><span> </span><span class="annot"><span class="annottext">Config
-</span><a href="#local-6989586621679210085"><span class="hs-identifier hs-var">pcompilationConfig</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListSTCS
-</span><a href="#local-6989586621679210083"><span class="hs-identifier hs-var">authorisedScriptsSTCS</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679204800"><span class="hs-identifier hs-var">pcompilationConfig</span></a></span><span> </span><span class="annot"><span class="annottext">AuthorisedScriptsSTCS
+</span><a href="#local-6989586621679204798"><span class="hs-identifier hs-var">authorisedScriptsSTCS</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-56"></span><span>          </span><span class="annot"><span class="annottext">[Natural]
-</span><a href="#local-6989586621679210081"><span class="hs-identifier hs-var">stakingValidatorsNonceList</span></a></span><span>
+</span><a href="#local-6989586621679204796"><span class="hs-identifier hs-var">stakingValidatorsNonceList</span></a></span><span>
 </span><span id="line-57"></span><span>
-</span><span id="line-58"></span><span>      </span><span id="local-6989586621679210090"><span class="annot"><span class="annottext">[HexStringScript &quot;YieldingMP&quot;]
-</span><a href="#local-6989586621679210090"><span class="hs-identifier hs-var">yieldingMPs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><span id="line-58"></span><span>      </span><span id="local-6989586621679204805"><span class="annot"><span class="annottext">[HexStringScript &quot;YieldingMP&quot;]
+</span><a href="#local-6989586621679204805"><span class="hs-identifier hs-var">yieldingMPs</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
 </span><span id="line-59"></span><span>        </span><span class="annot"><span class="annottext">(Natural -&gt; Either Text (HexStringScript &quot;YieldingMP&quot;))
 -&gt; [Natural] -&gt; Either Text [HexStringScript &quot;YieldingMP&quot;]
 forall (t :: Type -&gt; Type) (m :: Type -&gt; Type) a b.
@@ -106,14 +106,14 @@ Monad m =&gt;
 (a -&gt; m b) -&gt; [a] -&gt; m [b]
 </span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/Data.Traversable.html#mapM"><span class="hs-identifier hs-var">mapM</span></a></span><span>
 </span><span id="line-60"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Config
--&gt; YieldListSTCS
+-&gt; AuthorisedScriptsSTCS
 -&gt; Natural
 -&gt; Either Text (HexStringScript &quot;YieldingMP&quot;)
 </span><a href="Cardano.YTxP.Control.Yielding.MintingPolicy.html#compileYieldingMP"><span class="hs-identifier hs-var">compileYieldingMP</span></a></span><span> </span><span class="annot"><span class="annottext">Config
-</span><a href="#local-6989586621679210085"><span class="hs-identifier hs-var">pcompilationConfig</span></a></span><span> </span><span class="annot"><span class="annottext">YieldListSTCS
-</span><a href="#local-6989586621679210083"><span class="hs-identifier hs-var">authorisedScriptsSTCS</span></a></span><span class="hs-special">)</span><span>
+</span><a href="#local-6989586621679204800"><span class="hs-identifier hs-var">pcompilationConfig</span></a></span><span> </span><span class="annot"><span class="annottext">AuthorisedScriptsSTCS
+</span><a href="#local-6989586621679204798"><span class="hs-identifier hs-var">authorisedScriptsSTCS</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-61"></span><span>          </span><span class="annot"><span class="annottext">[Natural]
-</span><a href="#local-6989586621679210082"><span class="hs-identifier hs-var">mintingPoliciesNonceList</span></a></span><span>
+</span><a href="#local-6989586621679204797"><span class="hs-identifier hs-var">mintingPoliciesNonceList</span></a></span><span>
 </span><span id="line-62"></span><span>
 </span><span id="line-63"></span><span>      </span><span class="annot"><span class="annottext">ControlParameters -&gt; Either Text ControlParameters
 forall a. a -&gt; Either Text a
@@ -131,22 +131,22 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 -&gt; YieldingScripts
 </span><span class="hs-identifier hs-var">YieldingScripts</span></span><span>
 </span><span id="line-67"></span><span>                </span><span class="annot"><span class="annottext">[HexStringScript &quot;YieldingMP&quot;]
-</span><a href="#local-6989586621679210090"><span class="hs-identifier hs-var">yieldingMPs</span></a></span><span>
+</span><a href="#local-6989586621679204805"><span class="hs-identifier hs-var">yieldingMPs</span></a></span><span>
 </span><span id="line-68"></span><span>                </span><span class="annot"><span class="annottext">HexStringScript &quot;YieldingValidator&quot;
-</span><a href="#local-6989586621679210087"><span class="hs-identifier hs-var">yieldingVal</span></a></span><span>
+</span><a href="#local-6989586621679204802"><span class="hs-identifier hs-var">yieldingVal</span></a></span><span>
 </span><span id="line-69"></span><span>                </span><span class="annot"><span class="annottext">[HexStringScript &quot;YieldingSV&quot;]
-</span><a href="#local-6989586621679210088"><span class="hs-identifier hs-var">yieldingSVs</span></a></span><span>
+</span><a href="#local-6989586621679204803"><span class="hs-identifier hs-var">yieldingSVs</span></a></span><span>
 </span><span id="line-70"></span><span>          </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">$sel:sdkParameters:ControlParameters :: SdkParameters
 </span><span class="hs-identifier hs-var">sdkParameters</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">SdkParameters
-</span><a href="#local-6989586621679210080"><span class="hs-identifier hs-var">cpi</span></a></span><span>
+</span><a href="#local-6989586621679204795"><span class="hs-identifier hs-var">cpi</span></a></span><span>
 </span><span id="line-71"></span><span>          </span><span class="hs-special">}</span><span>
 </span><span id="line-72"></span><span>
 </span><span id="line-73"></span><span class="annot"><a href="Cardano.YTxP.Control.Parameters.html#toPlutarchConfig"><span class="hs-identifier hs-type">toPlutarchConfig</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Config</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Plutarch.Config</span></span><span>
 </span><span id="line-74"></span><span id="toPlutarchConfig"><span class="annot"><span class="annottext">toPlutarchConfig :: Config -&gt; Config
-</span><a href="Cardano.YTxP.Control.Parameters.html#toPlutarchConfig"><span class="hs-identifier hs-var hs-var">toPlutarchConfig</span></a></span></span><span> </span><span id="local-6989586621679210091"><span class="annot"><span class="annottext">Config
-</span><a href="#local-6989586621679210091"><span class="hs-identifier hs-var">conf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Config -&gt; TracingMode
+</span><a href="Cardano.YTxP.Control.Parameters.html#toPlutarchConfig"><span class="hs-identifier hs-var hs-var">toPlutarchConfig</span></a></span></span><span> </span><span id="local-6989586621679204806"><span class="annot"><span class="annottext">Config
+</span><a href="#local-6989586621679204806"><span class="hs-identifier hs-var">conf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">case</span><span> </span><span class="annot"><span class="annottext">Config -&gt; TracingMode
 </span><span class="hs-identifier hs-var">tracing</span></span><span> </span><span class="annot"><span class="annottext">Config
-</span><a href="#local-6989586621679210091"><span class="hs-identifier hs-var">conf</span></a></span><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="#local-6989586621679204806"><span class="hs-identifier hs-var">conf</span></a></span><span> </span><span class="hs-keyword">of</span><span>
 </span><span id="line-75"></span><span>  </span><span class="annot"><span class="annottext">TracingMode
 </span><span class="hs-identifier hs-var">DoTracing</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">TracingMode -&gt; Config
 </span><span class="hs-identifier hs-var">Plutarch.Config</span></span><span> </span><span class="annot"><span class="annottext">TracingMode

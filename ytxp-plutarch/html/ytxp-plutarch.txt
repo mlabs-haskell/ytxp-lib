@@ -127,13 +127,14 @@ module Utils
 --   the same representation
 pscriptHashToCurrencySymbol :: Term s PScriptHash -> Term s PCurrencySymbol
 pmember :: PIsData k => Term s (k :--> (PMap any k v :--> PBool))
+pcheck :: forall (s :: S). Term s PBool -> Term s POpaque
 
+
+-- | Add note on orphan instances. We want to have the haskell types come
+--   from the shared SDK so that other onchain implementations can reuse
+--   those same types. This however, forces us to declare orphan instances
+--   for haskell -&gt; plutarch conversion
 module Cardano.YTxP.Control.Yielding
-
--- | The redeemer passed to the yielding minting policy, validator, and
---   staking validators
-data YieldingRedeemer
-YieldingRedeemer :: AuthorisedScriptIndex -> AuthorisedScriptProofIndex -> YieldingRedeemer
 
 -- | Given a list of reference inputs and a Yielding Redeemer, dig out the
 --   authorised script hash by:
@@ -141,65 +142,38 @@ YieldingRedeemer :: AuthorisedScriptIndex -> AuthorisedScriptProofIndex -> Yield
 --   <ul>
 --   <li>Indexing the reference inputs according to the redeemer</li>
 --   <li>Checking the fetched reference input for the correct
---   YieldListSTCS</li>
+--   AuthorisedScriptsSTCS</li>
 --   <li>Returning the AuthorisedScriptHash</li>
 --   </ul>
-getAuthorisedScriptHash :: YieldListSTCS -> Term s (PBuiltinList PTxInInfo :--> (PYieldingRedeemer :--> PScriptHash))
+getAuthorisedScriptHash :: AuthorisedScriptsSTCS -> Term s (PBuiltinList PTxInInfo :--> (PYieldingRedeemer :--> PScriptHash))
 data PAuthorisedScriptPurpose (s :: S)
 PMinting :: PAuthorisedScriptPurpose (s :: S)
 PSpending :: PAuthorisedScriptPurpose (s :: S)
 PRewarding :: PAuthorisedScriptPurpose (s :: S)
-
--- | Represents an index into a authorised reference script in a
---   TxInReferenceInput list
-newtype AuthorisedScriptIndex
-AuthorisedScriptIndex :: Integer -> AuthorisedScriptIndex
-data AuthorisedScriptPurpose
-Minting :: AuthorisedScriptPurpose
-Spending :: AuthorisedScriptPurpose
-Rewarding :: AuthorisedScriptPurpose
-newtype AuthorisedScriptProofIndex
-AuthorisedScriptProofIndex :: (AuthorisedScriptPurpose, Integer) -> AuthorisedScriptProofIndex
 data PYieldingRedeemer (s :: S)
-instance Plutarch.DataRepr.Internal.Field.PDataFields Cardano.YTxP.Control.Yielding.PYieldingRedeemer
-instance Plutarch.Builtin.PIsData Cardano.YTxP.Control.Yielding.PYieldingRedeemer
-instance Plutarch.Internal.PlutusType.PlutusType Cardano.YTxP.Control.Yielding.PYieldingRedeemer
-instance forall (s :: Plutarch.Internal.S). GHC.Generics.Generic (Cardano.YTxP.Control.Yielding.PYieldingRedeemer s)
-instance Plutarch.Lift.PConstantDecl Cardano.YTxP.Control.Yielding.YieldingRedeemer
-instance Plutarch.Internal.PlutusType.DerivePlutusType Cardano.YTxP.Control.Yielding.PYieldingRedeemer
-instance Plutarch.TryFrom.PTryFrom Plutarch.Builtin.PData (Plutarch.Builtin.PAsData Cardano.YTxP.Control.Yielding.PYieldingRedeemer)
-instance Plutarch.Lift.PUnsafeLiftDecl Cardano.YTxP.Control.Yielding.PYieldingRedeemer
-instance PlutusTx.IsData.Class.ToData Cardano.YTxP.Control.Yielding.YieldingRedeemer
-instance PlutusTx.IsData.Class.FromData Cardano.YTxP.Control.Yielding.YieldingRedeemer
-instance PlutusTx.IsData.Class.UnsafeFromData Cardano.YTxP.Control.Yielding.YieldingRedeemer
-instance PlutusTx.IsData.Class.UnsafeFromData Cardano.YTxP.Control.Yielding.AuthorisedScriptIndex
-instance PlutusTx.IsData.Class.FromData Cardano.YTxP.Control.Yielding.AuthorisedScriptIndex
-instance PlutusTx.IsData.Class.ToData Cardano.YTxP.Control.Yielding.AuthorisedScriptIndex
 instance Plutarch.Builtin.PIsData Cardano.YTxP.Control.Yielding.PAuthorisedScriptIndex
 instance Plutarch.Internal.PlutusType.PlutusType Cardano.YTxP.Control.Yielding.PAuthorisedScriptIndex
 instance forall (s :: Plutarch.Internal.S). GHC.Generics.Generic (Cardano.YTxP.Control.Yielding.PAuthorisedScriptIndex s)
-instance PlutusTx.IsData.Class.UnsafeFromData Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
-instance PlutusTx.IsData.Class.FromData Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
-instance PlutusTx.IsData.Class.ToData Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
-instance GHC.Enum.Bounded Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
-instance GHC.Enum.Enum Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
-instance GHC.Generics.Generic Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
-instance GHC.Show.Show Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
 instance Plutarch.Bool.PEq Cardano.YTxP.Control.Yielding.PAuthorisedScriptPurpose
 instance Plutarch.Builtin.PIsData Cardano.YTxP.Control.Yielding.PAuthorisedScriptPurpose
 instance Plutarch.Internal.PlutusType.PlutusType Cardano.YTxP.Control.Yielding.PAuthorisedScriptPurpose
 instance forall (s :: Plutarch.Internal.S). GHC.Enum.Bounded (Cardano.YTxP.Control.Yielding.PAuthorisedScriptPurpose s)
 instance forall (s :: Plutarch.Internal.S). GHC.Enum.Enum (Cardano.YTxP.Control.Yielding.PAuthorisedScriptPurpose s)
 instance forall (s :: Plutarch.Internal.S). GHC.Generics.Generic (Cardano.YTxP.Control.Yielding.PAuthorisedScriptPurpose s)
-instance PlutusTx.IsData.Class.UnsafeFromData Cardano.YTxP.Control.Yielding.AuthorisedScriptProofIndex
-instance PlutusTx.IsData.Class.FromData Cardano.YTxP.Control.Yielding.AuthorisedScriptProofIndex
-instance PlutusTx.IsData.Class.ToData Cardano.YTxP.Control.Yielding.AuthorisedScriptProofIndex
 instance Plutarch.Builtin.PIsData Cardano.YTxP.Control.Yielding.PAuthorisedScriptProofIndex
 instance Plutarch.Internal.PlutusType.PlutusType Cardano.YTxP.Control.Yielding.PAuthorisedScriptProofIndex
 instance forall (s :: Plutarch.Internal.S). GHC.Generics.Generic (Cardano.YTxP.Control.Yielding.PAuthorisedScriptProofIndex s)
-instance Plutarch.Lift.PConstantDecl Cardano.YTxP.Control.Yielding.AuthorisedScriptIndex
-instance Plutarch.Lift.PConstantDecl Cardano.YTxP.Control.Yielding.AuthorisedScriptPurpose
-instance Plutarch.Lift.PConstantDecl Cardano.YTxP.Control.Yielding.AuthorisedScriptProofIndex
+instance Plutarch.DataRepr.Internal.Field.PDataFields Cardano.YTxP.Control.Yielding.PYieldingRedeemer
+instance Plutarch.Builtin.PIsData Cardano.YTxP.Control.Yielding.PYieldingRedeemer
+instance Plutarch.Internal.PlutusType.PlutusType Cardano.YTxP.Control.Yielding.PYieldingRedeemer
+instance forall (s :: Plutarch.Internal.S). GHC.Generics.Generic (Cardano.YTxP.Control.Yielding.PYieldingRedeemer s)
+instance Plutarch.Lift.PConstantDecl Cardano.YTxP.SDK.Redeemers.AuthorisedScriptIndex
+instance Plutarch.Lift.PConstantDecl Cardano.YTxP.SDK.Redeemers.AuthorisedScriptPurpose
+instance Plutarch.Lift.PConstantDecl Cardano.YTxP.SDK.Redeemers.AuthorisedScriptProofIndex
+instance Plutarch.Lift.PConstantDecl Cardano.YTxP.SDK.Redeemers.YieldingRedeemer
+instance Plutarch.Internal.PlutusType.DerivePlutusType Cardano.YTxP.Control.Yielding.PYieldingRedeemer
+instance Plutarch.TryFrom.PTryFrom Plutarch.Builtin.PData (Plutarch.Builtin.PAsData Cardano.YTxP.Control.Yielding.PYieldingRedeemer)
+instance Plutarch.Lift.PUnsafeLiftDecl Cardano.YTxP.Control.Yielding.PYieldingRedeemer
 instance Plutarch.Internal.PlutusType.DerivePlutusType Cardano.YTxP.Control.Yielding.PAuthorisedScriptProofIndex
 instance Plutarch.TryFrom.PTryFrom Plutarch.Builtin.PData (Plutarch.Builtin.PAsData Cardano.YTxP.Control.Yielding.PAuthorisedScriptProofIndex)
 instance Plutarch.Lift.PUnsafeLiftDecl Cardano.YTxP.Control.Yielding.PAuthorisedScriptProofIndex
@@ -215,20 +189,20 @@ instance Plutarch.Lift.PUnsafeLiftDecl Cardano.YTxP.Control.Yielding.PAuthorised
 --   yielding script that we use to implement the logic for yielding
 --   validator, minting policy and staking validator
 module Cardano.YTxP.Control.Yielding.Helper
-yieldingHelper :: forall (s :: S). YieldListSTCS -> Term s (PData :--> (PScriptContext :--> POpaque))
+yieldingHelper :: forall (s :: S). AuthorisedScriptsSTCS -> Term s (PData :--> (PScriptContext :--> POpaque))
 
 module Cardano.YTxP.Control.Yielding.Validator
-compileYieldingValidator :: Config -> YieldListSTCS -> Either Text (HexStringScript "YieldingValidator")
+compileYieldingValidator :: Config -> AuthorisedScriptsSTCS -> Either Text (HexStringScript "YieldingValidator")
 
 module Cardano.YTxP.Control.Yielding.StakingValidator
 
 -- | Compile a yielding staking validator that has been nonced. The nonce
 --   is required because each staking validator can only be delegated to a
 --   single pool; the inclusion of the nonce will change the script hash.
-compileYieldingSV :: Config -> YieldListSTCS -> Natural -> Either Text (HexStringScript "YieldingSV")
+compileYieldingSV :: Config -> AuthorisedScriptsSTCS -> Natural -> Either Text (HexStringScript "YieldingSV")
 
 module Cardano.YTxP.Control.Yielding.MintingPolicy
-compileYieldingMP :: Config -> YieldListSTCS -> Natural -> Either Text (HexStringScript "YieldingMP")
+compileYieldingMP :: Config -> AuthorisedScriptsSTCS -> Natural -> Either Text (HexStringScript "YieldingMP")
 
 
 module Cardano.YTxP.Control.Parameters
