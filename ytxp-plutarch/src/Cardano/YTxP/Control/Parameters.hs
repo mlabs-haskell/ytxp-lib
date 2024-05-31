@@ -13,19 +13,16 @@ module Cardano.YTxP.Control.Parameters (
   mkControlParameters,
 ) where
 
-import Cardano.YTxP.Control.Yielding.MintingPolicy (
+import Cardano.YTxP.Control.Yielding.Scripts (
   compileYieldingMP,
- )
-import Cardano.YTxP.Control.Yielding.StakingValidator (
   compileYieldingSV,
- )
-import Cardano.YTxP.Control.Yielding.Validator (
   compileYieldingValidator,
  )
-import Cardano.YTxP.SDK.ControlParameters (ControlParameters (ControlParameters, sdkParameters, yieldingScripts), YieldingScripts (YieldingScripts, yieldingMintingPolicies, yieldingStakingValidators, yieldingValidator))
+import Cardano.YTxP.SDK.ControlParameters (ControlParameters (ControlParameters, sdkParameters, yieldingScripts), HexStringScript (HexStringScript), YieldingScripts (YieldingScripts, yieldingMintingPolicies, yieldingStakingValidators, yieldingValidator))
 import Cardano.YTxP.SDK.SdkParameters (Config (tracing), SdkParameters (SdkParameters, authorisedScriptsSTCS, compilationConfig, mintingPoliciesNonceList, stakingValidatorsNonceList), TracingMode (DetTracing, DoTracing, DoTracingAndBinds, NoTracing))
 import Data.Text (Text)
 import Plutarch qualified
+import Plutarch.Script qualified as Plutarch
 
 {- | Compile all scripts, threading through the appropriate parameters and
 script hashes
@@ -48,7 +45,7 @@ mkControlParameters
       -- Now compile the yielding scripts
       yieldingVal <- compileYieldingValidator pcompilationConfig authorisedScriptsSTCS
 
-      -- Compile the staking validators, pulling any @Left@s (containing compilation
+      -- Compile the staking validators and minting policies, pulling any @Left@s (containing compilation
       -- error messages) through the list
       yieldingSVs <-
         mapM
@@ -64,11 +61,15 @@ mkControlParameters
         ControlParameters
           { yieldingScripts =
               YieldingScripts
-                yieldingMPs
-                yieldingVal
-                yieldingSVs
+                { yieldingMintingPolicies = serialiseScript <$> yieldingMPs
+                , yieldingValidator = serialiseScript yieldingVal
+                , yieldingStakingValidators = serialiseScript <$> yieldingSVs
+                }
           , sdkParameters = cpi
           }
+
+serialiseScript :: Plutarch.Script -> HexStringScript a
+serialiseScript = HexStringScript . Plutarch.serialiseScript
 
 toPlutarchConfig :: Config -> Plutarch.Config
 toPlutarchConfig conf = case tracing conf of
