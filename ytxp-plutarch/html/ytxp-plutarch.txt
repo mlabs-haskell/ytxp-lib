@@ -191,18 +191,16 @@ instance Plutarch.Lift.PUnsafeLiftDecl Cardano.YTxP.Control.Yielding.PAuthorised
 module Cardano.YTxP.Control.Yielding.Helper
 yieldingHelper :: forall (s :: S). AuthorisedScriptsSTCS -> Term s (PData :--> (PScriptContext :--> POpaque))
 
-module Cardano.YTxP.Control.Yielding.Validator
-compileYieldingValidator :: Config -> AuthorisedScriptsSTCS -> Either Text (HexStringScript "YieldingValidator")
-
-module Cardano.YTxP.Control.Yielding.StakingValidator
+module Cardano.YTxP.Control.Yielding.Scripts
+compileYieldingMP :: Config -> AuthorisedScriptsSTCS -> Natural -> Either Text Script
+compileYieldingValidator :: Config -> AuthorisedScriptsSTCS -> Either Text Script
 
 -- | Compile a yielding staking validator that has been nonced. The nonce
 --   is required because each staking validator can only be delegated to a
 --   single pool; the inclusion of the nonce will change the script hash.
-compileYieldingSV :: Config -> AuthorisedScriptsSTCS -> Natural -> Either Text (HexStringScript "YieldingSV")
-
-module Cardano.YTxP.Control.Yielding.MintingPolicy
-compileYieldingMP :: Config -> AuthorisedScriptsSTCS -> Natural -> Either Text (HexStringScript "YieldingMP")
+--   Since SVs and MPs share the same signature they share the same
+--   implementation, this function is only provided for semantic clarity
+compileYieldingSV :: Config -> AuthorisedScriptsSTCS -> Natural -> Either Text Script
 
 
 module Cardano.YTxP.Control.Parameters
