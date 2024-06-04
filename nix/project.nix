@@ -10,9 +10,11 @@ final: _prev: {
       "https://chap.intersectmbo.org/" = final.inputs.CHaP;
     };
     sha256map = {
-      "https://github.com/Plutonomicon/plutarch-plutus"."7efbb9fc9f358cfbfd89ff245d85632a17ff3fb3" = "sha256-S7UQrcBO+6G77O4OAAMfQNrChuGzfTr9ARovjAcP7eg=";
-      "https://github.com/input-output-hk/xsy-liqwid-libs"."01dcaf60ee5386f0975aed908d6f92ab0e9b34e0" = "sha256-RK3yytUxIFbceU+m6MxvXyYRrWvDnhx7xmO3UcOzgKc=";
-      "https://github.com/mlabs-haskell/ytxp-sdk"."d53079f5f6c9e1da5f64dd8b95738b64dfe119d0" = "sha256-JyXNI4sz+NEXhk5rC/MbQwgBT+zaFYpAXDZo81yfxx0=";
+      "https://github.com/Plutonomicon/plutarch-plutus"."fcdd2209433d8b8979e820dc4fa9aad5f202216d" = "sha256-gQwaYGIds5owHivXi+ktH7CGeBqoLBykVxyHZZiDUM4=";
+      "https://github.com/input-output-hk/xsy-liqwid-libs"."a799bcca72bcd133cc25a7b6841acb48b3885138" = "sha256-ibAtsyejc3SOUWKoyxSQ5r3jg9eOfyEHkpO+qTrwa2U=";
+      "https://github.com/mlabs-haskell/ytxp-sdk"."d4e52d53eab5d4c8b62efd72a35f3d4dc5b6bc43" = "sha256-6hO304XvHJRC2tw0hRcRR13QWGcO6z7E+HvkLKo9r2Q=";
+      "https://github.com/albertodvp/sc-tools"."91d197203f1255b6e33ef3cb11513b672250f48b" = "sha256-KeP5FjOygJxjPAasCdbv0tKabnxlZ4g/VkO/MNPx2YI=";
+
     };
   };
 }

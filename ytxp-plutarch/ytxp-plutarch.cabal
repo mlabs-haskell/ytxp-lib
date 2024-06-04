@@ -27,6 +27,10 @@ common common-language
   if !flag(dev)
     ghc-options: -Werror
 
+  build-depends:
+    , plutarch
+    , plutarch-ledger-api
+
   default-extensions:
     NoStarIsType
     BangPatterns
@@ -99,7 +103,6 @@ common common-test
     , pprelude
     , tasty
     , tasty-expected-failure
-    , testlib
     , ytxp-plutarch
 
   ghc-options:   -O2 -threaded -rtsopts -with-rtsopts=-N
@@ -122,35 +125,12 @@ library pprelude
   exposed-modules:  PPrelude
   hs-source-dirs:   src
 
-library testlib
-  import:          common-language
-  build-depends:
-    , aeson
-    , base
-    , containers
-    , plutarch
-    , plutarch-context-builder
-    , plutus-ledger-api
-    , plutus-tx
-    , pprelude
-    , prettyprinter
-    , QuickCheck
-    , tasty
-    , tasty-expected-failure
-    , tasty-hunit
-    , tasty-quickcheck
-    , ytxp-plutarch
-
-  hs-source-dirs:  testlib
-  exposed-modules: Test.Unit.Spec
-
 library
   import:          common-language
   build-depends:
     , aeson
     , base               ^>=4.18.1.0
     , generics-sop
-    , plutarch
     , plutarch-extra
     , plutus-core
     , plutus-ledger-api
@@ -190,12 +170,15 @@ executable write-config
 test-suite ytxp-lib-test
   import:         common-language, common-test
   type:           exitcode-stdio-1.0
+  other-modules:
+    Cardano.YTxP.Test.Control.Yielding.Helper
+    Utils
+
   main-is:        Main.hs
   build-depends:
     , aeson
     , bytestring
     , liqwid-plutarch-extra
-    , plutarch
     , plutarch-context-builder
     , plutarch-unit
     , plutus-ledger-api

@@ -28,8 +28,8 @@ usage:
 	@echo "    build_write-config                                          -- Build write-config"
 	@echo ""
 	# Test
-	@echo "    test                                                        -- Run test"
-	@echo "    test_dev                                                    -- Run test ignoring warning"
+	@echo "    test_all                                                    -- Run all the tests"
+	@echo "    test_all_dev                                                    -- Run all the tests ignoring warning"
 	@echo ""
 	# Check Typos
 	@echo "    typos_check                                                 -- Check typos"
@@ -146,13 +146,13 @@ build_write-config:
 
 ################################################################################
 # Test
-.PHONY: test
-test:
-	$(CABAL_YTXP_PLUTARCH) test -j ytxp-lib-test
+.PHONY: test_all
+test_all:
+	$(CABAL_YTXP_PLUTARCH) test -j all
 
-.PHONY: test_dev
-test_dev:
-	$(CABAL_YTXP_PLUTARCH) test -j -fdev ytxp-lib-test
+.PHONY: test_all_dev
+test_all_dev:
+	$(CABAL_YTXP_PLUTARCH) test -j -fdev all
 ################################################################################
 # Test
 .PHONY: typos_check
