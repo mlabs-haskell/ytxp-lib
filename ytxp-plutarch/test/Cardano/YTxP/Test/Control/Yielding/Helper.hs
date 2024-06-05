@@ -1,11 +1,12 @@
+{-# OPTIONS_GHC -Wno-deferred-out-of-scope-variables #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Use fewer imports" #-}
 module Cardano.YTxP.Test.Control.Yielding.Helper (tests) where
 
-import Cardano.YTxP.Control.Yielding (AuthorisedScriptIndex (AuthorisedScriptIndex), AuthorisedScriptProofIndex (AuthorisedScriptProofIndex), AuthorisedScriptPurpose (Minting), YieldingRedeemer (YieldingRedeemer))
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
-import Cardano.YTxP.SDK.SdkParameters (
-  -- TODO rename
-  YieldListSTCS (YieldListSTCS),
- )
+import Cardano.YTxP.SDK.Redeemers (AuthorisedScriptIndex (AuthorisedScriptIndex), AuthorisedScriptProofIndex (AuthorisedScriptProofIndex), AuthorisedScriptPurpose (Minting), YieldingRedeemer (YieldingRedeemer))
+import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS (AuthorisedScriptsSTCS))
 import Data.Either (fromRight)
 import Data.String (IsString)
 import Plutarch (
@@ -52,10 +53,10 @@ tests :: TestTree
 tests = yieldingHelperTestFails
 
 yieldingHelperTestFails :: TestTree
-yieldingHelperTestFails = failsWithExpectedTrace (yieldingHelper $ YieldListSTCS authorisedScriptSTCS) [PlutusTx.toData testRedeemer, PlutusTx.toData mintFromAuthorisedScript] "HERE WE PUT THE EXPECTED TRACE"
+yieldingHelperTestFails = failsWithExpectedTrace (yieldingHelper $ AuthorisedScriptsSTCS authorisedScriptSTCS) [PlutusTx.toData testRedeemer, PlutusTx.toData mintFromAuthorisedScript] "HERE WE PUT THE EXPECTED TRACE"
 
 _yieldingHelperTest :: TestTree
-_yieldingHelperTest = tryFromPTerm "yielding helper" (yieldingHelper $ YieldListSTCS authorisedScriptSTCS) $ do
+_yieldingHelperTest = tryFromPTerm "yielding helper" (yieldingHelper $ AuthorisedScriptsSTCS authorisedScriptSTCS) $ do
   [PlutusTx.toData testRedeemer, PlutusTx.toData mintFromAuthorisedScript] @> "It should mint a token from the yielding script"
 
 testRedeemer :: YieldingRedeemer
