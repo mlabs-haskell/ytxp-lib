@@ -73,7 +73,7 @@ serialiseScript = HexStringScript . Plutarch.serialiseScript
 
 toPlutarchConfig :: Config -> Plutarch.Config
 toPlutarchConfig conf = case tracing conf of
-  DoTracing -> Plutarch.Config Plutarch.DoTracing
-  NoTracing -> Plutarch.Config Plutarch.NoTracing
-  DetTracing -> Plutarch.Config Plutarch.DetTracing
-  DoTracingAndBinds -> Plutarch.Config Plutarch.DoTracingAndBinds
+  DoTracing -> Plutarch.Tracing Plutarch.LogInfo Plutarch.DoTracing
+  NoTracing -> Plutarch.NoTracing
+  DetTracing -> Plutarch.Tracing Plutarch.LogInfo Plutarch.DetTracing
+  DoTracingAndBinds -> Plutarch.Tracing Plutarch.LogInfo Plutarch.DoTracingAndBinds
