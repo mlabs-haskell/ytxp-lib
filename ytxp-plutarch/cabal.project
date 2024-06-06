@@ -21,7 +21,7 @@ source-repository-package
 source-repository-package
     type: git
     location: https://github.com/input-output-hk/xsy-liqwid-libs
-    tag: a799bcca72bcd133cc25a7b6841acb48b3885138
+    tag: 2425031da690546dd64669975598a99d1279eb16
     subdir:
       plutarch-context-builder
       liqwid-plutarch-extra

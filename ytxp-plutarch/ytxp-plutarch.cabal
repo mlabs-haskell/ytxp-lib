@@ -171,14 +171,16 @@ test-suite ytxp-lib-test
   import:         common-language, common-test
   type:           exitcode-stdio-1.0
   other-modules:
-    Cardano.YTxP.Test.Control.Yielding.Helper
+    Cardano.YTxP.Test.Control.Yielding.Scripts
     Utils
 
   main-is:        Main.hs
   build-depends:
     , aeson
     , bytestring
+    , convex-plutarch
     , liqwid-plutarch-extra
+    , mtl
     , plutarch-context-builder
     , plutarch-unit
     , plutus-ledger-api

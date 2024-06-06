@@ -26,11 +26,11 @@ yieldingHelper ::
   forall (s :: S).
   AuthorisedScriptsSTCS ->
   Term s (PData :--> PScriptContext :--> POpaque)
-yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
+yieldingHelper asstcs = plam $ \redeemer ctx -> unTermCont $ do
   txInfo <- pletC $ pfromData $ pfield @"txInfo" # ctx
   let txInfoRefInputs = pfromData $ pfield @"referenceInputs" # txInfo
   yieldingRedeemer <- pfromData . fst <$> ptryFromC redeemer
-  let authorisedScriptHash = getAuthorisedScriptHash ylstcs # txInfoRefInputs # yieldingRedeemer
+  let authorisedScriptHash = getAuthorisedScriptHash asstcs # txInfoRefInputs # yieldingRedeemer
       authorisedScriptProofIndex = pto $ pfromData $ pfield @"authorisedScriptProofIndex" # yieldingRedeemer
       authorisedScriptPurpose = pfromData $ pfstBuiltin # authorisedScriptProofIndex
       authorisedScriptIndex = pfromData $ psndBuiltin # authorisedScriptProofIndex

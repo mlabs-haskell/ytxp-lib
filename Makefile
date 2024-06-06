@@ -148,11 +148,12 @@ build_write-config:
 # Test
 .PHONY: test_all
 test_all:
-	$(CABAL_YTXP_PLUTARCH) test -j all
+	$(CABAL_YTXP_PLUTARCH) test -j all --test-show-details=always
 
 .PHONY: test_all_dev
 test_all_dev:
-	$(CABAL_YTXP_PLUTARCH) test -j -fdev all
+	$(CABAL_YTXP_PLUTARCH) test -j -fdev all --test-show-details=always
+
 ################################################################################
 # Test
 .PHONY: typos_check
