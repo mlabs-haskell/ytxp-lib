@@ -16,8 +16,9 @@ usage:
 	@echo "    format_check_nix                                            -- Check formatting of .nix files"
 	@echo "    format_cabal                                                -- Formats .cabal files"
 	@echo "    format_check_cabal                                          -- Check formatting of .cabal files"
-	@echo "    lint                                                        -- Auto-refactors code"
-	@echo "    lint_check                                                  -- Run code linting"
+	@echo "    lint                                                        -- Auto-refactors code and markdown"
+	@echo "    lint_haskell                                                -- Auto-refactors code"
+	@echo "    lint_haskell_check                                          -- Run code linting"
 	@echo ""
 	# Build
 	@echo "    build_all                                                   -- Build all"
