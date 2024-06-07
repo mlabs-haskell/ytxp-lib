@@ -1,6 +1,6 @@
 module Test.Unit.Spec (unitSpec) where
 
-import Plutarch.Api.V2 (KeyGuarantees (Unsorted), PMap)
+import Plutarch.LedgerApi (KeyGuarantees (Unsorted), PMap)
 import PlutusTx.AssocMap qualified as PlutusMap
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertBool, testCase)

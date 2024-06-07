@@ -130,6 +130,7 @@ library testlib
     , containers
     , plutarch
     , plutarch-context-builder
+    , plutarch-ledger-api
     , plutus-ledger-api
     , plutus-tx
     , pprelude
@@ -148,10 +149,11 @@ library
   import:          common-language
   build-depends:
     , aeson
-    , base               ^>=4.18.1.0
+    , base                 ^>=4.18.1.0
     , generics-sop
     , plutarch
     , plutarch-extra
+    , plutarch-ledger-api
     , plutus-core
     , plutus-ledger-api
     , plutus-tx

@@ -26,9 +26,13 @@ import Cardano.YTxP.SDK.Redeemers (
 import Cardano.YTxP.SDK.SdkParameters (
   AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
  )
-import Plutarch.Api.V1.Maybe (PMaybeData (PDJust, PDNothing))
-import Plutarch.Api.V2 (PScriptHash, PTxInInfo, PValue)
 import Plutarch.DataRepr (DerivePConstantViaData (DerivePConstantViaData), PDataFields)
+import Plutarch.LedgerApi (
+  PMaybeData (PDJust, PDNothing),
+  PScriptHash,
+  PTxInInfo,
+  PValue,
+ )
 import Plutarch.Lift (
   DerivePConstantViaNewtype (DerivePConstantViaNewtype),
   PConstantDecl,
@@ -170,9 +174,9 @@ getAuthorisedScriptHash authorisedScriptsSTCS = phoistAcyclic $
           (pcontainsAuthorisedScriptSTT authorisedScriptsSTCS # value)
           ( pmatch (pfield @"referenceScript" # output) $ \case
               PDJust ((pfield @"_0" #) -> autorisedScript) -> autorisedScript
-              PDNothing _ -> (ptraceError "getAuthorisedScriptHash: Reference input does not contain reference script")
+              PDNothing _ -> (ptraceInfoError "getAuthorisedScriptHash: Reference input does not contain reference script")
           )
-          (ptraceError "getAuthorisedScriptHash: Reference input does not contain AuthorisedScriptsSTCS")
+          (ptraceInfoError "getAuthorisedScriptHash: Reference input does not contain AuthorisedScriptsSTCS")
 
 {- | Checks that the given 'PValue' contains the YieldListSTT
 TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead

@@ -9,7 +9,7 @@ import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS)
 import Data.Text (Text)
 import Numeric.Natural (Natural)
 import Plutarch (Config, compile)
-import Plutarch.Api.V2 (PScriptContext)
+import Plutarch.LedgerApi (PScriptContext)
 import Plutarch.Script (Script)
 
 --------------------------------------------------------------------------------
