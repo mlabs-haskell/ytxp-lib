@@ -21,7 +21,7 @@ compileYieldingValidator ::
   Either
     Text
     Script
-compileYieldingValidator config ylstcs = do
+compileYieldingValidator config stcs = do
   let
     yieldingValidator ::
       forall (s :: S).
@@ -29,7 +29,7 @@ compileYieldingValidator config ylstcs = do
       )
     -- Takes the @yieldingHelper@ and turn it into a 3 argument script
     yieldingValidator = plam $ \_datum redeemer ctx ->
-      yieldingHelper ylstcs # redeemer # ctx
+      yieldingHelper stcs # redeemer # ctx
 
   compile config yieldingValidator
 

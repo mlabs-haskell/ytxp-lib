@@ -34,7 +34,6 @@ yieldingHelper asstcs = plam $ \redeemer ctx -> unTermCont $ do
       authorisedScriptProofIndex = pto $ pfromData $ pfield @"authorisedScriptProofIndex" # yieldingRedeemer
       authorisedScriptPurpose = pfromData $ pfstBuiltin # authorisedScriptProofIndex
       authorisedScriptIndex = pfromData $ psndBuiltin # authorisedScriptProofIndex
-
   pure $
     pcheck $
       pmatch authorisedScriptPurpose $ \case
