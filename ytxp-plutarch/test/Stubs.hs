@@ -9,7 +9,7 @@ module Stubs where
 --------------------------------------------------------------------------------
 -- YS Tests
 
--- | Happy path (These need to be tested for all 3 supported purposes)
+-- | [x] Happy path (These need to be tested for all 3 supported purposes)
 
 -- | YS fails when wrong authorisedScriptIndex passed:
 

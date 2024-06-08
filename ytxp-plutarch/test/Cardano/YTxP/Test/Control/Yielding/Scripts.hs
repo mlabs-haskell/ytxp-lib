@@ -12,6 +12,7 @@ import Cardano.YTxP.SDK.Redeemers (AuthorisedScriptIndex (AuthorisedScriptIndex)
 import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS (AuthorisedScriptsSTCS))
 import Control.Monad.Reader (Reader, asks, runReader)
 import Convex.TestUtils (nominalCaseBasic, txfCEKUnitCase)
+import Data.Text (Text)
 import Data.Text qualified as T
 import Plutarch (
   Config (Tracing),
@@ -95,53 +96,55 @@ testsR = do
 
 -- *** Scripts Readers
 
-yieldingMPScriptR :: Reader ScriptsTestsParams Script
-yieldingMPScriptR = do
+mkYieldingScriptR ::
+  (Config -> AuthorisedScriptsSTCS -> Either Text Script) ->
+  Reader ScriptsTestsParams Script
+mkYieldingScriptR compile = do
   authorisedScriptsSTCS' <- asks authorisedScriptsSTCS
-  -- NOTE: we use an arbitrary nounce (42)
-  case compileYieldingMP (Tracing LogInfo DetTracing) authorisedScriptsSTCS' 42 of
+  case compile (Tracing LogInfo DetTracing) authorisedScriptsSTCS' of
     Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
     Right script' -> pure script'
+
+yieldingMPScriptR :: Reader ScriptsTestsParams Script
+yieldingMPScriptR =
+  let compile config stcs = compileYieldingMP config stcs 42
+   in mkYieldingScriptR compile
 
 yieldingVScriptR :: Reader ScriptsTestsParams Script
-yieldingVScriptR = do
-  authorisedScriptsSTCS' <- asks authorisedScriptsSTCS
-  case compileYieldingValidator (Tracing LogInfo DetTracing) authorisedScriptsSTCS' of
-    Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
-    Right script' -> pure script'
+yieldingVScriptR = mkYieldingScriptR compileYieldingValidator
 
 yieldingSVScriptR :: Reader ScriptsTestsParams Script
-yieldingSVScriptR = do
-  authorisedScriptsSTCS' <- asks authorisedScriptsSTCS
-  -- NOTE: we use an arbitrary nounce (42)
-  case compileYieldingSV (Tracing LogInfo DetTracing) authorisedScriptsSTCS' 42 of
-    Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
-    Right script' -> pure script'
+yieldingSVScriptR =
+  let compile config stcs = compileYieldingSV config stcs 42
+   in mkYieldingScriptR compile
 
 -- *** Builders
 
-mintNominalCaseBuilderR :: Reader ScriptsTestsParams (Redeemer, ScriptContext)
-mintNominalCaseBuilderR = do
-  let redeemer = YieldingRedeemer (AuthorisedScriptIndex 0) (AuthorisedScriptProofIndex (Minting, 1))
-  context <- (<>) <$> authorisedScriptRefInputContext <*> mintTokenContext redeemer
+mkNominalCaseBuilderR ::
+  (Builder a, Semigroup a) =>
+  YieldingRedeemer ->
+  Reader ScriptsTestsParams a ->
+  (a -> ScriptContext) ->
+  Reader ScriptsTestsParams (Redeemer, ScriptContext)
+mkNominalCaseBuilderR redeemer builder contextBuilder = do
+  context <- (<>) <$> authorisedScriptRefInputContext <*> builder
   let contextWithOutRefIdx = mkOutRefIndices context
-  pure (toLedgerRedeemer redeemer, buildMinting' contextWithOutRefIdx)
+  pure (toLedgerRedeemer redeemer, contextBuilder contextWithOutRefIdx)
+
+mintNominalCaseBuilderR :: Reader ScriptsTestsParams (Redeemer, ScriptContext)
+mintNominalCaseBuilderR =
+  let redeemer = YieldingRedeemer (AuthorisedScriptIndex 0) (AuthorisedScriptProofIndex (Minting, 1))
+   in mkNominalCaseBuilderR redeemer (mintTokenContext redeemer) buildMinting'
 
 spendNominalCaseBuilderR :: Reader ScriptsTestsParams (Redeemer, ScriptContext)
-spendNominalCaseBuilderR = do
+spendNominalCaseBuilderR =
   let redeemer = YieldingRedeemer (AuthorisedScriptIndex 0) (AuthorisedScriptProofIndex (Spending, 0))
-  context <- (<>) <$> authorisedScriptRefInputContext <*> spendTokenContext
-  let contextWithOutRefIdx = mkOutRefIndices context
-  pure (toLedgerRedeemer redeemer, buildSpending' contextWithOutRefIdx)
+   in mkNominalCaseBuilderR redeemer spendTokenContext buildSpending'
 
 rewardNominalCaseBuilderR :: Reader ScriptsTestsParams (Redeemer, ScriptContext)
-rewardNominalCaseBuilderR = do
+rewardNominalCaseBuilderR =
   let redeemer = YieldingRedeemer (AuthorisedScriptIndex 0) (AuthorisedScriptProofIndex (Rewarding, 0))
-  -- TODO
-  context <- (<>) <$> authorisedScriptRefInputContext <*> rewardTokenContext
-  -- TODO what is this
-  let contextWithOutRefIdx = mkOutRefIndices context
-  pure (toLedgerRedeemer redeemer, buildRewarding' contextWithOutRefIdx)
+   in mkNominalCaseBuilderR redeemer rewardTokenContext buildRewarding'
 
 -- *** Builders utils
 
