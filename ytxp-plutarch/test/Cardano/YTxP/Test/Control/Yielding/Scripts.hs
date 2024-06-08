@@ -4,6 +4,7 @@
 module Cardano.YTxP.Test.Control.Yielding.Scripts (tests) where
 
 import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS (AuthorisedScriptsSTCS))
+import Cardano.YTxP.Test.Control.Yielding.Scripts.Attacks (testAttacksR)
 import Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (testNominalCasesR)
 import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   ScriptsTestsParams (
@@ -28,5 +29,5 @@ tests :: TestTree
 tests = runReader testsR dummyParams
 testsR :: Reader ScriptsTestsParams TestTree
 testsR =
-  let tests' = [testNominalCasesR]
+  let tests' = [testNominalCasesR, testAttacksR]
    in testGroup "YieldingScripts" <$> sequence tests'

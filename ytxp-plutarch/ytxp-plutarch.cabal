@@ -172,6 +172,7 @@ test-suite ytxp-lib-test
   type:           exitcode-stdio-1.0
   other-modules:
     Cardano.YTxP.Test.Control.Yielding.Scripts
+    Cardano.YTxP.Test.Control.Yielding.Scripts.Attacks
     Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases
     Cardano.YTxP.Test.Control.Yielding.Scripts.ScriptsBuilders
     Cardano.YTxP.Test.Control.Yielding.Scripts.Utils
