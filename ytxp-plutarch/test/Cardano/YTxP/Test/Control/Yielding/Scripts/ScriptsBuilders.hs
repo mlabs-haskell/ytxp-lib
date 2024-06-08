@@ -1,7 +1,8 @@
-{-# OPTIONS_GHC -Wno-deferred-out-of-scope-variables #-}
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-
-module Cardano.YTxP.Test.Control.Yielding.Scripts (tests) where
+module Cardano.YTxP.Test.Control.Yielding.Scripts.ScriptsBuilders (
+  yieldingMPScriptR,
+  yieldingVScriptR,
+  yieldingSVScriptR,
+) where
 
 import Cardano.YTxP.Control.Yielding.Scripts (
   compileYieldingMP,
@@ -10,15 +11,7 @@ import Cardano.YTxP.Control.Yielding.Scripts (
  )
 import Cardano.YTxP.SDK.Redeemers (AuthorisedScriptIndex (AuthorisedScriptIndex), AuthorisedScriptProofIndex (AuthorisedScriptProofIndex), AuthorisedScriptPurpose (Minting, Rewarding, Spending), YieldingRedeemer (YieldingRedeemer))
 import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS (AuthorisedScriptsSTCS))
-import Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (testNominalCasesR)
-import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
-  ScriptsTestsParams (
-    ScriptsTestsParams,
-    authorisedScriptHash,
-    authorisedScriptsManagerHash,
-    authorisedScriptsSTCS
-  ),
- )
+import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (ScriptsTestsParams, authorisedScriptsSTCS)
 import Control.Monad.Reader (Reader, asks, runReader)
 import Convex.TestUtils (nominalCaseBasic, txfCEKUnitCase)
 import Data.Text (Text)
@@ -43,17 +36,25 @@ import PlutusLedgerApi.V2 (
  )
 import Test.Tasty (TestTree, testGroup)
 
-dummyParams :: ScriptsTestsParams
-dummyParams =
-  ScriptsTestsParams
-    { authorisedScriptHash = "22222222222222222222222222222222222222222222222222222222"
-    , authorisedScriptsSTCS = AuthorisedScriptsSTCS "bb"
-    , authorisedScriptsManagerHash = "11111111111111111111111111111111111111111111111111111111"
-    }
+-- | Helper that produces a @Reader@ that yields a compiled Script, throws an error is compilation fails
+mkYieldingScriptR ::
+  (Config -> AuthorisedScriptsSTCS -> Either Text Script) ->
+  Reader ScriptsTestsParams Script
+mkYieldingScriptR compile = do
+  authorisedScriptsSTCS' <- asks authorisedScriptsSTCS
+  case compile (Tracing LogInfo DetTracing) authorisedScriptsSTCS' of
+    Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
+    Right script' -> pure script'
 
-tests :: TestTree
-tests = runReader testsR dummyParams
-testsR :: Reader ScriptsTestsParams TestTree
-testsR =
-  let tests' = [testNominalCasesR]
-   in testGroup "YieldingScripts" <$> sequence tests'
+yieldingMPScriptR :: Reader ScriptsTestsParams Script
+yieldingMPScriptR =
+  let compile config stcs = compileYieldingMP config stcs 42
+   in mkYieldingScriptR compile
+
+yieldingVScriptR :: Reader ScriptsTestsParams Script
+yieldingVScriptR = mkYieldingScriptR compileYieldingValidator
+
+yieldingSVScriptR :: Reader ScriptsTestsParams Script
+yieldingSVScriptR =
+  let compile config stcs = compileYieldingSV config stcs 42
+   in mkYieldingScriptR compile
