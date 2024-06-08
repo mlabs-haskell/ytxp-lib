@@ -34,6 +34,9 @@ import PlutusLedgerApi.V2 (
  )
 import Test.Tasty (TestTree, testGroup)
 
+--------------------------------------------------------------------------------
+-- Data
+
 data ScriptsTestsParams = ScriptsTestsParams
   { authorisedScriptsSTCS :: AuthorisedScriptsSTCS
   , authorisedScriptHash :: ScriptHash
@@ -48,6 +51,9 @@ dummyParams =
     , authorisedScriptsManagerHash = "11111111111111111111111111111111111111111111111111111111"
     }
 
+--------------------------------------------------------------------------------
+-- Tests
+
 tests :: TestTree
 tests = runReader testsR dummyParams
 
@@ -55,13 +61,13 @@ testsR :: Reader ScriptsTestsParams TestTree
 testsR = do
   -- Mint
   yieldingMPScript <- yieldingMPScriptR
-  (mintRedeemer, mintContext) <- mintNominalCaseBuilderR
+  (mintRedeemer, mintContext') <- mintNominalCaseBuilderR
   -- Spend
   yieldingVScript <- yieldingVScriptR
-  (spendRedeemer, spendContext) <- spendNominalCaseBuilderR
+  (spendRedeemer, spendContext') <- spendNominalCaseBuilderR
   -- Spend
   yieldingSVScript <- yieldingSVScriptR
-  (rewardRedeemer, rewardContext) <- rewardNominalCaseBuilderR
+  (rewardRedeemer, rewardContext') <- rewardNominalCaseBuilderR
   let
     nominalCases :: TestTree
     nominalCases =
@@ -72,21 +78,21 @@ testsR = do
               "Mint Case"
               Nothing
               mintRedeemer
-              mintContext
+              mintContext'
               yieldingMPScript
         , txfCEKUnitCase $
             nominalCaseBasic
               "Spend Case"
               (Just $ Datum $ toBuiltinData ())
               spendRedeemer
-              spendContext
+              spendContext'
               yieldingVScript
         , txfCEKUnitCase $
             nominalCaseBasic
               "Reward Case"
               Nothing
               rewardRedeemer
-              rewardContext
+              rewardContext'
               yieldingSVScript
         ]
   pure $
@@ -94,8 +100,10 @@ testsR = do
       "YieldingScripts"
       [nominalCases]
 
--- *** Scripts Readers
+--------------------------------------------------------------------------------
+-- Scripts builders
 
+-- | Helper that produces a @Reader@ that yields a compiled Script, throws an error is compilation fails
 mkYieldingScriptR ::
   (Config -> AuthorisedScriptsSTCS -> Either Text Script) ->
   Reader ScriptsTestsParams Script
@@ -118,8 +126,10 @@ yieldingSVScriptR =
   let compile config stcs = compileYieldingSV config stcs 42
    in mkYieldingScriptR compile
 
--- *** Builders
+--------------------------------------------------------------------------------
+-- Context Builders
 
+-- | Helper that produces a @Reader@ that yields a compiled a redeemerScript, throws an error is compilation fails
 mkNominalCaseBuilderR ::
   (Builder a, Semigroup a) =>
   YieldingRedeemer ->
@@ -128,26 +138,30 @@ mkNominalCaseBuilderR ::
   Reader ScriptsTestsParams (Redeemer, ScriptContext)
 mkNominalCaseBuilderR redeemer builder contextBuilder = do
   context <- (<>) <$> authorisedScriptRefInputContext <*> builder
-  let contextWithOutRefIdx = mkOutRefIndices context
+  let toLedgerRedeemer :: YieldingRedeemer -> Redeemer
+      toLedgerRedeemer = Redeemer . toBuiltinData
+      contextWithOutRefIdx = mkOutRefIndices context
   pure (toLedgerRedeemer redeemer, contextBuilder contextWithOutRefIdx)
 
 mintNominalCaseBuilderR :: Reader ScriptsTestsParams (Redeemer, ScriptContext)
 mintNominalCaseBuilderR =
   let redeemer = YieldingRedeemer (AuthorisedScriptIndex 0) (AuthorisedScriptProofIndex (Minting, 1))
-   in mkNominalCaseBuilderR redeemer (mintTokenContext redeemer) buildMinting'
+   in mkNominalCaseBuilderR redeemer (mintContext redeemer) buildMinting'
 
 spendNominalCaseBuilderR :: Reader ScriptsTestsParams (Redeemer, ScriptContext)
 spendNominalCaseBuilderR =
   let redeemer = YieldingRedeemer (AuthorisedScriptIndex 0) (AuthorisedScriptProofIndex (Spending, 0))
-   in mkNominalCaseBuilderR redeemer spendTokenContext buildSpending'
+   in mkNominalCaseBuilderR redeemer spendContext buildSpending'
 
 rewardNominalCaseBuilderR :: Reader ScriptsTestsParams (Redeemer, ScriptContext)
 rewardNominalCaseBuilderR =
   let redeemer = YieldingRedeemer (AuthorisedScriptIndex 0) (AuthorisedScriptProofIndex (Rewarding, 0))
-   in mkNominalCaseBuilderR redeemer rewardTokenContext buildRewarding'
+   in mkNominalCaseBuilderR redeemer rewardContext buildRewarding'
 
--- *** Builders utils
+--------------------------------------------------------------------------------
+-- Context Builders Helpers
 
+-- | Produces a @Reader@ that yields a context builder with an _authorised_ reference using @ScriptsTestsParams@
 authorisedScriptRefInputContext :: (Builder a) => Reader ScriptsTestsParams a
 authorisedScriptRefInputContext = do
   authorisedScriptsManagerHash' <- asks authorisedScriptsManagerHash
@@ -159,16 +173,17 @@ authorisedScriptRefInputContext = do
         <> withValue (singleton authorisedScriptsSTCS' "" 1)
         <> withReferenceScript authorisedScriptHash'
 
--- TODO renmae these
-mintTokenContext :: YieldingRedeemer -> Reader ScriptsTestsParams MintingBuilder
-mintTokenContext redeemer = do
-  authorisedMintingPolicy <- asks $ toCurrencySymbol . authorisedScriptHash
+-- | Produces a @Reader@ that yields a context builder for a minting use case
+mintContext :: YieldingRedeemer -> Reader ScriptsTestsParams MintingBuilder
+mintContext redeemer = do
+  authorisedMintingPolicy <- asks $ CurrencySymbol . getScriptHash . authorisedScriptHash
   return $
     mintSingletonWith redeemer authorisedMintingPolicy "token name" 42
       <> withMinting authorisedMintingPolicy
 
-spendTokenContext :: Reader ScriptsTestsParams SpendingBuilder
-spendTokenContext = do
+-- | Produces a @Reader@ that yields a context builder for a spending use case
+spendContext :: Reader ScriptsTestsParams SpendingBuilder
+spendContext = do
   authorisedValidator <- asks authorisedScriptHash
   let consumedUTxO =
         script authorisedValidator
@@ -176,20 +191,11 @@ spendTokenContext = do
   return $
     input consumedUTxO <> withSpendingUTXO consumedUTxO
 
-rewardTokenContext :: Reader ScriptsTestsParams RewardingBuilder
-rewardTokenContext = do
+-- | Produces a @Reader@ that yields a context builder for a rewarding use case
+rewardContext :: Reader ScriptsTestsParams RewardingBuilder
+rewardContext = do
   authorisedStakingValidator <- asks authorisedScriptHash
   let stakingCredentials = StakingHash $ ScriptCredential authorisedStakingValidator
   return $
     withdrawal stakingCredentials 0
       <> withRewarding stakingCredentials
-
--- *** Misc
-
--- TODO do we need this in the sdk?
-toLedgerRedeemer :: YieldingRedeemer -> Redeemer
-toLedgerRedeemer = Redeemer . toBuiltinData
-
--- TODO (I guess this util already exist but I don't know where that is)
-toCurrencySymbol :: ScriptHash -> CurrencySymbol
-toCurrencySymbol = CurrencySymbol . getScriptHash
