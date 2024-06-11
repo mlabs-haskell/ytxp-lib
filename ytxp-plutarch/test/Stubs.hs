@@ -13,11 +13,11 @@ module Stubs where
 
 -- | YS fails when wrong authorisedScriptIndex passed:
 
--- \| YS fails when no input is present at the index
+-- \| [x] YS fails when no input is present at the index
 
--- \| YS fails when input is not a reference script
+-- \| [x] YS fails when input is not a reference script
 
--- \| YS fails when a non-authorised reference script is present at the index (no STCS in value)
+-- \| [x] YS fails when a non-authorised reference script is present at the index (no STCS in value)
 
 -- | YS fails when wrong authorisedScriptProofIndex passed: (These need to be tested for all 3 supported purposes)
 

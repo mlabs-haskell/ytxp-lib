@@ -1,4 +1,9 @@
-module Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (testNominalCasesR) where
+module Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (
+  testNominalCasesR,
+  mintNominalCaseBuilderR,
+  spendNominalCaseBuilderR,
+  rewardNominalCaseBuilderR,
+) where
 
 import Cardano.YTxP.SDK.Redeemers (AuthorisedScriptIndex (AuthorisedScriptIndex), AuthorisedScriptProofIndex (AuthorisedScriptProofIndex), AuthorisedScriptPurpose (Minting, Rewarding, Spending), YieldingRedeemer (YieldingRedeemer))
 import Cardano.YTxP.Test.Control.Yielding.Scripts.ScriptsBuilders (

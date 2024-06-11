@@ -182,7 +182,9 @@ test-suite ytxp-lib-test
   build-depends:
     , aeson
     , bytestring
+    , convex-optics
     , convex-plutarch
+    , lens
     , liqwid-plutarch-extra
     , mtl
     , plutarch-context-builder
@@ -191,6 +193,7 @@ test-suite ytxp-lib-test
     , plutus-tx
     , prettyprinter
     , QuickCheck
+    , regex
     , tasty-golden
     , tasty-hunit
     , tasty-quickcheck
