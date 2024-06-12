@@ -184,5 +184,5 @@ lint_markdown:
 # Export scripts
 .PHONY: export_scripts
 export_scripts:
-	$(CABAL_YTXP_PLUTARCH) run export file -- -o .. -p ytxp-info.json -b "ytxp"
-	$(CABAL_YTXP_PLUTARCH) run export file -- -o .. -p ytxp-info.json -b "ytxp-tracing"
+	$(CABAL_YTXP_PLUTARCH) run export file -- -o .. -p ../ytxp-info.json -b "ytxp"
+	$(CABAL_YTXP_PLUTARCH) run export file -- -o .. -p ../ytxp-info.json -b "ytxp-tracing"
