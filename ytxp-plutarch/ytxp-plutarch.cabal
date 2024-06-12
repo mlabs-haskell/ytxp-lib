@@ -183,6 +183,7 @@ executable export
   build-depends:
     , base
     , liqwid-script-export
+    , plutarch
     , pprelude
     , ytxp-plutarch
 

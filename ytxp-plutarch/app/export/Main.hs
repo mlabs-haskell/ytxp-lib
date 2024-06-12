@@ -1,7 +1,9 @@
 module Main (main) where
 
 import Plutarch (
-  Config (NoTracing),
+  Config (NoTracing, Tracing),
+  LogLevel (LogInfo),
+  TracingMode (DetTracing),
  )
 
 import ScriptExport.Export (exportMain)
@@ -15,4 +17,13 @@ import Cardano.YTxP.Control.Yielding.Scripts (scripts)
 main :: IO ()
 main =
   exportMain $
-    insertScriptExportWithLinker "ytxp" (scripts NoTracing) YTxP.linker params
+    mconcat
+      [ insertScriptExportWithLinker
+          "ytxp"
+          (scripts NoTracing)
+          YTxP.linker
+      , insertScriptExportWithLinker
+          "ytxp:dettracing-info"
+          (scripts (Tracing LogInfo DetTracing))
+          YTxP.linker
+      ]
