@@ -149,21 +149,25 @@ library
   import:          common-language
   build-depends:
     , aeson
-    , base                 ^>=4.18.1.0
+    , base                  ^>=4.18.1.0
+    , containers
     , generics-sop
+    , liqwid-script-export
     , plutarch
     , plutarch-extra
     , plutarch-ledger-api
     , plutus-core
     , plutus-ledger-api
     , plutus-tx
+    , ply-core
+    , ply-plutarch
     , pprelude
     , text
     , ytxp-sdk
 
   hs-source-dirs:  src
   exposed-modules:
-    Cardano.YTxP.Control.Parameters
+    Cardano.YTxP
     Cardano.YTxP.Control.Stubs
     Cardano.YTxP.Control.Vendored
     Cardano.YTxP.Control.Yielding
@@ -173,19 +177,16 @@ library
 
 -- Executables
 
-executable write-config
+executable export
   import:         common-language
   main-is:        Main.hs
   build-depends:
-    , aeson
-    , aeson-pretty
     , base
-    , bytestring
-    , directory
+    , liqwid-script-export
     , pprelude
     , ytxp-plutarch
 
-  hs-source-dirs: app/write-config
+  hs-source-dirs: app/export
 
 -- Tests
 
