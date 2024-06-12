@@ -1,0 +1,19 @@
+{
+    "params": {
+        "stakingValidatorsNonceList": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+        ],
+        "mintingPoliciesNonceList": [
+            1,
+            2
+        ],
+        "authorisedScriptsSTCS": "1f7a58a1aa1e6b047a42109ade331ce26c9c2cce027d043ff264fb1f",
+        "compilationConfig": "NoTracing"
+    },
+    "commitHash": "bb5f68213d49608552523766b22485e8e4f2c9e8"
+}
