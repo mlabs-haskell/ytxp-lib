@@ -23,7 +23,7 @@ main =
           (scripts NoTracing)
           YTxP.linker
       , insertScriptExportWithLinker
-          "ytxp:dettracing-info"
+          "ytxp-tracing"
           (scripts (Tracing LogInfo DetTracing))
           YTxP.linker
       ]
