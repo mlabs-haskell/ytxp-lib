@@ -1,3 +1,5 @@
+{-# LANGUAGE RankNTypes #-}
+
 {- | This module export a helper function that produces a two argument yielding script that
 we use to implement the logic for yielding validator, minting policy and staking validator
 -}

@@ -17,7 +17,6 @@ import Convex.TestUtils (nominalCaseBasic, txfCEKUnitCase)
 import Plutarch.Context (Builder, buildMinting', buildRewarding', buildSpending', mkOutRefIndices)
 import PlutusLedgerApi.V2 (
   Datum (Datum),
-  Redeemer (Redeemer),
   ScriptContext,
   ToData (toBuiltinData),
  )

@@ -4,9 +4,8 @@
 
 module Cardano.YTxP.Test.Control.Yielding.Scripts.Attacks (testAttacksR) where
 
-import Cardano.YTxP.Control.Yielding (PAuthorisedScriptPurpose (PRewarding))
 import Cardano.YTxP.SDK.Optics qualified as O
-import Cardano.YTxP.SDK.Redeemers (AuthorisedScriptIndex (AuthorisedScriptIndex), AuthorisedScriptProofIndex (AuthorisedScriptProofIndex), AuthorisedScriptPurpose (Minting, Rewarding, Spending), YieldingRedeemer (YieldingRedeemer))
+import Cardano.YTxP.SDK.Redeemers (YieldingRedeemer)
 import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS (AuthorisedScriptsSTCS))
 import Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (
   mintNominalCaseBuilderR,
@@ -25,13 +24,13 @@ import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   ),
   toLedgerRedeemer,
  )
-import Control.Lens (Iso', Lens', Setter', over, set, traversed, (&), _1, _2, _Wrapped)
+import Control.Lens (Setter', over, set, traversed, (&), _2, _Wrapped)
 import Control.Monad.Reader (Reader, asks)
 import Convex.PlutusLedgerApi.Optics qualified as O
 import Convex.TestUtils (PreProcessor, TxFCEKInput (TxFCEKInput), attackCaseBasicRegex, mkPreProcessor, txfCEKUnitCase)
 import Data.Bifunctor (Bifunctor (first, second))
 import Data.Monoid (Endo (Endo, appEndo))
-import PlutusLedgerApi.V2 (Credential (ScriptCredential), CurrencySymbol (CurrencySymbol), Datum (Datum), Redeemer (Redeemer), ScriptContext, ScriptHash, StakingCredential (StakingHash), ToData (toBuiltinData), TxInInfo, Value (Value, getValue), getScriptHash, unsafeFromBuiltinData)
+import PlutusLedgerApi.V2 (Credential (ScriptCredential), CurrencySymbol (CurrencySymbol), Datum (Datum), ScriptContext, ScriptHash, StakingCredential (StakingHash), ToData (toBuiltinData), TxInInfo, Value (Value, getValue), getScriptHash, unsafeFromBuiltinData)
 import PlutusTx.AssocMap qualified as PTx.Map
 import PlutusTx.Eq qualified
 import Test.Tasty (TestTree, testGroup)

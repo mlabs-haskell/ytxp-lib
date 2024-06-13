@@ -120,40 +120,39 @@ format_lint: format lint
 
 ################################################################################
 # Build
-CABAL_YTXP_PLUTARCH := cd ytxp-plutarch && cabal
 
 .PHONY: build_all
 build_all:
-	$(CABAL_YTXP_PLUTARCH) build -j all
+	cabal build -j all
 
 .PHONY: build_all_dev
 build_all_dev:
-	$(CABAL_YTXP_PLUTARCH) build -j -fdev all
+	cabal build -j -fdev all
 .PHONY: build_ytxp-plutarch
 build_ytxp-plutarch:
-	$(CABAL_YTXP_PLUTARCH) build -j ytxp-plutarch
+	cabal build -j ytxp-plutarch
 
 .PHONY: build_testlib
 build_testlib:
-	$(CABAL_YTXP_PLUTARCH) build -j testlib
+	cabal build -j testlib
 
 .PHONY: build_pprelude
 build_pprelude:
-	$(CABAL_YTXP_PLUTARCH) build -j pprelude
+	cabal build -j pprelude
 
 .PHONY: build_write-config
 build_write-config:
-	$(CABAL_YTXP_PLUTARCH) build -j write-config
+	cabal build -j write-config
 
 ################################################################################
 # Test
 .PHONY: test_all
 test_all:
-	$(CABAL_YTXP_PLUTARCH) test -j all --test-show-details=always
+	cabal test -j all --test-show-details=always
 
 .PHONY: test_all_dev
 test_all_dev:
-	$(CABAL_YTXP_PLUTARCH) test -j -fdev all --test-show-details=always
+	cabal test -j -fdev all --test-show-details=always
 
 ################################################################################
 # Test
