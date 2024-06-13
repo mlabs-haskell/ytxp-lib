@@ -14,6 +14,9 @@ module Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   mintContext,
   spendContext,
   rewardContext,
+
+  -- * Misc
+  toLedgerRedeemer,
 ) where
 
 import Cardano.YTxP.Control.Yielding.Scripts (
@@ -35,9 +38,11 @@ import Plutarch.Context (Builder, MintingBuilder, RewardingBuilder, SpendingBuil
 import PlutusLedgerApi.V2 (
   Credential (ScriptCredential),
   CurrencySymbol (CurrencySymbol),
+  Redeemer (Redeemer),
   ScriptHash (getScriptHash),
   StakingCredential (StakingHash),
   singleton,
+  toBuiltinData,
  )
 
 -- | Yielding Script tests static parameters
@@ -85,3 +90,6 @@ rewardContext = do
   return $
     withdrawal stakingCredentials 0
       <> withRewarding stakingCredentials
+
+toLedgerRedeemer :: YieldingRedeemer -> Redeemer
+toLedgerRedeemer = Redeemer . toBuiltinData
