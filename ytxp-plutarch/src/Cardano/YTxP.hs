@@ -30,14 +30,14 @@ import ScriptExport.ScriptInfo (
 
 --------------------------------------------------------------------------------
 
-data YTxPInfo = YTxPInfo
+data YTxPParams = YTxPParams
   { params :: SdkParameters
   , commitHash :: Text
   }
   deriving stock (Show, Generic)
   deriving anyclass (ToJSON, FromJSON)
 
-linker :: Linker YTxPInfo (ScriptExport YTxPInfo)
+linker :: Linker YTxPParams (ScriptExport YTxPParams)
 linker = do
   info <- getParam
 
