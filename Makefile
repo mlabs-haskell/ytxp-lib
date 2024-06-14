@@ -42,6 +42,8 @@ usage:
 	@echo "    lint_markdown_check                                         -- Check markdownlint suggestions"
 	@echo "    lint_markdown                                               -- Apply markdownlint suggestions"
 	@echo ""
+	# Export
+	@echo "    export_scripts                                               -- Export scripts"
 
 ################################################################################
 # Code
@@ -184,5 +186,5 @@ lint_markdown:
 # Export scripts
 .PHONY: export_scripts
 export_scripts:
-	$(CABAL_YTXP_PLUTARCH) run export file -- -o .. -p ../ytxp-params.json -b "ytxp"
-	$(CABAL_YTXP_PLUTARCH) run export file -- -o .. -p ../ytxp-params.json -b "ytxp-tracing"
+	$(CABAL_YTXP_PLUTARCH) run export file -- -o ../exported-scripts/ -p ../ytxp-params.json -b "ytxp"
+	$(CABAL_YTXP_PLUTARCH) run export file -- -o ../exported-scripts/ -p ../ytxp-params.json -b "ytxp-tracing"
