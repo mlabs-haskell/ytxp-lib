@@ -4,11 +4,9 @@ we use to implement the logic for yielding validator, minting policy and staking
 module Cardano.YTxP.Control.Yielding.Helper (yieldingHelper) where
 
 import Cardano.YTxP.Control.Yielding (PAuthorisedScriptPurpose (PMinting, PRewarding, PSpending), getAuthorisedScriptHash)
-import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS)
-import Plutarch.Api.V1.Address (
+import Plutarch.LedgerApi (
   PCredential (PPubKeyCredential, PScriptCredential),
- )
-import Plutarch.Api.V2 (
+  PCurrencySymbol,
   PScriptContext,
   PStakingCredential (PStakingHash, PStakingPtr),
  )
@@ -26,13 +24,12 @@ import Utils (pcheck, pscriptHashToCurrencySymbol)
 
 yieldingHelper ::
   forall (s :: S).
-  AuthorisedScriptsSTCS ->
-  Term s (PData :--> PScriptContext :--> POpaque)
-yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
+  Term s (PCurrencySymbol :--> PData :--> PScriptContext :--> POpaque)
+yieldingHelper = plam $ \pylstcs redeemer ctx -> unTermCont $ do
   txInfo <- pletC $ pfromData $ pfield @"txInfo" # ctx
   let txInfoRefInputs = pfromData $ pfield @"referenceInputs" # txInfo
   yieldingRedeemer <- pfromData . fst <$> ptryFromC redeemer
-  let authorisedScriptHash = getAuthorisedScriptHash ylstcs # txInfoRefInputs # yieldingRedeemer
+  let authorisedScriptHash = getAuthorisedScriptHash # pylstcs # txInfoRefInputs # yieldingRedeemer
       authorisedScriptProofIndex = pto $ pfromData $ pfield @"authorisedScriptProofIndex" # yieldingRedeemer
       authorisedScriptPurpose = pfromData $ pfstBuiltin # authorisedScriptProofIndex
       authorisedScriptIndex = pfromData $ psndBuiltin # authorisedScriptProofIndex
@@ -44,7 +41,7 @@ yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
           let txInfoMints = pfromData $ pfield @"mint" # txInfo
               authorisedScriptMint = pto (pto txInfoMints) #!! authorisedScriptIndex
               currencySymbol = pscriptHashToCurrencySymbol authorisedScriptHash
-           in ptraceIfFalse "Minting policy does not match expected yielded to minting policy" $
+           in ptraceInfoIfFalse "Minting policy does not match expected yielded to minting policy" $
                 pfromData (pfstBuiltin # authorisedScriptMint) #== currencySymbol
         PSpending ->
           let txInfoInputs = pfromData $ pfield @"inputs" # txInfo
@@ -54,10 +51,10 @@ yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
               credential = pfield @"credential" # pfromData address
            in pmatch (pfromData credential) $ \case
                 PScriptCredential ((pfield @"_0" #) -> hash) ->
-                  ptraceIfFalse "Input does not match expected yielded to validator" $
+                  ptraceInfoIfFalse "Input does not match expected yielded to validator" $
                     hash #== authorisedScriptHash
                 PPubKeyCredential _ ->
-                  ptraceError "Input at specified index is not a script input"
+                  ptraceInfoError "Input at specified index is not a script input"
         PRewarding ->
           let txInfoWithdrawals = pfromData $ pfield @"wdrl" # txInfo
               authorisedScriptWithdrawal = pto txInfoWithdrawals #!! authorisedScriptIndex
@@ -65,9 +62,9 @@ yieldingHelper ylstcs = plam $ \redeemer ctx -> unTermCont $ do
                 PStakingHash ((pfield @"_0" #) -> credential) ->
                   pmatch credential $ \case
                     PScriptCredential ((pfield @"_0" #) -> hash) ->
-                      ptraceIfFalse "Withdrawal does not match expected yielded to staking validator" $
+                      ptraceInfoIfFalse "Withdrawal does not match expected yielded to staking validator" $
                         hash #== authorisedScriptHash
                     PPubKeyCredential _ ->
-                      ptraceError "Staking credential at specified index is not a script credential"
+                      ptraceInfoError "Staking credential at specified index is not a script credential"
                 PStakingPtr _ ->
-                  ptraceError "No staking validator found"
+                  ptraceInfoError "No staking validator found"

@@ -23,12 +23,13 @@ import Cardano.YTxP.SDK.Redeemers (
   AuthorisedScriptPurpose,
   YieldingRedeemer,
  )
-import Cardano.YTxP.SDK.SdkParameters (
-  AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
- )
-import Plutarch.Api.V1.Maybe (PMaybeData (PDJust, PDNothing))
-import Plutarch.Api.V2 (PScriptHash, PTxInInfo, PValue)
 import Plutarch.DataRepr (DerivePConstantViaData (DerivePConstantViaData), PDataFields)
+import Plutarch.LedgerApi (
+  PCurrencySymbol,
+  PMaybeData (PDJust, PDNothing),
+  PScriptHash,
+  PTxInInfo,
+ )
 import Plutarch.Lift (
   DerivePConstantViaNewtype (DerivePConstantViaNewtype),
   PConstantDecl,
@@ -145,16 +146,17 @@ deriving via
 - Returning the AuthorisedScriptHash
 -}
 getAuthorisedScriptHash ::
-  AuthorisedScriptsSTCS ->
+  forall (s :: S).
   Term
     s
-    ( PBuiltinList PTxInInfo
+    ( PCurrencySymbol
+        :--> PBuiltinList PTxInInfo
         :--> PYieldingRedeemer
         :--> PScriptHash
     )
-getAuthorisedScriptHash authorisedScriptsSTCS = phoistAcyclic $
+getAuthorisedScriptHash = phoistAcyclic $
   plam $
-    \txInfoRefInputs redeemer -> unTermCont $ do
+    \psymbol txInfoRefInputs redeemer -> unTermCont $ do
       -- TODO (OPTIMIZE): these values only get used once, can be a `let`
       yieldingRedeemer <-
         pletFieldsC @'["authorisedScriptIndex"] redeemer
@@ -167,18 +169,9 @@ getAuthorisedScriptHash authorisedScriptsSTCS = phoistAcyclic $
 
       pure $
         pif
-          (pcontainsAuthorisedScriptSTT authorisedScriptsSTCS # value)
+          (pmember # psymbol # pto (pfromData value)) -- TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead
           ( pmatch (pfield @"referenceScript" # output) $ \case
               PDJust ((pfield @"_0" #) -> autorisedScript) -> autorisedScript
-              PDNothing _ -> (ptraceError "getAuthorisedScriptHash: Reference input does not contain reference script")
+              PDNothing _ -> (ptraceInfoError "getAuthorisedScriptHash: Reference input does not contain reference script")
           )
-          (ptraceError "getAuthorisedScriptHash: Reference input does not contain AuthorisedScriptsSTCS")
-
-{- | Checks that the given 'PValue' contains the YieldListSTT
-TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead
--}
-pcontainsAuthorisedScriptSTT ::
-  AuthorisedScriptsSTCS -> Term s (PValue anyKey anyAmount :--> PBool)
-pcontainsAuthorisedScriptSTT (AuthorisedScriptsSTCS symbol) =
-  plam $ \value ->
-    pmember # pconstant symbol # pto value
+          (ptraceInfoError "getAuthorisedScriptHash: Reference input does not contain AuthorisedScriptsSTCS")

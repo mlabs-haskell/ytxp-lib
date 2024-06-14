@@ -2,10 +2,6 @@ module Main (main) where
 
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
 import Cardano.YTxP.SDK.Redeemers (AuthorisedScriptIndex (AuthorisedScriptIndex), AuthorisedScriptProofIndex (AuthorisedScriptProofIndex), AuthorisedScriptPurpose (Minting), YieldingRedeemer (YieldingRedeemer))
-import Cardano.YTxP.SDK.SdkParameters (
-  -- TODO rename
-  AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
- )
 import Data.String (IsString)
 import Plutarch.Context (Builder, MintingBuilder, SpendingBuilder, buildMinting, mintSingletonWith, mkOutRefIndices, referenceInput, script, withMinting, withRefTxId, withReferenceScript, withSpendingUTXO, withValue)
 import Plutarch.Test.Precompiled (
@@ -30,7 +26,7 @@ main = do
       ]
 
 yieldingHelperTest :: TestTree
-yieldingHelperTest = tryFromPTerm "yielding helper" (yieldingHelper $ AuthorisedScriptsSTCS authorisedScriptSTCS) $ do
+yieldingHelperTest = tryFromPTerm "yielding helper" (yieldingHelper # pconstant authorisedScriptSTCS) $ do
   [PlutusTx.toData testRedeemer, PlutusTx.toData mintFromAuthorisedScript] @> "It should mint a token from the yielding script"
 
 testRedeemer :: YieldingRedeemer
