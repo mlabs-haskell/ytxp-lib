@@ -162,17 +162,6 @@ attackHelper ::
   Either () TxFCEKInput
 attackHelper attack (TxFCEKInput md r sc script) =
   let
-    -- TODO/Question a lot of wrapping/unwrapping. Do we want to create a class
-    -- IsRedeemer on sc-tools that does this automatically? E.g.
-    --
-    -- class (FromData a, ToData a) => CustomRedeemer a where
-    --   toCustomRedeemer :: Redeemer -> a
-    --   toCustomRedeemer = unsafeFromBuiltinData . toBuiltinData
-    --   fromCustomRedeemer :: a -> Redeemer
-    --   fromCustomRedeemer = Redeemer . toBuiltinData
-    --
-    -- Does it add values? We could rewrite TxFCEKInput in term of thatYieldingRedeemer
-    -- and we could derive anyclass it. Is it safe?
     redeemer = unsafeFromBuiltinData (toBuiltinData r)
     (badRedeemer, sc') = appEndo attack (redeemer, sc)
     badLedgerRedeemer = toLedgerRedeemer badRedeemer
