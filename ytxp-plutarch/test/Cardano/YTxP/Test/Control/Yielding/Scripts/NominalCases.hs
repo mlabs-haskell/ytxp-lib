@@ -5,7 +5,12 @@ module Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (
   rewardNominalCaseBuilderR,
 ) where
 
-import Cardano.YTxP.SDK.Redeemers (AuthorisedScriptIndex (AuthorisedScriptIndex), AuthorisedScriptProofIndex (AuthorisedScriptProofIndex), AuthorisedScriptPurpose (Minting, Rewarding, Spending), YieldingRedeemer (YieldingRedeemer))
+import Cardano.YTxP.SDK.Redeemers (
+  AuthorisedScriptIndex (AuthorisedScriptIndex),
+  AuthorisedScriptProofIndex (AuthorisedScriptProofIndex),
+  AuthorisedScriptPurpose (Minting, Rewarding, Spending),
+  YieldingRedeemer (YieldingRedeemer),
+ )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.ScriptsBuilders (
   yieldingMPScriptR,
   yieldingSVScriptR,
