@@ -16,8 +16,9 @@ usage:
 	@echo "    format_check_nix                                            -- Check formatting of .nix files"
 	@echo "    format_cabal                                                -- Formats .cabal files"
 	@echo "    format_check_cabal                                          -- Check formatting of .cabal files"
-	@echo "    lint                                                        -- Auto-refactors code"
-	@echo "    lint_check                                                  -- Run code linting"
+	@echo "    lint                                                        -- Auto-refactors code and markdown"
+	@echo "    lint_haskell                                                -- Auto-refactors code"
+	@echo "    lint_haskell_check                                          -- Run code linting"
 	@echo ""
 	# Build
 	@echo "    build_all                                                   -- Build all"
@@ -28,7 +29,8 @@ usage:
 	@echo "    build_export                                                -- Build export"
 	@echo ""
 	# Test
-	@echo "    test                                                        -- Run test"
+	@echo "    test_all                                                    -- Run all the tests"
+	@echo "    test_all_dev                                                    -- Run all the tests ignoring warning"
 	@echo ""
 	# Check Typos
 	@echo "    typos_check                                                 -- Check typos"
@@ -120,26 +122,25 @@ format_lint: format lint
 
 ################################################################################
 # Build
-CABAL_YTXP_PLUTARCH := cd ytxp-plutarch && cabal
 
 .PHONY: build_all
 build_all:
-	$(CABAL_YTXP_PLUTARCH) build -j all
+	cabal build -j all
 
 .PHONY: build_all_dev
 build_all_dev:
-	$(CABAL_YTXP_PLUTARCH) build -j -fdev all
+	cabal build -j -fdev all
 .PHONY: build_ytxp-plutarch
 build_ytxp-plutarch:
-	$(CABAL_YTXP_PLUTARCH) build -j ytxp-plutarch
+	cabal build -j ytxp-plutarch
 
 .PHONY: build_testlib
 build_testlib:
-	$(CABAL_YTXP_PLUTARCH) build -j testlib
+	cabal build -j testlib
 
 .PHONY: build_pprelude
 build_pprelude:
-	$(CABAL_YTXP_PLUTARCH) build -j pprelude
+	cabal build -j pprelude
 
 .PHONY: build_export
 build_export:
@@ -147,9 +148,13 @@ build_export:
 
 ################################################################################
 # Test
-.PHONY: test
-test:
-	$(CABAL_YTXP_PLUTARCH) test -j ytxp-lib-test
+.PHONY: test_all
+test_all:
+	cabal test -j all --test-show-details=always
+
+.PHONY: test_all_dev
+test_all_dev:
+	cabal test -j -fdev all --test-show-details=always
 
 ################################################################################
 # Test
@@ -186,5 +191,5 @@ lint_markdown:
 # Export scripts
 .PHONY: export_scripts
 export_scripts:
-	$(CABAL_YTXP_PLUTARCH) run export file -- -o ../exported-scripts/ -p ../ytxp-params.json -b "ytxp"
-	$(CABAL_YTXP_PLUTARCH) run export file -- -o ../exported-scripts/ -p ../ytxp-params.json -b "ytxp-tracing"
+	cabal run export file -- -o exported-scripts/ -p ytxp-params.json -b "ytxp"
+	cabal run export file -- -o exported-scripts/ -p ytxp-params.json -b "ytxp-tracing"

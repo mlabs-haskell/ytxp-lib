@@ -45,7 +45,7 @@ linker = do
     fetchTS
       @'ThreeArgumentScript
       @'[CurrencySymbol]
-      "djed:yieldingValidator"
+      "djed:yieldingV"
 
   yieldingMP <-
     fetchTS
@@ -89,7 +89,7 @@ linker = do
   return $
     ScriptExport
       ( fromList
-          ( ("djed:yieldingValidator", toRoledScript yieldingValidator')
+          ( ("djed:yieldingV", toRoledScript yieldingValidator')
               : yieldingMPs
                 <> yieldingSVs
           )

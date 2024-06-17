@@ -1,3 +1,5 @@
+{-# LANGUAGE RankNTypes #-}
+
 {- | This module export a helper function that produces a two argument yielding script that
 we use to implement the logic for yielding validator, minting policy and staking validator
 -}
@@ -33,7 +35,6 @@ yieldingHelper = plam $ \pylstcs redeemer ctx -> unTermCont $ do
       authorisedScriptProofIndex = pto $ pfromData $ pfield @"authorisedScriptProofIndex" # yieldingRedeemer
       authorisedScriptPurpose = pfromData $ pfstBuiltin # authorisedScriptProofIndex
       authorisedScriptIndex = pfromData $ psndBuiltin # authorisedScriptProofIndex
-
   pure $
     pcheck $
       pmatch authorisedScriptPurpose $ \case
