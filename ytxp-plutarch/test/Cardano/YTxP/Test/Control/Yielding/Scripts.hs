@@ -21,7 +21,7 @@ dummyParams :: ScriptsTestsParams
 dummyParams =
   ScriptsTestsParams
     { authorisedScriptHash = "22222222222222222222222222222222222222222222222222222222"
-    , authorisedScriptsSTCS = AuthorisedScriptsSTCS "bb"
+    , authorisedScriptsSTCS = AuthorisedScriptsSTCS "33333333333333333333333333333333333333333333333333333333"
     , authorisedScriptsManagerHash = "11111111111111111111111111111111111111111111111111111111"
     }
 
