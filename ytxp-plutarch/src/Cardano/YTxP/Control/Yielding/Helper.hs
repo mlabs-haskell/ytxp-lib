@@ -6,9 +6,9 @@ we use to implement the logic for yielding validator, minting policy and staking
 module Cardano.YTxP.Control.Yielding.Helper (yieldingHelper) where
 
 import Cardano.YTxP.Control.Yielding (PAuthorisedScriptPurpose (PMinting, PRewarding, PSpending), getAuthorisedScriptHash)
-import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS)
 import Plutarch.LedgerApi (
   PCredential (PPubKeyCredential, PScriptCredential),
+  PCurrencySymbol,
   PScriptContext,
   PStakingCredential (PStakingHash, PStakingPtr),
  )
@@ -26,13 +26,12 @@ import Utils (pcheck, pscriptHashToCurrencySymbol)
 
 yieldingHelper ::
   forall (s :: S).
-  AuthorisedScriptsSTCS ->
-  Term s (PData :--> PScriptContext :--> POpaque)
-yieldingHelper asstcs = plam $ \redeemer ctx -> unTermCont $ do
+  Term s (PCurrencySymbol :--> PData :--> PScriptContext :--> POpaque)
+yieldingHelper = plam $ \pylstcs redeemer ctx -> unTermCont $ do
   txInfo <- pletC $ pfromData $ pfield @"txInfo" # ctx
   let txInfoRefInputs = pfromData $ pfield @"referenceInputs" # txInfo
   yieldingRedeemer <- pfromData . fst <$> ptryFromC redeemer
-  let authorisedScriptHash = getAuthorisedScriptHash asstcs # txInfoRefInputs # yieldingRedeemer
+  let authorisedScriptHash = getAuthorisedScriptHash # pylstcs # txInfoRefInputs # yieldingRedeemer
       authorisedScriptProofIndex = pto $ pfromData $ pfield @"authorisedScriptProofIndex" # yieldingRedeemer
       authorisedScriptPurpose = pfromData $ pfstBuiltin # authorisedScriptProofIndex
       authorisedScriptIndex = pfromData $ psndBuiltin # authorisedScriptProofIndex

@@ -26,7 +26,7 @@ usage:
 	@echo "    build_ytxp-plutarch                                         -- Build ytxp-plutarch"
 	@echo "    build_testlib                                               -- Build testlib"
 	@echo "    build_pprelude                                              -- Build pprelude"
-	@echo "    build_write-config                                          -- Build write-config"
+	@echo "    build_export                                                -- Build export"
 	@echo ""
 	# Test
 	@echo "    test_all                                                    -- Run all the tests"
@@ -44,6 +44,8 @@ usage:
 	@echo "    lint_markdown_check                                         -- Check markdownlint suggestions"
 	@echo "    lint_markdown                                               -- Apply markdownlint suggestions"
 	@echo ""
+	# Export
+	@echo "    export_scripts                                               -- Export scripts"
 
 ################################################################################
 # Code
@@ -140,9 +142,9 @@ build_testlib:
 build_pprelude:
 	cabal build -j pprelude
 
-.PHONY: build_write-config
-build_write-config:
-	cabal build -j write-config
+.PHONY: build_export
+build_export:
+	$(CABAL_YTXP_PLUTARCH) build -j export
 
 ################################################################################
 # Test
@@ -184,3 +186,10 @@ lint_markdown_check:
 .PHONY: lint_markdown
 lint_markdown: 
 	$(call find_exec_all_fn, $(FIND_MARKDOWN_SOURCES), markdownlint -f)
+
+################################################################################
+# Export scripts
+.PHONY: export_scripts
+export_scripts:
+	$(CABAL_YTXP_PLUTARCH) run export file -- -o ../exported-scripts/ -p ../ytxp-params.json -b "ytxp"
+	$(CABAL_YTXP_PLUTARCH) run export file -- -o ../exported-scripts/ -p ../ytxp-params.json -b "ytxp-tracing"

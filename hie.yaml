@@ -1,13 +1,2 @@
 cradle:
   cabal:
-    - path: "ytxp-plutarch/src"
-      component: "ytxp-plutarch:lib:pprelude"
-
-    - path: "ytxp-plutarch/src"
-      component: "lib:ytxp-plutarch"
-
-    - path: "ytxp-plutarch/app/write-config/Main.hs"
-      component: "ytxp-plutarch:exe:write-config"
-
-    - path: "ytxp-plutarch/test"
-      component: "ytxp-plutarch:test:ytxp-lib-test"

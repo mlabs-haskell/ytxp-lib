@@ -19,15 +19,12 @@ module Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   toLedgerRedeemer,
 ) where
 
-import Cardano.YTxP.Control.Yielding.Scripts (
-  compileYieldingMP,
-  compileYieldingSV,
-  compileYieldingValidator,
- )
 import Cardano.YTxP.SDK.Redeemers (AuthorisedScriptIndex (AuthorisedScriptIndex), AuthorisedScriptProofIndex (AuthorisedScriptProofIndex), AuthorisedScriptPurpose (Minting, Rewarding, Spending), YieldingRedeemer (YieldingRedeemer))
 import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS (AuthorisedScriptsSTCS))
 import Control.Monad.Reader (Reader, asks)
 
+-- TODO which instances are we importing with this? (it does not compile if we remove it)
+import Cardano.YTxP.Control.Yielding.Scripts ()
 import Plutarch (
   Config (Tracing),
   LogLevel (LogInfo),

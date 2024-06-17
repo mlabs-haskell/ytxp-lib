@@ -15,23 +15,33 @@ source-repository-package
     tag: fcdd2209433d8b8979e820dc4fa9aad5f202216d
     subdir:
       .
+      plutarch-ledger-api
       plutarch-extra
       plutarch-ledger-api
 
 source-repository-package
     type: git
+    location: https://github.com/mlabs-haskell/ply
+    tag: a0aa36863372a3375e0ec73dd0ccfa49046d7855
+    subdir:
+      ply-core
+      ply-plutarch
+
+source-repository-package
+    type: git
     location: https://github.com/input-output-hk/xsy-liqwid-libs
-    tag: 2425031da690546dd64669975598a99d1279eb16
+    tag: f46485d8796db37a5b3e7fe90a830355504f4edb
     subdir:
       plutarch-context-builder
       liqwid-plutarch-extra
+      liqwid-script-export
       plutarch-unit
       plutarch-quickcheck
 
 source-repository-package
     type: git
     location: https://github.com/mlabs-haskell/ytxp-sdk
-    tag: 6644be4d8045ab67e23e0533d4be37b8443435db
+    tag: 4e741f5a22a1cb6c6f64aca1797986189ebb93b9
     subdir:
       ytxp-sdk
 

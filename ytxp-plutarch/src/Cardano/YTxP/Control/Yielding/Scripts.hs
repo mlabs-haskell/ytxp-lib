@@ -1,73 +1,73 @@
 module Cardano.YTxP.Control.Yielding.Scripts (
-  compileYieldingMP,
-  compileYieldingValidator,
-  compileYieldingSV,
+  -- * RawScriptExport exporter
+  scripts,
+
+  -- * Plutarch validators
+  yieldingV,
+  yieldingMP,
+  yieldingSV,
 ) where
 
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
-import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS)
-import Data.Text (Text)
-import Numeric.Natural (Natural)
-import Plutarch (Config, compile)
-import Plutarch.LedgerApi (PScriptContext)
-import Plutarch.Script (Script)
+import Data.Map (fromList)
+import Data.Text (Text, unpack)
+import Plutarch (Config)
+import Plutarch.LedgerApi (PCurrencySymbol, PScriptContext)
+import Ply (TypedScriptEnvelope)
+import Ply.Plutarch.TypedWriter (TypedWriter, mkEnvelope)
+import ScriptExport.ScriptInfo (RawScriptExport (RawScriptExport))
 
 --------------------------------------------------------------------------------
--- Yielding Validator Script
+-- Raw Script Export
 
-compileYieldingValidator ::
-  Config ->
-  AuthorisedScriptsSTCS ->
-  Either
-    Text
-    Script
-compileYieldingValidator config stcs = do
-  let
-    yieldingValidator ::
-      forall (s :: S).
-      ( Term s (PData :--> PData :--> PScriptContext :--> POpaque)
-      )
-    -- Takes the @yieldingHelper@ and turn it into a 3 argument script
-    yieldingValidator = plam $ \_datum redeemer ctx ->
-      yieldingHelper stcs # redeemer # ctx
-
-  compile config yieldingValidator
-
---------------------------------------------------------------------------------
--- Yielding Minting Policy Script
-
-compileYieldingMP ::
-  Config ->
-  AuthorisedScriptsSTCS ->
-  Natural ->
-  Either
-    Text
-    Script
-compileYieldingMP config stcs nonce = do
-  let
-    yieldingMP ::
-      forall (s :: S).
-      ( Term s (PData :--> PScriptContext :--> POpaque)
-      )
-    yieldingMP = plet (pconstant $ toInteger nonce) (const $ yieldingHelper stcs)
-
-  compile config yieldingMP
-
---------------------------------------------------------------------------------
--- Yielding Staking Validator
-
-{- | Compile a yielding staking validator that has been nonced.
-The nonce is required because each staking validator can only
-be delegated to a single pool; the inclusion of the nonce will change the
-script hash.
-Since SVs and MPs share the same signature they share the same implementation,
-this function is only provided for semantic clarity
+{- | Exports the yielding validator, yielding minting policy and yielding staking validator
+from a given Plutarch @Config@
 -}
-compileYieldingSV ::
-  Config ->
-  AuthorisedScriptsSTCS ->
-  Natural ->
-  Either
-    Text
-    Script
-compileYieldingSV = compileYieldingMP
+scripts :: Config -> RawScriptExport
+scripts conf =
+  RawScriptExport $
+    fromList
+      [ envelope "djed:yieldingV" yieldingV
+      , envelope "djed:yieldingMP" yieldingMP
+      , envelope "djed:yieldingSV" yieldingSV
+      ]
+  where
+    envelope ::
+      forall (pt :: S -> Type).
+      (TypedWriter pt) =>
+      Text ->
+      ClosedTerm pt ->
+      (Text, TypedScriptEnvelope)
+    envelope d t = (d, either (error . unpack) id $ mkEnvelope conf d t)
+
+--------------------------------------------------------------------------------
+-- Plutarch level terms
+
+-- | Yielding Validator
+yieldingV ::
+  forall (s :: S).
+  Term
+    s
+    ( PCurrencySymbol :--> PData :--> PData :--> PScriptContext :--> POpaque
+    )
+yieldingV = plam $ \psymbol _datum redeemer ctx ->
+  yieldingHelper # psymbol # redeemer # ctx
+
+-- | Yielding Minting Policy
+yieldingMP ::
+  forall (s :: S).
+  Term
+    s
+    ( PCurrencySymbol :--> PInteger :--> PData :--> PScriptContext :--> POpaque
+    )
+yieldingMP = plam $ \psymbol _nonce redeemer ctx ->
+  yieldingHelper # psymbol # redeemer # ctx
+
+-- | Yielding Staking Validator
+yieldingSV ::
+  forall (s :: S).
+  Term
+    s
+    ( PCurrencySymbol :--> PInteger :--> PData :--> PScriptContext :--> POpaque
+    )
+yieldingSV = yieldingMP
