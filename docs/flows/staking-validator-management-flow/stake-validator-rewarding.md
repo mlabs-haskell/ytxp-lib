@@ -11,7 +11,7 @@
 
 To trigger a staking validator under normal operation, a transaction must be submitted to withdraw rewards.
 
-The ledger specification allows for withdrawing at <span class="underline">any</span> time, and the full amount of accumulated rewards must be withdrawn. Explicitly, withdrawing is allowed <span class="underline">even if there are no accumulated rewards in the account</span> (&ldquo;withdraw 0&rdquo;). This is the primary way in which we trigger Yielded-to staking validators.
+The ledger specification allows for withdrawing at <span class="underline">any</span> time, and the full amount of accumulated rewards must be withdrawn. Explicitly, withdrawing is allowed <span class="underline">even if there are no accumulated rewards in the account</span> (&ldquo;withdraw 0&rdquo;). This is the primary way in which we trigger _authorised_ staking validators.
 
 A transaction of this type will trigger the corresponding staking validator with the `Rewarding` constructor of the `ScriptPurpose` type.
 This can be induced by building a transaction with the appropriate entry in the `txInfoWdrl` field of the `TxInfo`.

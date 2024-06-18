@@ -27,7 +27,7 @@ This template can be used to describe transaction families that do not strictly 
 
 ## Script Execution Specification
 
-> This section's subsections detail how the yielded-to script should execute.
+> This section's subsections detail how the authorised script should execute.
 > It should include all relevant fields of the `ScriptContext` that are used for validation.
 > You should also include whether or not the TxF is "composable".
 > If so, you should indicate in what ways ("accepts additional minted tokens", "can spend additional script inputs as long as they are not members of set XYZ").
