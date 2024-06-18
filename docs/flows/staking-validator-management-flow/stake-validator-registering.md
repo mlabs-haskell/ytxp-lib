@@ -9,7 +9,7 @@
 7. [Semantics](#org5bbb055)
 8. [Constraints](#org58cb41f)
 
-Each of the staking validators (yielding and yielded-to) must be registered prior to use.
+Each of the yielding staking validators and authorised staking validators must be registered prior to use.
 
 To register a staking validator, we need to submit a transaction that:
 

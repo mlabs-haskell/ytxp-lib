@@ -72,7 +72,7 @@ data YieldingScripts = YieldingScripts
   { yieldingValidator :: YieldingValidator
   , yieldingMintingPolicies :: [YieldingMintingPolicy]
   -- ^ We have multiple of these, so we can allow differentiating tokens just by their currency symbol
-  -- This makes it easier for yielded-to scripts to ensure no unexpected token is being minted
+  -- This makes it easier for authorised scripts to ensure no unexpected token is being minted
   , yieldingStakingValidators :: [YieldingStakingValidator]
   -- ^ We have multiple of these, because each can only be delegated to a single
   -- pool.

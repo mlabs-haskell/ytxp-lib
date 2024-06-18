@@ -107,7 +107,7 @@ testAttacksR = do
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(MP) AuthorisedScriptProofIndex point to a wrong script"
-            [re|Minting policy does not match expected yielded to minting policy|]
+            [re|Minting policy does not match expected authorised minting policy|]
             Nothing
             (toLedgerRedeemer mintNominalRedeemer)
             mintNominalContext
@@ -125,7 +125,7 @@ testAttacksR = do
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(V) AuthorisedScriptProofIndex point to a wrong script"
-            [re|Input does not match expected yielded to validator|]
+            [re|Input does not match expected authorised validator|]
             (Just $ Datum $ toBuiltinData ())
             (toLedgerRedeemer spendNominalRedeemer)
             spendNominalContext
@@ -143,7 +143,7 @@ testAttacksR = do
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(SV) AuthorisedScriptProofIndex point to a wrong script"
-            [re|Withdrawal does not match expected yielded to staking validator|]
+            [re|Withdrawal does not match expected authorised staking validator|]
             Nothing
             (toLedgerRedeemer rewardNominalRedeemer)
             rewardNominalContext

@@ -14,7 +14,7 @@ This value must contain the `StakingCredential` of the stake validator and the P
 One or more `DCert`s can be submitted at once.
 
 Delegation triggers the staking validator. This means that the staking validator can be used to control where the ada is staked to.
-Our `yieldingStakingValidators` do not make any such assertions directly. Instead, the yielded-to script can make these assertions.
+Our `yieldingStakingValidators` do not make any such assertions directly. Instead, the authorised script can make these assertions.
 This allows maximum flexibility in determining exactly how delegation occurs.
 
 <a id="org95dbb5f"></a>

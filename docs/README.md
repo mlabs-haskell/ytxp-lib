@@ -2,10 +2,10 @@
 
 The Yielding Transaction Pattern is pretty simple.
 
-- A Yielding Script only succeeds if it can find evidence that an _authorized_ "Yielded To" script also succeeded.
+- A Yielding Script only succeeds if it can find evidence that an `AuthorisedScript` also succeeded.
 - The _authorization_ is determined by examination of the script context.
 - The _authorization_ is checked by:
-  - Indexing the reference inputs to find evidence that a "Yielded To" script containing a token minted with the `authorisedScriptsSTCS` is being referenced
+  - Indexing the reference inputs to find evidence that a `AuthorisedScript` containing a token minted with the `authorisedScriptsSTCS` is being referenced
   - Searching for evidence that this script was triggered
     In practice this will involve either:
     - Looking at the `txInfoWithdrawls` field for a staking validator being triggered with the correct StakingCredential
@@ -96,7 +96,7 @@ Transaction families are referred to by gerunds &#x2013; &ldquo;-ing words&rdquo
 
 ### Transaction Family Hash
 
-Transaction families are implemented as &ldquo;Yielded To&rdquo; scripts. These can be:
+Transaction families are implemented as `AuthorisedScripts`. These can be:
 
 - staking validators, which are preferred because a &ldquo;withdraw 0&rdquo; transaction is more functionally &ldquo;pure&rdquo; (side-effect free) than other options
 - minting policies, which are known as &ldquo;transaction tokens&rdquo;, and may be useful for legacy reasons or integration with existing protocols. However, these require minting a token, which may be a superfluous side-effect.

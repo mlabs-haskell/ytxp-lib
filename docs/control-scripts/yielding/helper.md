@@ -21,9 +21,9 @@ It is used as the basis for implementing the yielding minting policy, yielding v
     The index of the `TxInReferenceInput` that contains the authorised reference script
 
 - **authorisedScriptProofIndex:** AuthorisedScriptPurpose
-    This pair indicates the yielded to (authorised) script type and the index at which to find proof
+    This pair indicates the _authorised_ script type and the index at which to find proof
     of the script execution.
-    This index has a different meaning depending on if the yielded-to script is a valdiator,
+    This index has a different meaning depending on if the _authorised_ script is a valdiator,
     minting policy, or staking validator.
 
 <a id="org8648bdd"></a>
