@@ -7,6 +7,14 @@ let
 in
 {
   withHoogle = true;
+  additional = ps: with ps; [
+    plutarch
+    ytxp-plutarch
+    plutarch
+    plutus-core
+    plutus-tx
+    plutus-ledger-api
+  ];
   tools = {
     cabal = "latest";
     haskell-language-server = "latest";
