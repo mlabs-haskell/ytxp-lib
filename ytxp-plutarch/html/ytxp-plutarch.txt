@@ -8,6 +8,14 @@
 @package ytxp-plutarch
 @version 0.1.0
 
+module Cardano.YTxP
+data YTxPParams
+linker :: Linker YTxPParams (ScriptExport YTxPParams)
+instance Data.Aeson.Types.FromJSON.FromJSON Cardano.YTxP.YTxPParams
+instance Data.Aeson.Types.ToJSON.ToJSON Cardano.YTxP.YTxPParams
+instance GHC.Generics.Generic Cardano.YTxP.YTxPParams
+instance GHC.Show.Show Cardano.YTxP.YTxPParams
+
 
 -- | have some scripts fully implemented yet.
 module Cardano.YTxP.Control.Stubs
@@ -145,7 +153,7 @@ module Cardano.YTxP.Control.Yielding
 --   AuthorisedScriptsSTCS</li>
 --   <li>Returning the AuthorisedScriptHash</li>
 --   </ul>
-getAuthorisedScriptHash :: AuthorisedScriptsSTCS -> Term s (PBuiltinList PTxInInfo :--> (PYieldingRedeemer :--> PScriptHash))
+getAuthorisedScriptHash :: forall (s :: S). Term s (PCurrencySymbol :--> (PBuiltinList PTxInInfo :--> (PYieldingRedeemer :--> PScriptHash)))
 data PAuthorisedScriptPurpose (s :: S)
 PMinting :: PAuthorisedScriptPurpose (s :: S)
 PSpending :: PAuthorisedScriptPurpose (s :: S)
@@ -189,23 +197,7 @@ instance Plutarch.Lift.PUnsafeLiftDecl Cardano.YTxP.Control.Yielding.PAuthorised
 --   yielding script that we use to implement the logic for yielding
 --   validator, minting policy and staking validator
 module Cardano.YTxP.Control.Yielding.Helper
-yieldingHelper :: forall (s :: S). AuthorisedScriptsSTCS -> Term s (PData :--> (PScriptContext :--> POpaque))
+yieldingHelper :: forall (s :: S). Term s (PCurrencySymbol :--> (PData :--> (PScriptContext :--> POpaque)))
 
 module Cardano.YTxP.Control.Yielding.Scripts
-compileYieldingMP :: Config -> AuthorisedScriptsSTCS -> Natural -> Either Text Script
-compileYieldingValidator :: Config -> AuthorisedScriptsSTCS -> Either Text Script
-
--- | Compile a yielding staking validator that has been nonced. The nonce
---   is required because each staking validator can only be delegated to a
---   single pool; the inclusion of the nonce will change the script hash.
---   Since SVs and MPs share the same signature they share the same
---   implementation, this function is only provided for semantic clarity
-compileYieldingSV :: Config -> AuthorisedScriptsSTCS -> Natural -> Either Text Script
-
-
-module Cardano.YTxP.Control.Parameters
-data () => YieldingScripts
-
--- | Compile all scripts, threading through the appropriate parameters and
---   script hashes
-mkControlParameters :: SdkParameters -> Either Text ControlParameters
+scripts :: Config -> RawScriptExport
