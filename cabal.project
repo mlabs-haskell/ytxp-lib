@@ -56,7 +56,7 @@ source-repository-package
 
 
 packages:
-  ytxp-plutarch/ytxp-plutarch.cabal
+  ytxp-plutarch/
 
 tests: true
 

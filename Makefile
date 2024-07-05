@@ -144,7 +144,7 @@ build_pprelude:
 
 .PHONY: build_export
 build_export:
-	$(CABAL_YTXP_PLUTARCH) build -j export
+	cabal build -j export
 
 ################################################################################
 # Test
@@ -191,5 +191,5 @@ lint_markdown:
 # Export scripts
 .PHONY: export_scripts
 export_scripts:
-	cabal run export file -- -o exported-scripts/ -p ytxp-params.json -b "ytxp"
-	cabal run export file -- -o exported-scripts/ -p ytxp-params.json -b "ytxp-tracing"
+	cabal run export file -- -o ../exported-scripts/ -p ../ytxp-params.json -b "ytxp"
+	cabal run export file -- -o ../exported-scripts/ -p ../ytxp-params.json -b "ytxp-tracing"

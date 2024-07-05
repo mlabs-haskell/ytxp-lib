@@ -1,4 +1,5 @@
 module Cardano.YTxP (
+  YTxPParams,
   linker,
 ) where
 
