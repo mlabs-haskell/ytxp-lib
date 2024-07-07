@@ -1,5 +1,11 @@
 module Cardano.YTxP.Control.Yielding.Scripts (
+  -- * RawScriptExport exporter
   scripts,
+
+  -- * Plutarch validators
+  yieldingV,
+  yieldingMP,
+  yieldingSV,
 ) where
 
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
@@ -14,11 +20,14 @@ import ScriptExport.ScriptInfo (RawScriptExport (RawScriptExport))
 --------------------------------------------------------------------------------
 -- Raw Script Export
 
+{- | Exports the yielding validator, yielding minting policy and yielding staking validator
+from a given Plutarch @Config@
+-}
 scripts :: Config -> RawScriptExport
 scripts conf =
   RawScriptExport $
     fromList
-      [ envelope "djed:yieldingValidator" yieldingValidator
+      [ envelope "djed:yieldingV" yieldingV
       , envelope "djed:yieldingMP" yieldingMP
       , envelope "djed:yieldingSV" yieldingSV
       ]
@@ -35,13 +44,13 @@ scripts conf =
 -- Plutarch level terms
 
 -- | Yielding Validator
-yieldingValidator ::
+yieldingV ::
   forall (s :: S).
   Term
     s
     ( PCurrencySymbol :--> PData :--> PData :--> PScriptContext :--> POpaque
     )
-yieldingValidator = plam $ \psymbol _datum redeemer ctx ->
+yieldingV = plam $ \psymbol _datum redeemer ctx ->
   yieldingHelper # psymbol # redeemer # ctx
 
 -- | Yielding Minting Policy
@@ -54,14 +63,7 @@ yieldingMP ::
 yieldingMP = plam $ \psymbol _nonce redeemer ctx ->
   yieldingHelper # psymbol # redeemer # ctx
 
-{- | Yielding Staking Validator
-Compile a yielding staking validator that has been nonced.
-The nonce is required because each staking validator can only
-be delegated to a single pool; the inclusion of the nonce will change the
-script hash.
-Since SVs and MPs share the same signature they share the same implementation,
-this function is only provided for semantic clarity
--}
+-- | Yielding Staking Validator
 yieldingSV ::
   forall (s :: S).
   Term

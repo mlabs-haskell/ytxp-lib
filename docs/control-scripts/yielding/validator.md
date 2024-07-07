@@ -9,7 +9,7 @@
 A yielding validator script that can be used to lock UTxOs.
 
 In practice, these UTxOs will usually be "component UTxOs"; UTxOs that carry component tokens.
-The component tokens indicate the "type" of component, and the "yielded to" scripts make use of these types in their validation logic.
+The component tokens indicate the "type" of component, and the _authorised_ scripts make use of these types in their validation logic.
 
 It is implemented via the ["yield helper"](./helper.md) script.
 

@@ -16,8 +16,9 @@ usage:
 	@echo "    format_check_nix                                            -- Check formatting of .nix files"
 	@echo "    format_cabal                                                -- Formats .cabal files"
 	@echo "    format_check_cabal                                          -- Check formatting of .cabal files"
-	@echo "    lint                                                        -- Auto-refactors code"
-	@echo "    lint_check                                                  -- Run code linting"
+	@echo "    lint                                                        -- Auto-refactors code and markdown"
+	@echo "    lint_haskell                                                -- Auto-refactors code"
+	@echo "    lint_haskell_check                                          -- Run code linting"
 	@echo ""
 	# Build
 	@echo "    build_all                                                   -- Build all"
@@ -28,7 +29,8 @@ usage:
 	@echo "    build_export                                                -- Build export"
 	@echo ""
 	# Test
-	@echo "    test                                                        -- Run test"
+	@echo "    test_all                                                    -- Run all the tests"
+	@echo "    test_all_dev                                                    -- Run all the tests ignoring warning"
 	@echo ""
 	# Check Typos
 	@echo "    typos_check                                                 -- Check typos"
@@ -146,9 +148,13 @@ build_export:
 
 ################################################################################
 # Test
-.PHONY: test
-test:
-	cabal test -j ytxp-lib-test
+.PHONY: test_all
+test_all:
+	cabal test -j all --test-show-details=always
+
+.PHONY: test_all_dev
+test_all_dev:
+	cabal test -j -fdev all --test-show-details=always
 
 ################################################################################
 # Test

@@ -9,7 +9,7 @@
 7. [Semantics](#orge82b809)
 8. [Constraints](#org187c6f6)
 
-When a yielding or yielded-to staking validator is no longer needed, we can de-register it by submitting a transaction with a `DCertDelegDeRegKey` in the `txInfoDCert` field.
+When a yielding staking validator or authorised staking validator is no longer needed, we can de-register it by submitting a transaction with a `DCertDelegDeRegKey` in the `txInfoDCert` field.
 
 Deregistering will trigger the corresponding staking validator. The offchain code implementing this family should first ensure that the
 staking validator is indeed registered.

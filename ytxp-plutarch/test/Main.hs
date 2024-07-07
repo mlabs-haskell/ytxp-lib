@@ -1,12 +1,18 @@
 module Main (main) where
 
+import GHC.IO.Encoding (setLocaleEncoding, utf8)
 import Test.Tasty (defaultMain, testGroup)
 
--- TODO these tests were placeholders,
--- actual tests are: https://github.com/mlabs-haskell/ytxp-lib/pull/17
+import Cardano.YTxP.Test.Control.Yielding.Scripts qualified as YieldingScripts
+
+import Utils qualified
+
 main :: IO ()
 main = do
+  setLocaleEncoding utf8
   defaultMain $
     testGroup
-      "test suite"
-      []
+      "YTxP-lib Test Suite"
+      [ YieldingScripts.tests
+      , Utils.tests
+      ]

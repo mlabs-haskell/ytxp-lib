@@ -1,3 +1,5 @@
+{-# LANGUAGE RankNTypes #-}
+
 {- | This module export a helper function that produces a two argument yielding script that
 we use to implement the logic for yielding validator, minting policy and staking validator
 -}
@@ -33,7 +35,6 @@ yieldingHelper = plam $ \pylstcs redeemer ctx -> unTermCont $ do
       authorisedScriptProofIndex = pto $ pfromData $ pfield @"authorisedScriptProofIndex" # yieldingRedeemer
       authorisedScriptPurpose = pfromData $ pfstBuiltin # authorisedScriptProofIndex
       authorisedScriptIndex = pfromData $ psndBuiltin # authorisedScriptProofIndex
-
   pure $
     pcheck $
       pmatch authorisedScriptPurpose $ \case
@@ -41,7 +42,7 @@ yieldingHelper = plam $ \pylstcs redeemer ctx -> unTermCont $ do
           let txInfoMints = pfromData $ pfield @"mint" # txInfo
               authorisedScriptMint = pto (pto txInfoMints) #!! authorisedScriptIndex
               currencySymbol = pscriptHashToCurrencySymbol authorisedScriptHash
-           in ptraceInfoIfFalse "Minting policy does not match expected yielded to minting policy" $
+           in ptraceInfoIfFalse "Minting policy does not match expected authorised minting policy" $
                 pfromData (pfstBuiltin # authorisedScriptMint) #== currencySymbol
         PSpending ->
           let txInfoInputs = pfromData $ pfield @"inputs" # txInfo
@@ -51,7 +52,7 @@ yieldingHelper = plam $ \pylstcs redeemer ctx -> unTermCont $ do
               credential = pfield @"credential" # pfromData address
            in pmatch (pfromData credential) $ \case
                 PScriptCredential ((pfield @"_0" #) -> hash) ->
-                  ptraceInfoIfFalse "Input does not match expected yielded to validator" $
+                  ptraceInfoIfFalse "Input does not match expected authorised validator" $
                     hash #== authorisedScriptHash
                 PPubKeyCredential _ ->
                   ptraceInfoError "Input at specified index is not a script input"
@@ -62,7 +63,7 @@ yieldingHelper = plam $ \pylstcs redeemer ctx -> unTermCont $ do
                 PStakingHash ((pfield @"_0" #) -> credential) ->
                   pmatch credential $ \case
                     PScriptCredential ((pfield @"_0" #) -> hash) ->
-                      ptraceInfoIfFalse "Withdrawal does not match expected yielded to staking validator" $
+                      ptraceInfoIfFalse "Withdrawal does not match expected authorised staking validator" $
                         hash #== authorisedScriptHash
                     PPubKeyCredential _ ->
                       ptraceInfoError "Staking credential at specified index is not a script credential"

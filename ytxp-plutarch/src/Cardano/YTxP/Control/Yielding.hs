@@ -14,8 +14,6 @@ module Cardano.YTxP.Control.Yielding (
 )
 where
 
--- TODO rename
-
 import Cardano.YTxP.Control.Vendored (DerivePConstantViaEnum (DerivePConstantEnum), PlutusTypeEnumData)
 import Cardano.YTxP.SDK.Redeemers (
   AuthorisedScriptIndex (AuthorisedScriptIndex),

@@ -6,7 +6,7 @@
 4. [Semantics](#org8648bdd)
 
 A parametrised script for yielding minting policies.
-In practice, this minting policy can be used to either mint "Component Tokens", other STT (possibly NFTs, when combined with one-shot yielded-to transactions), or general, fungible tokens such as stablecoins, liquidity tokens, and so forth.
+In practice, this minting policy can be used to either mint "Component Tokens", other STT (possibly NFTs, when combined with one-shot authorised transactions), or general, fungible tokens such as stablecoins, liquidity tokens, and so forth.
 
 This script is implemented via the ["yield helper"](./helper.md) script.
 
