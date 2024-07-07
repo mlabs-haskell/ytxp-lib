@@ -200,4 +200,16 @@ module Cardano.YTxP.Control.Yielding.Helper
 yieldingHelper :: forall (s :: S). Term s (PCurrencySymbol :--> (PData :--> (PScriptContext :--> POpaque)))
 
 module Cardano.YTxP.Control.Yielding.Scripts
+
+-- | Exports the yielding validator, yielding minting policy and yielding
+--   staking validator from a given Plutarch <tt>Config</tt>
 scripts :: Config -> RawScriptExport
+
+-- | Yielding Validator
+yieldingV :: forall (s :: S). Term s (PCurrencySymbol :--> (PData :--> (PData :--> (PScriptContext :--> POpaque))))
+
+-- | Yielding Minting Policy
+yieldingMP :: forall (s :: S). Term s (PCurrencySymbol :--> (PInteger :--> (PData :--> (PScriptContext :--> POpaque))))
+
+-- | Yielding Staking Validator
+yieldingSV :: forall (s :: S). Term s (PCurrencySymbol :--> (PInteger :--> (PData :--> (PScriptContext :--> POpaque))))

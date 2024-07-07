@@ -1,32 +1,41 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Cardano.YTxP.Control.Yielding.Scripts</span><span> </span><span class="hs-special">(</span><span>
-</span><span id="line-2"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Scripts.html#scripts"><span class="hs-identifier">scripts</span></a></span><span class="hs-special">,</span><span>
-</span><span id="line-3"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-2"></span><span>  </span><span class="annot"><span class="hs-comment">-- * RawScriptExport exporter</span></span><span>
+</span><span id="line-3"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Scripts.html#scripts"><span class="hs-identifier">scripts</span></a></span><span class="hs-special">,</span><span>
 </span><span id="line-4"></span><span>
-</span><span id="line-5"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Helper.html"><span class="hs-identifier">Cardano.YTxP.Control.Yielding.Helper</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Helper.html#yieldingHelper"><span class="hs-identifier">yieldingHelper</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-6"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">fromList</span></span><span class="hs-special">)</span><span>
-</span><span id="line-7"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">unpack</span></span><span class="hs-special">)</span><span>
-</span><span id="line-8"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Plutarch</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Config</span></span><span class="hs-special">)</span><span>
-</span><span id="line-9"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Plutarch.LedgerApi</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">PCurrencySymbol</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">PScriptContext</span></span><span class="hs-special">)</span><span>
-</span><span id="line-10"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Ply</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">TypedScriptEnvelope</span></span><span class="hs-special">)</span><span>
-</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Ply.Plutarch.TypedWriter</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">TypedWriter</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">mkEnvelope</span></span><span class="hs-special">)</span><span>
-</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">ScriptExport.ScriptInfo</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">RawScriptExport</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">RawScriptExport</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
-</span><span id="line-13"></span><span>
-</span><span id="line-14"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-15"></span><span class="hs-comment">-- Raw Script Export</span><span>
-</span><span id="line-16"></span><span>
-</span><span id="line-17"></span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Scripts.html#scripts"><span class="hs-identifier hs-type">scripts</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Config</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RawScriptExport</span></span><span>
-</span><span id="line-18"></span><span id="scripts"><span class="annot"><span class="annottext">scripts :: Config -&gt; RawScriptExport
-</span><a href="Cardano.YTxP.Control.Yielding.Scripts.html#scripts"><span class="hs-identifier hs-var hs-var">scripts</span></a></span></span><span> </span><span id="local-6989586621679211843"><span class="annot"><span class="annottext">Config
-</span><a href="#local-6989586621679211843"><span class="hs-identifier hs-var">conf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
-</span><span id="line-19"></span><span>  </span><span class="annot"><span class="annottext">Map Text TypedScriptEnvelope -&gt; RawScriptExport
+</span><span id="line-5"></span><span>  </span><span class="annot"><span class="hs-comment">-- * Plutarch validators</span></span><span>
+</span><span id="line-6"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingV"><span class="hs-identifier">yieldingV</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-7"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingMP"><span class="hs-identifier">yieldingMP</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-8"></span><span>  </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingSV"><span class="hs-identifier">yieldingSV</span></a></span><span class="hs-special">,</span><span>
+</span><span id="line-9"></span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><span id="line-10"></span><span>
+</span><span id="line-11"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Helper.html"><span class="hs-identifier">Cardano.YTxP.Control.Yielding.Helper</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Helper.html#yieldingHelper"><span class="hs-identifier">yieldingHelper</span></a></span><span class="hs-special">)</span><span>
+</span><span id="line-12"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Map</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">fromList</span></span><span class="hs-special">)</span><span>
+</span><span id="line-13"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Data.Text</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Text</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">unpack</span></span><span class="hs-special">)</span><span>
+</span><span id="line-14"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Plutarch</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">Config</span></span><span class="hs-special">)</span><span>
+</span><span id="line-15"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Plutarch.LedgerApi</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">PCurrencySymbol</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">PScriptContext</span></span><span class="hs-special">)</span><span>
+</span><span id="line-16"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Ply</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">TypedScriptEnvelope</span></span><span class="hs-special">)</span><span>
+</span><span id="line-17"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">Ply.Plutarch.TypedWriter</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">TypedWriter</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier">mkEnvelope</span></span><span class="hs-special">)</span><span>
+</span><span id="line-18"></span><span class="hs-keyword">import</span><span> </span><span class="annot"><span class="hs-identifier">ScriptExport.ScriptInfo</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">RawScriptExport</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier">RawScriptExport</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><span id="line-19"></span><span>
+</span><span id="line-20"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-21"></span><span class="hs-comment">-- Raw Script Export</span><span>
+</span><span id="line-22"></span><span>
+</span><span id="line-23"></span><span class="annot"><span class="hs-comment">{- | Exports the yielding validator, yielding minting policy and yielding staking validator
+from a given Plutarch @Config@
+-}</span></span><span>
+</span><span id="line-26"></span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Scripts.html#scripts"><span class="hs-identifier hs-type">scripts</span></a></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Config</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="hs-identifier hs-type">RawScriptExport</span></span><span>
+</span><span id="line-27"></span><span id="scripts"><span class="annot"><span class="annottext">scripts :: Config -&gt; RawScriptExport
+</span><a href="Cardano.YTxP.Control.Yielding.Scripts.html#scripts"><span class="hs-identifier hs-var hs-var">scripts</span></a></span></span><span> </span><span id="local-6989586621679211846"><span class="annot"><span class="annottext">Config
+</span><a href="#local-6989586621679211846"><span class="hs-identifier hs-var">conf</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-28"></span><span>  </span><span class="annot"><span class="annottext">Map Text TypedScriptEnvelope -&gt; RawScriptExport
 </span><span class="hs-identifier hs-var">RawScriptExport</span></span><span> </span><span class="annot"><span class="annottext">(Map Text TypedScriptEnvelope -&gt; RawScriptExport)
 -&gt; Map Text TypedScriptEnvelope -&gt; RawScriptExport
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span>
-</span><span id="line-20"></span><span>    </span><span class="annot"><span class="annottext">[(Text, TypedScriptEnvelope)] -&gt; Map Text TypedScriptEnvelope
+</span><span id="line-29"></span><span>    </span><span class="annot"><span class="annottext">[(Text, TypedScriptEnvelope)] -&gt; Map Text TypedScriptEnvelope
 forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
 </span><span class="hs-identifier hs-var">fromList</span></span><span>
-</span><span id="line-21"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span id="line-30"></span><span>      </span><span class="hs-special">[</span><span> </span><span class="annot"><span class="annottext">Text
 -&gt; ClosedTerm
      (PCurrencySymbol
       :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
@@ -34,16 +43,16 @@ forall k a. Ord k =&gt; [(k, a)] -&gt; Map k a
 forall (pt :: S -&gt; Type).
 TypedWriter pt =&gt;
 Text -&gt; ClosedTerm pt -&gt; (Text, TypedScriptEnvelope)
-</span><a href="#local-6989586621679211844"><span class="hs-identifier hs-var">envelope</span></a></span><span> </span><span class="annot"><span class="annottext">Text
-</span><span class="hs-string">&quot;djed:yieldingValidator&quot;</span></span><span> </span><span class="annot"><span class="annottext">Term
+</span><a href="#local-6989586621679211847"><span class="hs-identifier hs-var">envelope</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><span class="hs-string">&quot;djed:yieldingV&quot;</span></span><span> </span><span class="annot"><span class="annottext">Term
   s
   (PCurrencySymbol
    :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
 ClosedTerm
   (PCurrencySymbol
    :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
-</span><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingValidator"><span class="hs-identifier hs-var">yieldingValidator</span></a></span><span>
-</span><span id="line-22"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingV"><span class="hs-identifier hs-var">yieldingV</span></a></span><span>
+</span><span id="line-31"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
 -&gt; ClosedTerm
      (PCurrencySymbol
       :--&gt; (PInteger :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
@@ -51,7 +60,7 @@ ClosedTerm
 forall (pt :: S -&gt; Type).
 TypedWriter pt =&gt;
 Text -&gt; ClosedTerm pt -&gt; (Text, TypedScriptEnvelope)
-</span><a href="#local-6989586621679211844"><span class="hs-identifier hs-var">envelope</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679211847"><span class="hs-identifier hs-var">envelope</span></a></span><span> </span><span class="annot"><span class="annottext">Text
 </span><span class="hs-string">&quot;djed:yieldingMP&quot;</span></span><span> </span><span class="annot"><span class="annottext">Term
   s
   (PCurrencySymbol
@@ -60,7 +69,7 @@ ClosedTerm
   (PCurrencySymbol
    :--&gt; (PInteger :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
 </span><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingMP"><span class="hs-identifier hs-var">yieldingMP</span></a></span><span>
-</span><span id="line-23"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
+</span><span id="line-32"></span><span>      </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">Text
 -&gt; ClosedTerm
      (PCurrencySymbol
       :--&gt; (PInteger :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
@@ -68,7 +77,7 @@ ClosedTerm
 forall (pt :: S -&gt; Type).
 TypedWriter pt =&gt;
 Text -&gt; ClosedTerm pt -&gt; (Text, TypedScriptEnvelope)
-</span><a href="#local-6989586621679211844"><span class="hs-identifier hs-var">envelope</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679211847"><span class="hs-identifier hs-var">envelope</span></a></span><span> </span><span class="annot"><span class="annottext">Text
 </span><span class="hs-string">&quot;djed:yieldingSV&quot;</span></span><span> </span><span class="annot"><span class="annottext">Term
   s
   (PCurrencySymbol
@@ -77,18 +86,18 @@ ClosedTerm
   (PCurrencySymbol
    :--&gt; (PInteger :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
 </span><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingSV"><span class="hs-identifier hs-var">yieldingSV</span></a></span><span>
-</span><span id="line-24"></span><span>      </span><span class="hs-special">]</span><span>
-</span><span id="line-25"></span><span>  </span><span class="hs-keyword">where</span><span>
-</span><span id="line-26"></span><span>    </span><span class="annot"><a href="#local-6989586621679211844"><span class="hs-identifier hs-type">envelope</span></a></span><span> </span><span class="hs-glyph">::</span><span>
-</span><span id="line-27"></span><span>      </span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679211759"><span class="annot"><a href="#local-6989586621679211759"><span class="hs-identifier hs-type">pt</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../../ghc-9.6.5/html/libraries/ghc-prim-0.10.0/src/GHC.Types.html#Type"><span class="hs-identifier hs-type">Type</span></a></span><span class="hs-special">)</span><span class="hs-operator">.</span><span>
-</span><span id="line-28"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TypedWriter</span></span><span> </span><span class="annot"><a href="#local-6989586621679211759"><span class="hs-identifier hs-type">pt</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
-</span><span id="line-29"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-30"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">ClosedTerm</span></span><span> </span><span class="annot"><a href="#local-6989586621679211759"><span class="hs-identifier hs-type">pt</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-31"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TypedScriptEnvelope</span></span><span class="hs-special">)</span><span>
-</span><span id="line-32"></span><span>    </span><span id="local-6989586621679211844"><span class="annot"><span class="annottext">envelope :: forall (pt :: S -&gt; Type).
+</span><span id="line-33"></span><span>      </span><span class="hs-special">]</span><span>
+</span><span id="line-34"></span><span>  </span><span class="hs-keyword">where</span><span>
+</span><span id="line-35"></span><span>    </span><span class="annot"><a href="#local-6989586621679211847"><span class="hs-identifier hs-type">envelope</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-36"></span><span>      </span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679211759"><span class="annot"><a href="#local-6989586621679211759"><span class="hs-identifier hs-type">pt</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><a href="../../../ghc-9.6.5/html/libraries/ghc-prim-0.10.0/src/GHC.Types.html#Type"><span class="hs-identifier hs-type">Type</span></a></span><span class="hs-special">)</span><span class="hs-operator">.</span><span>
+</span><span id="line-37"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">TypedWriter</span></span><span> </span><span class="annot"><a href="#local-6989586621679211759"><span class="hs-identifier hs-type">pt</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span>
+</span><span id="line-38"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-39"></span><span>      </span><span class="annot"><span class="hs-identifier hs-type">ClosedTerm</span></span><span> </span><span class="annot"><a href="#local-6989586621679211759"><span class="hs-identifier hs-type">pt</span></a></span><span> </span><span class="hs-glyph">-&gt;</span><span>
+</span><span id="line-40"></span><span>      </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Text</span></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-identifier hs-type">TypedScriptEnvelope</span></span><span class="hs-special">)</span><span>
+</span><span id="line-41"></span><span>    </span><span id="local-6989586621679211847"><span class="annot"><span class="annottext">envelope :: forall (pt :: S -&gt; Type).
 TypedWriter pt =&gt;
 Text -&gt; ClosedTerm pt -&gt; (Text, TypedScriptEnvelope)
-</span><a href="#local-6989586621679211844"><span class="hs-identifier hs-var hs-var">envelope</span></a></span></span><span> </span><span id="local-6989586621679211858"><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679211847"><span class="hs-identifier hs-var hs-var">envelope</span></a></span></span><span> </span><span id="local-6989586621679211858"><span class="annot"><span class="annottext">Text
 </span><a href="#local-6989586621679211858"><span class="hs-identifier hs-var">d</span></a></span></span><span> </span><span id="local-6989586621679211859"><span class="annot"><span class="annottext">ClosedTerm pt
 </span><a href="#local-6989586621679211859"><span class="hs-identifier hs-var">t</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Text
 </span><a href="#local-6989586621679211858"><span class="hs-identifier hs-var">d</span></a></span><span class="hs-special">,</span><span> </span><span class="annot"><span class="annottext">(Text -&gt; TypedScriptEnvelope)
@@ -113,25 +122,25 @@ TypedWriter ptype =&gt;
 Config
 -&gt; Text -&gt; ClosedTerm ptype -&gt; Either Text TypedScriptEnvelope
 </span><span class="hs-identifier hs-var">mkEnvelope</span></span><span> </span><span class="annot"><span class="annottext">Config
-</span><a href="#local-6989586621679211843"><span class="hs-identifier hs-var">conf</span></a></span><span> </span><span class="annot"><span class="annottext">Text
+</span><a href="#local-6989586621679211846"><span class="hs-identifier hs-var">conf</span></a></span><span> </span><span class="annot"><span class="annottext">Text
 </span><a href="#local-6989586621679211858"><span class="hs-identifier hs-var">d</span></a></span><span> </span><span class="annot"><span class="annottext">Term s pt
 ClosedTerm pt
 </span><a href="#local-6989586621679211859"><span class="hs-identifier hs-var">t</span></a></span><span class="hs-special">)</span><span>
-</span><span id="line-33"></span><span>
-</span><span id="line-34"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
-</span><span id="line-35"></span><span class="hs-comment">-- Plutarch level terms</span><span>
-</span><span id="line-36"></span><span>
-</span><span id="line-37"></span><span class="annot"><span class="hs-comment">-- | Yielding Validator</span></span><span>
-</span><span id="line-38"></span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingValidator"><span class="hs-identifier hs-type">yieldingValidator</span></a></span><span> </span><span class="hs-glyph">::</span><span>
-</span><span id="line-39"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679211864"><span class="annot"><a href="#local-6989586621679211864"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span class="hs-operator">.</span><span>
-</span><span id="line-40"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Term</span></span><span>
-</span><span id="line-41"></span><span>    </span><span class="annot"><a href="#local-6989586621679211864"><span class="hs-identifier hs-type">s</span></a></span><span>
-</span><span id="line-42"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PCurrencySymbol</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PScriptContext</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">POpaque</span></span><span>
-</span><span id="line-43"></span><span>    </span><span class="hs-special">)</span><span>
-</span><span id="line-44"></span><span id="yieldingValidator"><span class="annot"><span class="annottext">yieldingValidator :: ClosedTerm
+</span><span id="line-42"></span><span>
+</span><span id="line-43"></span><span class="hs-comment">--------------------------------------------------------------------------------</span><span>
+</span><span id="line-44"></span><span class="hs-comment">-- Plutarch level terms</span><span>
+</span><span id="line-45"></span><span>
+</span><span id="line-46"></span><span class="annot"><span class="hs-comment">-- | Yielding Validator</span></span><span>
+</span><span id="line-47"></span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingV"><span class="hs-identifier hs-type">yieldingV</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-48"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679211864"><span class="annot"><a href="#local-6989586621679211864"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span class="hs-operator">.</span><span>
+</span><span id="line-49"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Term</span></span><span>
+</span><span id="line-50"></span><span>    </span><span class="annot"><a href="#local-6989586621679211864"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-51"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PCurrencySymbol</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PScriptContext</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">POpaque</span></span><span>
+</span><span id="line-52"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-53"></span><span id="yieldingV"><span class="annot"><span class="annottext">yieldingV :: ClosedTerm
   (PCurrencySymbol
    :--&gt; (PData :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
-</span><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingValidator"><span class="hs-identifier hs-var hs-var">yieldingValidator</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Term s PCurrencySymbol
+</span><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingV"><span class="hs-identifier hs-var hs-var">yieldingV</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Term s PCurrencySymbol
  -&gt; Term s PData
  -&gt; Term s PData
  -&gt; Term s PScriptContext
@@ -176,7 +185,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><a href="#local-6989586621679211879"><span class="hs-identifier hs-var">_datum</span></a></span></span><span> </span><span id="local-6989586621679211880"><span class="annot"><span class="annottext">Term s PData
 </span><a href="#local-6989586621679211880"><span class="hs-identifier hs-var">redeemer</span></a></span></span><span> </span><span id="local-6989586621679211881"><span class="annot"><span class="annottext">Term s PScriptContext
 </span><a href="#local-6989586621679211881"><span class="hs-identifier hs-var">ctx</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-45"></span><span>  </span><span class="annot"><span class="annottext">Term
+</span><span id="line-54"></span><span>  </span><span class="annot"><span class="annottext">Term
   s (PCurrencySymbol :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
 forall (s :: S).
 Term
@@ -199,15 +208,15 @@ forall (s :: S) (a :: S -&gt; Type) (b :: S -&gt; Type).
 Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
 </span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s PScriptContext
 </span><a href="#local-6989586621679211881"><span class="hs-identifier hs-var">ctx</span></a></span><span>
-</span><span id="line-46"></span><span>
-</span><span id="line-47"></span><span class="annot"><span class="hs-comment">-- | Yielding Minting Policy</span></span><span>
-</span><span id="line-48"></span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingMP"><span class="hs-identifier hs-type">yieldingMP</span></a></span><span> </span><span class="hs-glyph">::</span><span>
-</span><span id="line-49"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679211883"><span class="annot"><a href="#local-6989586621679211883"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span class="hs-operator">.</span><span>
-</span><span id="line-50"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Term</span></span><span>
-</span><span id="line-51"></span><span>    </span><span class="annot"><a href="#local-6989586621679211883"><span class="hs-identifier hs-type">s</span></a></span><span>
-</span><span id="line-52"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PCurrencySymbol</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PInteger</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PScriptContext</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">POpaque</span></span><span>
-</span><span id="line-53"></span><span>    </span><span class="hs-special">)</span><span>
-</span><span id="line-54"></span><span id="yieldingMP"><span class="annot"><span class="annottext">yieldingMP :: ClosedTerm
+</span><span id="line-55"></span><span>
+</span><span id="line-56"></span><span class="annot"><span class="hs-comment">-- | Yielding Minting Policy</span></span><span>
+</span><span id="line-57"></span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingMP"><span class="hs-identifier hs-type">yieldingMP</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-58"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679211883"><span class="annot"><a href="#local-6989586621679211883"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span class="hs-operator">.</span><span>
+</span><span id="line-59"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Term</span></span><span>
+</span><span id="line-60"></span><span>    </span><span class="annot"><a href="#local-6989586621679211883"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-61"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PCurrencySymbol</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PInteger</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PScriptContext</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">POpaque</span></span><span>
+</span><span id="line-62"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-63"></span><span id="yieldingMP"><span class="annot"><span class="annottext">yieldingMP :: ClosedTerm
   (PCurrencySymbol
    :--&gt; (PInteger :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
 </span><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingMP"><span class="hs-identifier hs-var hs-var">yieldingMP</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">(Term s PCurrencySymbol
@@ -256,7 +265,7 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><a href="#local-6989586621679211895"><span class="hs-identifier hs-var">_nonce</span></a></span></span><span> </span><span id="local-6989586621679211896"><span class="annot"><span class="annottext">Term s PData
 </span><a href="#local-6989586621679211896"><span class="hs-identifier hs-var">redeemer</span></a></span></span><span> </span><span id="local-6989586621679211897"><span class="annot"><span class="annottext">Term s PScriptContext
 </span><a href="#local-6989586621679211897"><span class="hs-identifier hs-var">ctx</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span>
-</span><span id="line-55"></span><span>  </span><span class="annot"><span class="annottext">Term
+</span><span id="line-64"></span><span>  </span><span class="annot"><span class="annottext">Term
   s (PCurrencySymbol :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque)))
 forall (s :: S).
 Term
@@ -279,22 +288,15 @@ forall (s :: S) (a :: S -&gt; Type) (b :: S -&gt; Type).
 Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
 </span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s PScriptContext
 </span><a href="#local-6989586621679211897"><span class="hs-identifier hs-var">ctx</span></a></span><span>
-</span><span id="line-56"></span><span>
-</span><span id="line-57"></span><span class="annot"><span class="hs-comment">{- | Yielding Staking Validator
-Compile a yielding staking validator that has been nonced.
-The nonce is required because each staking validator can only
-be delegated to a single pool; the inclusion of the nonce will change the
-script hash.
-Since SVs and MPs share the same signature they share the same implementation,
-this function is only provided for semantic clarity
--}</span></span><span>
-</span><span id="line-65"></span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingSV"><span class="hs-identifier hs-type">yieldingSV</span></a></span><span> </span><span class="hs-glyph">::</span><span>
-</span><span id="line-66"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679211898"><span class="annot"><a href="#local-6989586621679211898"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span class="hs-operator">.</span><span>
-</span><span id="line-67"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Term</span></span><span>
-</span><span id="line-68"></span><span>    </span><span class="annot"><a href="#local-6989586621679211898"><span class="hs-identifier hs-type">s</span></a></span><span>
-</span><span id="line-69"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PCurrencySymbol</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PInteger</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PScriptContext</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">POpaque</span></span><span>
-</span><span id="line-70"></span><span>    </span><span class="hs-special">)</span><span>
-</span><span id="line-71"></span><span id="yieldingSV"><span class="annot"><span class="annottext">yieldingSV :: ClosedTerm
+</span><span id="line-65"></span><span>
+</span><span id="line-66"></span><span class="annot"><span class="hs-comment">-- | Yielding Staking Validator</span></span><span>
+</span><span id="line-67"></span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingSV"><span class="hs-identifier hs-type">yieldingSV</span></a></span><span> </span><span class="hs-glyph">::</span><span>
+</span><span id="line-68"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679211898"><span class="annot"><a href="#local-6989586621679211898"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span class="hs-operator">.</span><span>
+</span><span id="line-69"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Term</span></span><span>
+</span><span id="line-70"></span><span>    </span><span class="annot"><a href="#local-6989586621679211898"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-71"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PCurrencySymbol</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PInteger</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PScriptContext</span></span><span> </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">POpaque</span></span><span>
+</span><span id="line-72"></span><span>    </span><span class="hs-special">)</span><span>
+</span><span id="line-73"></span><span id="yieldingSV"><span class="annot"><span class="annottext">yieldingSV :: ClosedTerm
   (PCurrencySymbol
    :--&gt; (PInteger :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
 </span><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingSV"><span class="hs-identifier hs-var hs-var">yieldingSV</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">Term
@@ -305,4 +307,4 @@ ClosedTerm
   (PCurrencySymbol
    :--&gt; (PInteger :--&gt; (PData :--&gt; (PScriptContext :--&gt; POpaque))))
 </span><a href="Cardano.YTxP.Control.Yielding.Scripts.html#yieldingMP"><span class="hs-identifier hs-var">yieldingMP</span></a></span><span>
-</span><span id="line-72"></span></pre></body></html>
+</span><span id="line-74"></span></pre></body></html>
