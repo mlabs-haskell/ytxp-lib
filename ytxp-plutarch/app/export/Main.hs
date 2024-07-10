@@ -19,11 +19,27 @@ main =
   exportMain $
     mconcat
       [ insertScriptExportWithLinker
-          "ytxp"
+          "ytxp-validator"
           (scripts NoTracing)
-          YTxP.linker
+          YTxP.validatorLinker
       , insertScriptExportWithLinker
-          "ytxp-tracing"
+          "ytxp-mp"
+          (scripts NoTracing)
+          YTxP.mpLinker
+      , insertScriptExportWithLinker
+          "ytxp-sv"
+          (scripts NoTracing)
+          YTxP.svLinker
+      , insertScriptExportWithLinker
+          "ytxp-validator-tracing"
           (scripts (Tracing LogInfo DetTracing))
-          YTxP.linker
+          YTxP.validatorLinker
+      , insertScriptExportWithLinker
+          "ytxp-mp-tracing"
+          (scripts (Tracing LogInfo DetTracing))
+          YTxP.mpLinker
+      , insertScriptExportWithLinker
+          "ytxp-sv-tracing"
+          (scripts (Tracing LogInfo DetTracing))
+          YTxP.svLinker
       ]
