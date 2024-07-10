@@ -2,7 +2,7 @@
 
 module Utils (tests) where
 
-import Plutarch.LedgerApi (KeyGuarantees (Unsorted), PMap)
+import Plutarch.LedgerApi.V2 (KeyGuarantees (Unsorted), PMap)
 import PlutusTx.AssocMap qualified as PlutusMap
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertBool, testCase)
@@ -42,14 +42,14 @@ pmemberTestOne :: Term s PBool
 pmemberTestOne =
   pmember
     # (pconstant 1 :: Term s PInteger)
-    # (pconstant (PlutusMap.fromList []) :: Term s (PMap 'Unsorted PInteger PInteger))
+    # (pconstant (PlutusMap.safeFromList []) :: Term s (PMap 'Unsorted PInteger PInteger))
     #== pexpectedResultFalse
 
 pmemberTestTwo :: Term s PBool
 pmemberTestTwo =
   pmember
     # (pconstant 1 :: Term s PInteger)
-    # ( pconstant (PlutusMap.fromList [(1, 1)]) ::
+    # ( pconstant (PlutusMap.safeFromList [(1, 1)]) ::
           Term s (PMap 'Unsorted PInteger PInteger)
       )
     #== pexpectedResultTrue
@@ -58,7 +58,7 @@ pmemberTestThree :: Term s PBool
 pmemberTestThree =
   pmember
     # (pconstant 2 :: Term s PInteger)
-    # ( pconstant (PlutusMap.fromList [(1, 1)]) ::
+    # ( pconstant (PlutusMap.safeFromList [(1, 1)]) ::
           Term s (PMap 'Unsorted PInteger PInteger)
       )
     #== pexpectedResultFalse
@@ -67,7 +67,7 @@ pmemberTestFour :: Term s PBool
 pmemberTestFour =
   pmember
     # (pconstant 1 :: Term s PInteger)
-    # ( pconstant (PlutusMap.fromList [(1, 1), (2, 2)]) ::
+    # ( pconstant (PlutusMap.safeFromList [(1, 1), (2, 2)]) ::
           Term s (PMap 'Unsorted PInteger PInteger)
       )
     #== pexpectedResultTrue
@@ -76,7 +76,7 @@ pmemberTestFive :: Term s PBool
 pmemberTestFive =
   pmember
     # (pconstant 2 :: Term s PInteger)
-    # ( pconstant (PlutusMap.fromList [(1, 1), (2, 2)]) ::
+    # ( pconstant (PlutusMap.safeFromList [(1, 1), (2, 2)]) ::
           Term s (PMap 'Unsorted PInteger PInteger)
       )
     #== pexpectedResultTrue

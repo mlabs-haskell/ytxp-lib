@@ -130,9 +130,10 @@ library
   import:          common-language
   build-depends:
     , aeson
-    , base                  ^>=4.18.1.0
+    , base                   ^>=4.18.1.0
     , containers
     , generics-sop
+    , liqwid-plutarch-extra
     , liqwid-script-export
     , plutarch
     , plutarch-extra
@@ -143,11 +144,15 @@ library
     , ply-core
     , ply-plutarch
     , pprelude
+    , regex
+    , tasty
+    , tasty-hunit
     , text
     , ytxp-sdk
 
   hs-source-dirs:  src
   exposed-modules:
+    Cardano.TestUtils
     Cardano.YTxP
     Cardano.YTxP.Control.Stubs
     Cardano.YTxP.Control.Vendored
@@ -188,7 +193,6 @@ test-suite ytxp-lib-test
     , aeson
     , bytestring
     , convex-optics
-    , convex-plutarch
     , lens
     , liqwid-plutarch-extra
     , mtl
@@ -205,4 +209,5 @@ test-suite ytxp-lib-test
     , text
     , ytxp-sdk
 
+  -- , convex-plutarch
   hs-source-dirs: test

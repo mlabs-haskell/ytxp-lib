@@ -5,6 +5,7 @@ module Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (
   rewardNominalCaseBuilderR,
 ) where
 
+import Cardano.TestUtils (nominalCaseBasic, txfCEKUnitCase)
 import Cardano.YTxP.SDK.Redeemers (
   AuthorisedScriptIndex (AuthorisedScriptIndex),
   AuthorisedScriptProofIndex (AuthorisedScriptProofIndex),
@@ -18,7 +19,6 @@ import Cardano.YTxP.Test.Control.Yielding.Scripts.ScriptsBuilders (
  )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (ScriptsTestsParams, authorisedScriptRefInputContext, mintContext, rewardContext, spendContext, toLedgerRedeemer)
 import Control.Monad.Reader (Reader)
-import Convex.TestUtils (nominalCaseBasic, txfCEKUnitCase)
 import Plutarch.Context (Builder, buildMinting', buildRewarding', buildSpending', mkOutRefIndices)
 import PlutusLedgerApi.V2 (
   Datum (Datum),
