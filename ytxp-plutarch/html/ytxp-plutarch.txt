@@ -10,7 +10,9 @@
 
 module Cardano.YTxP
 data YTxPParams
-linker :: Linker YTxPParams (ScriptExport YTxPParams)
+validatorLinker :: Linker YTxPParams (ScriptExport YTxPParams)
+stakeValidatorLinker :: Linker YTxPParams (ScriptExport YTxPParams)
+mintingPolicyLinker :: Linker YTxPParams (ScriptExport YTxPParams)
 instance Data.Aeson.Types.FromJSON.FromJSON Cardano.YTxP.YTxPParams
 instance Data.Aeson.Types.ToJSON.ToJSON Cardano.YTxP.YTxPParams
 instance GHC.Generics.Generic Cardano.YTxP.YTxPParams
@@ -47,87 +49,13 @@ module Cardano.YTxP.Control.Vendored
 newtype DerivePConstantViaEnum (h :: Type) (p :: S -> Type)
 DerivePConstantEnum :: h -> DerivePConstantViaEnum (h :: Type) (p :: S -> Type)
 
--- | Wrapper for deriving <a>ToData</a>, <a>FromData</a> using an Integer
---   representation via <a>Enum</a>.
---   
---   Vendored from LPE TODO: Licensing info
-newtype EnumIsData (a :: Type)
-EnumIsData :: a -> EnumIsData (a :: Type)
-
--- | Wrapper for deriving <a>ToData</a>, <a>FromData</a> using the List
---   constructor of Data to represent a Product type.
---   
---   It is recommended to use <a>PlutusTypeDataList</a> when deriving
---   <a>PlutusType</a> as it provides some basic safety by ensuring
---   Plutarch types have an Inner type of <a>PDataRecord</a>.
---   
---   Uses <a>gProductToBuiltinData</a>, <tt>gproductFromBuiltinData</tt>.
---   
---   <h1>Example</h1>
---   
---   <pre>
---   import qualified Generics.SOP as SOP
---   
---   data Foo =
---     Foo Integer [Integer]
---     deriving stock (Generic)
---     deriving anyclass (SOP.Generic)
---     deriving (FromData, ToData) via (ProductIsData Foo)
---     deriving (PConstantDecl) via (DerivePConstantViaDataList Foo PFoo)
---   
---   instance PUnsafeLiftDecl PFoo where type PLifted PFoo = Foo
---   
---   newtype PFoo s
---       = PFoo
---         ( Term s
---             ( PDataRecord
---                 '[ "abc" ':= PInteger
---                  , "def" ':= PBuiltinList (PAsData PInteger)
---                  ]
---             )
---         )
---     deriving stock (Generic)
---     deriving anyclass (SOP.Generic)
---     deriving anyclass (PlutusType, PIsData)
---   
---   instance DerivePlutusType PFoo where
---      type DPTStrat _ = PlutusTypeDataList
---   </pre>
-newtype ProductIsData (a :: Type)
-ProductIsData :: a -> ProductIsData (a :: Type)
-
--- | Vendored from LPE @since 3.8.0
-unProductIsData :: forall (a :: Type). ProductIsData a -> a
-
--- | Variant of <tt>PConstantViaData</tt> using the List repr from
---   <a>ProductIsData</a>
-newtype DerivePConstantViaDataList (h :: Type) (p :: S -> Type)
-DerivePConstantViaDataList :: h -> DerivePConstantViaDataList (h :: Type) (p :: S -> Type)
-
 -- | PlutusTypeEnumData
 --   
 --   Vendored from LPE TODO: Licensing info
 data PlutusTypeEnumData
-
--- | Vendored from LPE @since 3.5.0
-data PlutusTypeDataList
-
--- | Apply a function to an argument on the compiled <a>Script</a> level.
---   
---   Vendored from LPE TODO: Licensing info
-applyScript :: Script -> Script -> Script
-instance Plutarch.Internal.PlutusType.PlutusTypeStrat Cardano.YTxP.Control.Vendored.PlutusTypeDataList
-instance forall (p :: Plutarch.Internal.S -> GHC.Types.Type). (Plutarch.Internal.Generic.PGeneric p, (Plutarch.Internal.Generic.PCode p :: [[Plutarch.Internal.PType]]) GHC.Types.~ ((':) @[Plutarch.Internal.S -> GHC.Types.Type] ((':) @(Plutarch.Internal.S -> GHC.Types.Type) (Cardano.YTxP.Control.Vendored.GetPRecord p) ('[] @(Plutarch.Internal.S -> GHC.Types.Type))) ('[] @[Plutarch.Internal.S -> GHC.Types.Type]) :: [[Plutarch.Internal.PType]]), Cardano.YTxP.Control.Vendored.MatchTypes (Cardano.YTxP.Control.Vendored.UD (Cardano.YTxP.Control.Vendored.GetRecordTypes (Generics.SOP.Universe.Code (Plutarch.Lift.PLifted p)))) (Cardano.YTxP.Control.Vendored.PUnlabel (Cardano.YTxP.Control.Vendored.GetPRecord' (Plutarch.Internal.Generic.PCode p)))) => Cardano.YTxP.Control.Vendored.IsPlutusTypeDataList p
-instance forall h (p :: Plutarch.Internal.S -> GHC.Types.Type). (PlutusTx.IsData.Class.FromData h, PlutusTx.IsData.Class.ToData h, Plutarch.Lift.PLift p) => Plutarch.Lift.PConstantDecl (Cardano.YTxP.Control.Vendored.DerivePConstantViaDataList h p)
-instance forall a (repr :: [GHC.Types.Type]). (Generics.SOP.Universe.IsProductType a repr, Data.SOP.Constraint.All @GHC.Types.Type PlutusTx.IsData.Class.ToData repr) => PlutusTx.IsData.Class.ToData (Cardano.YTxP.Control.Vendored.ProductIsData a)
-instance forall a (repr :: [GHC.Types.Type]). (Generics.SOP.Universe.IsProductType a repr, Data.SOP.Constraint.All @GHC.Types.Type PlutusTx.IsData.Class.UnsafeFromData repr) => PlutusTx.IsData.Class.UnsafeFromData (Cardano.YTxP.Control.Vendored.ProductIsData a)
-instance forall a (repr :: [GHC.Types.Type]). (Generics.SOP.Universe.IsProductType a repr, Data.SOP.Constraint.All @GHC.Types.Type PlutusTx.IsData.Class.FromData repr) => PlutusTx.IsData.Class.FromData (Cardano.YTxP.Control.Vendored.ProductIsData a)
 instance forall (p :: Plutarch.Internal.S -> GHC.Types.Type) h. (Plutarch.Lift.PLift p, GHC.Enum.Enum h, Plutarch.Internal.PlutusType.DerivePlutusType p, (Plutarch.Internal.PlutusType.DPTStrat p :: GHC.Types.Type) GHC.Types.~ (Cardano.YTxP.Control.Vendored.PlutusTypeEnumData :: GHC.Types.Type)) => Plutarch.Lift.PConstantDecl (Cardano.YTxP.Control.Vendored.DerivePConstantViaEnum h p)
 instance forall (p :: Plutarch.Internal.PType). (Plutarch.Internal.Generic.PGeneric p, forall (s :: Plutarch.Internal.S). GHC.Enum.Enum (p s), forall (s :: Plutarch.Internal.S). GHC.Enum.Bounded (p s)) => Cardano.YTxP.Control.Vendored.IsPlutusTypeEnumData p
 instance Plutarch.Internal.PlutusType.PlutusTypeStrat Cardano.YTxP.Control.Vendored.PlutusTypeEnumData
-instance forall a. GHC.Enum.Enum a => PlutusTx.IsData.Class.ToData (Cardano.YTxP.Control.Vendored.EnumIsData a)
-instance forall a. GHC.Enum.Enum a => PlutusTx.IsData.Class.FromData (Cardano.YTxP.Control.Vendored.EnumIsData a)
-instance forall a. GHC.Enum.Enum a => PlutusTx.IsData.Class.UnsafeFromData (Cardano.YTxP.Control.Vendored.EnumIsData a)
 
 module Utils
 
