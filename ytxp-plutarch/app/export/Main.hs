@@ -23,23 +23,23 @@ main =
           (scripts NoTracing)
           YTxP.validatorLinker
       , insertScriptExportWithLinker
-          "ytxp-mp"
+          "ytxp-mintingPolicy"
           (scripts NoTracing)
-          YTxP.mpLinker
+          YTxP.mintingPolicyLinker
       , insertScriptExportWithLinker
-          "ytxp-sv"
+          "ytxp-stakeValidator"
           (scripts NoTracing)
-          YTxP.svLinker
+          YTxP.stakeValidatorLinker
       , insertScriptExportWithLinker
           "ytxp-validator-tracing"
           (scripts (Tracing LogInfo DetTracing))
           YTxP.validatorLinker
       , insertScriptExportWithLinker
-          "ytxp-mp-tracing"
+          "ytxp-mintingPolicy-tracing"
           (scripts (Tracing LogInfo DetTracing))
-          YTxP.mpLinker
+          YTxP.mintingPolicyLinker
       , insertScriptExportWithLinker
-          "ytxp-sv-tracing"
+          "ytxp-stakeValidator-tracing"
           (scripts (Tracing LogInfo DetTracing))
-          YTxP.svLinker
+          YTxP.stakeValidatorLinker
       ]

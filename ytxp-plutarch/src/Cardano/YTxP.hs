@@ -1,8 +1,8 @@
 module Cardano.YTxP (
   YTxPParams,
   validatorLinker,
-  svLinker,
-  mpLinker,
+  stakeValidatorLinker,
+  mintingPolicyLinker,
 ) where
 
 import Data.Aeson (FromJSON, ToJSON)
@@ -48,7 +48,7 @@ validatorLinker = do
     fetchTS
       @'ThreeArgumentScript
       @'[CurrencySymbol]
-      "ytxp:yieldingV"
+      "ytxp:yieldingValidator"
 
   let
     authorisedScriptsSymbol =
@@ -64,15 +64,15 @@ validatorLinker = do
       )
       info
 
-mpLinker :: Linker YTxPParams (ScriptExport YTxPParams)
-mpLinker = do
+mintingPolicyLinker :: Linker YTxPParams (ScriptExport YTxPParams)
+mintingPolicyLinker = do
   info <- getParam
 
   yieldingMP <-
     fetchTS
       @'TwoArgumentScript
       @'[CurrencySymbol, Integer]
-      "ytxp:yieldingMP"
+      "ytxp:yieldingMintingPolicy"
 
   let
     authorisedScriptsSymbol =
@@ -81,7 +81,7 @@ mpLinker = do
     yieldingMPs =
       map
         ( \nonce ->
-            ( pack ("ytxp:yieldingMP:" <> show nonce)
+            ( pack ("ytxp:yieldingMintingPolicy:" <> show nonce)
             , toRoledScript $
                 yieldingMP Ply.# authorisedScriptsSymbol Ply.# toInteger nonce
             )
@@ -93,15 +93,15 @@ mpLinker = do
       (fromList yieldingMPs)
       info
 
-svLinker :: Linker YTxPParams (ScriptExport YTxPParams)
-svLinker = do
+stakeValidatorLinker :: Linker YTxPParams (ScriptExport YTxPParams)
+stakeValidatorLinker = do
   info <- getParam
 
   yieldingSV <-
     fetchTS
       @'TwoArgumentScript
       @'[CurrencySymbol, Integer]
-      "ytxp:yieldingSV"
+      "ytxp:yieldingStakeValidator"
 
   let
     authorisedScriptsSymbol =
@@ -110,7 +110,7 @@ svLinker = do
     yieldingSVs =
       map
         ( \nonce ->
-            ( pack ("ytxp:yieldingSV:" <> show nonce)
+            ( pack ("ytxp:yieldingStakeValidator:" <> show nonce)
             , toRoledScript $
                 yieldingSV Ply.# authorisedScriptsSymbol Ply.# toInteger nonce
             )
