@@ -1,6 +1,8 @@
 module Cardano.YTxP (
   YTxPParams,
-  linker,
+  validatorLinker,
+  stakeValidatorLinker,
+  mintingPolicyLinker,
 ) where
 
 import Data.Aeson (FromJSON, ToJSON)
@@ -38,27 +40,15 @@ data YTxPParams = YTxPParams
   deriving stock (Show, Generic)
   deriving anyclass (ToJSON, FromJSON)
 
-linker :: Linker YTxPParams (ScriptExport YTxPParams)
-linker = do
+validatorLinker :: Linker YTxPParams (ScriptExport YTxPParams)
+validatorLinker = do
   info <- getParam
 
   yieldingValidator <-
     fetchTS
       @'ThreeArgumentScript
       @'[CurrencySymbol]
-      "djed:yieldingV"
-
-  yieldingMP <-
-    fetchTS
-      @'TwoArgumentScript
-      @'[CurrencySymbol, Integer]
-      "djed:yieldingMP"
-
-  yieldingSV <-
-    fetchTS
-      @'TwoArgumentScript
-      @'[CurrencySymbol, Integer]
-      "djed:yieldingSV"
+      "ytxp:yieldingValidator"
 
   let
     authorisedScriptsSymbol =
@@ -67,20 +57,60 @@ linker = do
     yieldingValidator' =
       yieldingValidator Ply.# authorisedScriptsSymbol
 
+  return $
+    ScriptExport
+      ( fromList
+          [("ytxp:yieldingValidator", toRoledScript yieldingValidator')]
+      )
+      info
+
+mintingPolicyLinker :: Linker YTxPParams (ScriptExport YTxPParams)
+mintingPolicyLinker = do
+  info <- getParam
+
+  yieldingMP <-
+    fetchTS
+      @'TwoArgumentScript
+      @'[CurrencySymbol, Integer]
+      "ytxp:yieldingMintingPolicy"
+
+  let
+    authorisedScriptsSymbol =
+      coerce @_ @CurrencySymbol (authorisedScriptsSTCS . params $ info)
+
     yieldingMPs =
       map
         ( \nonce ->
-            ( pack ("djed:yieldingMP:" <> show nonce)
+            ( pack ("ytxp:yieldingMintingPolicy:" <> show nonce)
             , toRoledScript $
                 yieldingMP Ply.# authorisedScriptsSymbol Ply.# toInteger nonce
             )
         )
         (mintingPoliciesNonceList . params $ info)
 
+  return $
+    ScriptExport
+      (fromList yieldingMPs)
+      info
+
+stakeValidatorLinker :: Linker YTxPParams (ScriptExport YTxPParams)
+stakeValidatorLinker = do
+  info <- getParam
+
+  yieldingSV <-
+    fetchTS
+      @'TwoArgumentScript
+      @'[CurrencySymbol, Integer]
+      "ytxp:yieldingStakeValidator"
+
+  let
+    authorisedScriptsSymbol =
+      coerce @_ @CurrencySymbol (authorisedScriptsSTCS . params $ info)
+
     yieldingSVs =
       map
         ( \nonce ->
-            ( pack ("djed:yieldingSV:" <> show nonce)
+            ( pack ("ytxp:yieldingStakeValidator:" <> show nonce)
             , toRoledScript $
                 yieldingSV Ply.# authorisedScriptsSymbol Ply.# toInteger nonce
             )
@@ -89,10 +119,5 @@ linker = do
 
   return $
     ScriptExport
-      ( fromList
-          ( ("djed:yieldingV", toRoledScript yieldingValidator')
-              : yieldingMPs
-                <> yieldingSVs
-          )
-      )
+      (fromList yieldingSVs)
       info

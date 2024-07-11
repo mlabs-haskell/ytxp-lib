@@ -27,9 +27,9 @@ scripts :: Config -> RawScriptExport
 scripts conf =
   RawScriptExport $
     fromList
-      [ envelope "djed:yieldingV" yieldingV
-      , envelope "djed:yieldingMP" yieldingMP
-      , envelope "djed:yieldingSV" yieldingSV
+      [ envelope "ytxp:yieldingValidator" yieldingV
+      , envelope "ytxp:yieldingMintingPolicy" yieldingMP
+      , envelope "ytxp:yieldingStakeValidator" yieldingSV
       ]
   where
     envelope ::

@@ -191,5 +191,9 @@ lint_markdown:
 # Export scripts
 .PHONY: export_scripts
 export_scripts:
-	cabal run export file -- -o ../exported-scripts/ -p ../ytxp-params.json -b "ytxp"
-	cabal run export file -- -o ../exported-scripts/ -p ../ytxp-params.json -b "ytxp-tracing"
+	cabal run export file -- -o ./exported-scripts/ -p ./ytxp-params.json -b "ytxp-validator"
+	cabal run export file -- -o ./exported-scripts/ -p ./ytxp-params.json -b "ytxp-mintingPolicy"
+	cabal run export file -- -o ./exported-scripts/ -p ./ytxp-params.json -b "ytxp-stakeValidator"
+	cabal run export file -- -o ./exported-scripts/ -p ./ytxp-params.json -b "ytxp-validator-tracing"
+	cabal run export file -- -o ./exported-scripts/ -p ./ytxp-params.json -b "ytxp-mintingPolicy-tracing"
+	cabal run export file -- -o ./exported-scripts/ -p ./ytxp-params.json -b "ytxp-stakeValidator-tracing"
