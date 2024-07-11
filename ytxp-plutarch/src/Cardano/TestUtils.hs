@@ -1,5 +1,8 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE KindSignatures #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Redundant bracket" #-}
 
 {- | Module: Cardano.TestUtils
 Description: Construct nominal and attack test cases for unit tests
@@ -118,7 +121,7 @@ balancing, etc
 
 TODO: rewrite as Kleisli?
 -}
-data PreCondition err input = PreCondition
+newtype PreCondition err input = PreCondition
   { preCondition :: input -> First err
   }
 
@@ -143,7 +146,7 @@ TODO: If its possible to turn budgeting off, we should. These scripts
 will be run with some logging output, and they wouldn't in production; thus
 costing is not actually representative of anything useful.
 -}
-data PostCondition err output = PostCondition
+newtype PostCondition err output = PostCondition
   {postCondition :: output -> First err}
 
 mkPostCondition :: (output -> Maybe err) -> PostCondition err output
@@ -295,7 +298,7 @@ mkTxFCEKCase name' pps preCs input' postCs =
     comp :: TxFCEKInput -> TxFCEKOutput
     comp (TxFCEKInput md r sc script) =
       let
-        dataArgs = mkDataArgs $ (md, r, sc)
+        dataArgs = mkDataArgs (md, r, sc)
         (res, budget, logs) = evalScriptHuge . applyArguments script $ dataArgs
        in
         TxFCEKOutput res budget logs
