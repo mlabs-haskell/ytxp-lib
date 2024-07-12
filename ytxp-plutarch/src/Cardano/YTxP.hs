@@ -37,7 +37,7 @@ data YTxPParams = YTxPParams
   { params :: SdkParameters
   , commitHash :: Text
   }
-  deriving stock (Show, Generic)
+  deriving stock (Show, Generic, Eq)
   deriving anyclass (ToJSON, FromJSON)
 
 validatorLinker :: Linker YTxPParams (ScriptExport YTxPParams)
