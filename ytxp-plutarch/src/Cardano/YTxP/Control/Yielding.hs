@@ -22,9 +22,9 @@ import Cardano.YTxP.SDK.Redeemers (
   YieldingRedeemer,
  )
 import Plutarch.DataRepr (DerivePConstantViaData (DerivePConstantViaData), PDataFields)
-import Plutarch.LedgerApi (
+import Plutarch.LedgerApi.Utils (PMaybeData (PDJust, PDNothing))
+import Plutarch.LedgerApi.V2 (
   PCurrencySymbol,
-  PMaybeData (PDJust, PDNothing),
   PScriptHash,
   PTxInInfo,
  )
@@ -148,7 +148,7 @@ getAuthorisedScriptHash ::
   Term
     s
     ( PCurrencySymbol
-        :--> PBuiltinList PTxInInfo
+        :--> PBuiltinList (PAsData PTxInInfo)
         :--> PYieldingRedeemer
         :--> PScriptHash
     )

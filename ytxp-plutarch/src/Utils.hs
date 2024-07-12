@@ -5,7 +5,7 @@ module Utils (
 )
 where
 
-import Plutarch.LedgerApi (
+import Plutarch.LedgerApi.V2 (
   PCurrencySymbol,
   PMap,
   PScriptHash,

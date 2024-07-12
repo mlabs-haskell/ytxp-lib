@@ -6,7 +6,7 @@ we use to implement the logic for yielding validator, minting policy and staking
 module Cardano.YTxP.Control.Yielding.Helper (yieldingHelper) where
 
 import Cardano.YTxP.Control.Yielding (PAuthorisedScriptPurpose (PMinting, PRewarding, PSpending), getAuthorisedScriptHash)
-import Plutarch.LedgerApi (
+import Plutarch.LedgerApi.V2 (
   PCredential (PPubKeyCredential, PScriptCredential),
   PCurrencySymbol,
   PScriptContext,

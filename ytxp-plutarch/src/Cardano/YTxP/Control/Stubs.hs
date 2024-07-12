@@ -9,7 +9,7 @@ module Cardano.YTxP.Control.Stubs (
   noncedTwoArgumentScriptWrapper,
 ) where
 
-import Plutarch.LedgerApi (PScriptContext)
+import Plutarch.LedgerApi.V2 (PScriptContext)
 
 --------------------------------------------------------------------------------
 -- Validator stubs
