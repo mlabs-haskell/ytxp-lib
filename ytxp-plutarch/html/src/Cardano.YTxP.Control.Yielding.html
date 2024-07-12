@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679221142"><span id="local-6989586621679221143"></span></span><span class="hs-pragma">{-# OPTIONS_GHC -fno-warn-orphans #-}</span><span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span id="local-6989586621679221191"><span id="local-6989586621679221192"></span></span><span class="hs-pragma">{-# OPTIONS_GHC -fno-warn-orphans #-}</span><span>
 </span><span id="line-2"></span><span>
 </span><span id="line-3"></span><span class="annot"><span class="hs-comment">{- | Module: Caradno.YTxP.Control.Stubs
 Description: TODO
@@ -40,8 +40,8 @@ forces us to declare orphan instances for haskell -&gt; plutarch conversion
 TODO: Add haddock for PAuthorisedScriptIndex
 -}</span><span>
 </span><span id="line-42"></span><span>
-</span><span id="line-43"></span><span class="hs-keyword">newtype</span><span> </span><span id="PAuthorisedScriptIndex"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptIndex"><span class="hs-identifier hs-var">PAuthorisedScriptIndex</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221156"><span class="annot"><a href="#local-6989586621679221156"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PAuthorisedScriptIndex"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptIndex"><span class="hs-identifier hs-var">PAuthorisedScriptIndex</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Term</span></span><span> </span><span class="annot"><a href="#local-6989586621679221156"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PInteger</span></span><span class="hs-special">)</span><span>
-</span><span id="line-44"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221159"><span id="local-6989586621679221161"><span class="annot"><span class="annottext">(forall x.
+</span><span id="line-43"></span><span class="hs-keyword">newtype</span><span> </span><span id="PAuthorisedScriptIndex"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptIndex"><span class="hs-identifier hs-var">PAuthorisedScriptIndex</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221205"><span class="annot"><a href="#local-6989586621679221205"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PAuthorisedScriptIndex"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptIndex"><span class="hs-identifier hs-var">PAuthorisedScriptIndex</span></a></span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">Term</span></span><span> </span><span class="annot"><a href="#local-6989586621679221205"><span class="hs-identifier hs-type">s</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PInteger</span></span><span class="hs-special">)</span><span>
+</span><span id="line-44"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221208"><span id="local-6989586621679221210"><span class="annot"><span class="annottext">(forall x.
  PAuthorisedScriptIndex s -&gt; Rep (PAuthorisedScriptIndex s) x)
 -&gt; (forall x.
     Rep (PAuthorisedScriptIndex s) x -&gt; PAuthorisedScriptIndex s)
@@ -65,7 +65,7 @@ Rep (PAuthorisedScriptIndex s) x -&gt; PAuthorisedScriptIndex s
 to :: forall x.
 Rep (PAuthorisedScriptIndex s) x -&gt; PAuthorisedScriptIndex s
 </span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Generics.html#Generic"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></a></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-45"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">anyclass</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221165"><span id="local-6989586621679221171"><span class="annot"><span class="annottext">(forall (s :: S).
+</span><span id="line-45"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">anyclass</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221214"><span id="local-6989586621679221220"><span class="annot"><span class="annottext">(forall (s :: S).
  PAuthorisedScriptIndex s -&gt; Term s (PInner PAuthorisedScriptIndex))
 -&gt; (forall (s :: S) (b :: PType).
     Term s (PInner PAuthorisedScriptIndex)
@@ -91,7 +91,7 @@ Term s (PInner PAuthorisedScriptIndex)
 pmatch' :: forall (s :: S) (b :: PType).
 Term s (PInner PAuthorisedScriptIndex)
 -&gt; (PAuthorisedScriptIndex s -&gt; Term s b) -&gt; Term s b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">PlutusType</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221176"><span id="local-6989586621679221182"><span class="annot"><span class="annottext">(forall (s :: S).
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">PlutusType</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221225"><span id="local-6989586621679221231"><span class="annot"><span class="annottext">(forall (s :: S).
  Term s (PAsData PAuthorisedScriptIndex)
  -&gt; Term s PAuthorisedScriptIndex)
 -&gt; (forall (s :: S). Term s PAuthorisedScriptIndex -&gt; Term s PData)
@@ -116,12 +116,12 @@ pdataImpl :: forall (s :: S). Term s PAuthorisedScriptIndex -&gt; Term s PData
 </span><span id="line-47"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DerivePlutusType</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptIndex"><span class="hs-identifier hs-type">PAuthorisedScriptIndex</span></a></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-48"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DPTStrat"><span class="annot"><span class="hs-identifier hs-var">DPTStrat</span></span></span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlutusTypeNewtype</span></span><span>
 </span><span id="line-49"></span><span>
-</span><span id="line-50"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679221211"><span class="annot"><span class="hs-identifier hs-type">PTryFrom</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PAsData</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptIndex"><span class="hs-identifier hs-type">PAuthorisedScriptIndex</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-50"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679221260"><span class="annot"><span class="hs-identifier hs-type">PTryFrom</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PAsData</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptIndex"><span class="hs-identifier hs-type">PAuthorisedScriptIndex</span></a></span><span class="hs-special">)</span></span><span>
 </span><span id="line-51"></span><span>
 </span><span id="line-52"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PUnsafeLiftDecl</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptIndex"><span class="hs-identifier hs-type">PAuthorisedScriptIndex</span></a></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-53"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="PLifted"><span class="annot"><span class="hs-identifier hs-var">PLifted</span></span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptIndex"><span class="hs-identifier hs-type">PAuthorisedScriptIndex</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AuthorisedScriptIndex</span></span><span>
 </span><span id="line-54"></span><span>
-</span><span id="line-55"></span><span id="local-6989586621679221238"><span id="local-6989586621679221247"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">via</span><span>
+</span><span id="line-55"></span><span id="local-6989586621679221287"><span id="local-6989586621679221296"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">via</span><span>
 </span><span id="line-56"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DerivePConstantViaNewtype</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AuthorisedScriptIndex</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptIndex"><span class="hs-identifier hs-type">PAuthorisedScriptIndex</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PInteger</span></span><span class="hs-special">)</span><span>
 </span><span id="line-57"></span><span>  </span><span class="hs-keyword">instance</span><span>
 </span><span id="line-58"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PConstantDecl</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AuthorisedScriptIndex</span></span><span class="hs-special">)</span></span></span><span>
@@ -130,8 +130,8 @@ pdataImpl :: forall (s :: S). Term s PAuthorisedScriptIndex -&gt; Term s PData
 TODO: Add haddock for PAuthorisedScriptPurpose
 -}</span><span>
 </span><span id="line-63"></span><span>
-</span><span id="line-64"></span><span class="hs-keyword">data</span><span> </span><span id="PAuthorisedScriptPurpose"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptPurpose"><span class="hs-identifier hs-var">PAuthorisedScriptPurpose</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679220852"><span class="annot"><a href="#local-6989586621679220852"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PMinting"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PMinting"><span class="hs-identifier hs-var">PMinting</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="PSpending"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PSpending"><span class="hs-identifier hs-var">PSpending</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="PRewarding"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PRewarding"><span class="hs-identifier hs-var">PRewarding</span></a></span></span><span>
-</span><span id="line-65"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221262"><span id="local-6989586621679221264"><span class="annot"><span class="annottext">(forall x.
+</span><span id="line-64"></span><span class="hs-keyword">data</span><span> </span><span id="PAuthorisedScriptPurpose"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptPurpose"><span class="hs-identifier hs-var">PAuthorisedScriptPurpose</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679220901"><span class="annot"><a href="#local-6989586621679220901"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span id="PMinting"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PMinting"><span class="hs-identifier hs-var">PMinting</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="PSpending"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PSpending"><span class="hs-identifier hs-var">PSpending</span></a></span></span><span> </span><span class="hs-glyph">|</span><span> </span><span id="PRewarding"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PRewarding"><span class="hs-identifier hs-var">PRewarding</span></a></span></span><span>
+</span><span id="line-65"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221311"><span id="local-6989586621679221313"><span class="annot"><span class="annottext">(forall x.
  PAuthorisedScriptPurpose s -&gt; Rep (PAuthorisedScriptPurpose s) x)
 -&gt; (forall x.
     Rep (PAuthorisedScriptPurpose s) x -&gt; PAuthorisedScriptPurpose s)
@@ -154,7 +154,7 @@ $cto :: forall (s :: S) x.
 Rep (PAuthorisedScriptPurpose s) x -&gt; PAuthorisedScriptPurpose s
 to :: forall x.
 Rep (PAuthorisedScriptPurpose s) x -&gt; PAuthorisedScriptPurpose s
-</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Generics.html#Generic"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></a></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221267"><span id="local-6989586621679221275"><span id="local-6989586621679221281"><span id="local-6989586621679221295"><span id="local-6989586621679221297"><span id="local-6989586621679221301"><span id="local-6989586621679221305"><span id="local-6989586621679221309"><span class="annot"><span class="annottext">Int -&gt; PAuthorisedScriptPurpose s
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Generics.html#Generic"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></a></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221316"><span id="local-6989586621679221324"><span id="local-6989586621679221330"><span id="local-6989586621679221344"><span id="local-6989586621679221346"><span id="local-6989586621679221350"><span id="local-6989586621679221354"><span id="local-6989586621679221358"><span class="annot"><span class="annottext">Int -&gt; PAuthorisedScriptPurpose s
 PAuthorisedScriptPurpose s -&gt; Int
 PAuthorisedScriptPurpose s -&gt; [PAuthorisedScriptPurpose s]
 PAuthorisedScriptPurpose s -&gt; PAuthorisedScriptPurpose s
@@ -234,7 +234,7 @@ enumFromThenTo :: PAuthorisedScriptPurpose s
 -&gt; PAuthorisedScriptPurpose s
 -&gt; PAuthorisedScriptPurpose s
 -&gt; [PAuthorisedScriptPurpose s]
-</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Enum.html#Enum"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></a></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221313"><span id="local-6989586621679221315"><span class="annot"><span class="annottext">PAuthorisedScriptPurpose s
+</span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Enum.html#Enum"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var hs-var">Enum</span></a></span></span></span></span></span></span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221362"><span id="local-6989586621679221364"><span class="annot"><span class="annottext">PAuthorisedScriptPurpose s
 PAuthorisedScriptPurpose s
 -&gt; PAuthorisedScriptPurpose s
 -&gt; Bounded (PAuthorisedScriptPurpose s)
@@ -245,7 +245,7 @@ minBound :: PAuthorisedScriptPurpose s
 $cmaxBound :: forall (s :: S). PAuthorisedScriptPurpose s
 maxBound :: PAuthorisedScriptPurpose s
 </span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Enum.html#Bounded"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Bounded</span></a></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-66"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">anyclass</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221319"><span id="local-6989586621679221325"><span class="annot"><span class="annottext">(forall (s :: S).
+</span><span id="line-66"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">anyclass</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221368"><span id="local-6989586621679221374"><span class="annot"><span class="annottext">(forall (s :: S).
  PAuthorisedScriptPurpose s
  -&gt; Term s (PInner PAuthorisedScriptPurpose))
 -&gt; (forall (s :: S) (b :: PType).
@@ -275,7 +275,7 @@ Term s (PInner PAuthorisedScriptPurpose)
 pmatch' :: forall (s :: S) (b :: PType).
 Term s (PInner PAuthorisedScriptPurpose)
 -&gt; (PAuthorisedScriptPurpose s -&gt; Term s b) -&gt; Term s b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">PlutusType</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221329"><span id="local-6989586621679221335"><span class="annot"><span class="annottext">(forall (s :: S).
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">PlutusType</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221378"><span id="local-6989586621679221384"><span class="annot"><span class="annottext">(forall (s :: S).
  Term s (PAsData PAuthorisedScriptPurpose)
  -&gt; Term s PAuthorisedScriptPurpose)
 -&gt; (forall (s :: S).
@@ -296,7 +296,7 @@ Term s (PAsData PAuthorisedScriptPurpose)
 -&gt; Term s PAuthorisedScriptPurpose
 $cpdataImpl :: forall (s :: S). Term s PAuthorisedScriptPurpose -&gt; Term s PData
 pdataImpl :: forall (s :: S). Term s PAuthorisedScriptPurpose -&gt; Term s PData
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">PIsData</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221340"><span class="annot"><span class="annottext">(forall (s :: S).
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">PIsData</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221389"><span class="annot"><span class="annottext">(forall (s :: S).
  Term s PAuthorisedScriptPurpose
  -&gt; Term s PAuthorisedScriptPurpose -&gt; Term s PBool)
 -&gt; PEq PAuthorisedScriptPurpose
@@ -316,12 +316,12 @@ Term s PAuthorisedScriptPurpose
 </span><span id="line-68"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DerivePlutusType</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptPurpose"><span class="hs-identifier hs-type">PAuthorisedScriptPurpose</span></a></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-69"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DPTStrat"><span class="annot"><span class="hs-identifier hs-var">DPTStrat</span></span></span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Vendored.html#PlutusTypeEnumData"><span class="hs-identifier hs-type">PlutusTypeEnumData</span></a></span><span>
 </span><span id="line-70"></span><span>
-</span><span id="line-71"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679221376"><span class="annot"><span class="hs-identifier hs-type">PTryFrom</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PAsData</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptPurpose"><span class="hs-identifier hs-type">PAuthorisedScriptPurpose</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-71"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679221425"><span class="annot"><span class="hs-identifier hs-type">PTryFrom</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PAsData</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptPurpose"><span class="hs-identifier hs-type">PAuthorisedScriptPurpose</span></a></span><span class="hs-special">)</span></span><span>
 </span><span id="line-72"></span><span>
 </span><span id="line-73"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PUnsafeLiftDecl</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptPurpose"><span class="hs-identifier hs-type">PAuthorisedScriptPurpose</span></a></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-74"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="PLifted"><span class="annot"><span class="hs-identifier hs-var">PLifted</span></span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptPurpose"><span class="hs-identifier hs-type">PAuthorisedScriptPurpose</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AuthorisedScriptPurpose</span></span><span>
 </span><span id="line-75"></span><span>
-</span><span id="line-76"></span><span id="local-6989586621679221400"><span id="local-6989586621679221410"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">via</span><span>
+</span><span id="line-76"></span><span id="local-6989586621679221449"><span id="local-6989586621679221459"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">via</span><span>
 </span><span id="line-77"></span><span>  </span><span class="hs-special">(</span><span class="annot"><a href="Cardano.YTxP.Control.Vendored.html#DerivePConstantViaEnum"><span class="hs-identifier hs-type">DerivePConstantViaEnum</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AuthorisedScriptPurpose</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptPurpose"><span class="hs-identifier hs-type">PAuthorisedScriptPurpose</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-78"></span><span>  </span><span class="hs-keyword">instance</span><span>
 </span><span id="line-79"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PConstantDecl</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AuthorisedScriptPurpose</span></span><span class="hs-special">)</span></span></span><span>
@@ -332,13 +332,13 @@ TODO: Add haddock for PAuthorisedScriptProofIndex
 </span><span id="line-84"></span><span>
 </span><span id="line-85"></span><span class="hs-comment">-- TODO: Why do we need to wrap the args in PAsData here?</span><span>
 </span><span id="line-86"></span><span class="hs-comment">-- If we don' there is some issues with the derivation of plutus types</span><span>
-</span><span id="line-87"></span><span class="hs-keyword">newtype</span><span> </span><span id="PAuthorisedScriptProofIndex"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptProofIndex"><span class="hs-identifier hs-var">PAuthorisedScriptProofIndex</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221422"><span class="annot"><a href="#local-6989586621679221422"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span>
+</span><span id="line-87"></span><span class="hs-keyword">newtype</span><span> </span><span id="PAuthorisedScriptProofIndex"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptProofIndex"><span class="hs-identifier hs-var">PAuthorisedScriptProofIndex</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221471"><span class="annot"><a href="#local-6989586621679221471"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span>
 </span><span id="line-88"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="PAuthorisedScriptProofIndex"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptProofIndex"><span class="hs-identifier hs-var">PAuthorisedScriptProofIndex</span></a></span></span><span>
 </span><span id="line-89"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Term</span></span><span>
-</span><span id="line-90"></span><span>          </span><span class="annot"><a href="#local-6989586621679221422"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-90"></span><span>          </span><span class="annot"><a href="#local-6989586621679221471"><span class="hs-identifier hs-type">s</span></a></span><span>
 </span><span id="line-91"></span><span>          </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PBuiltinPair</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PAsData</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptPurpose"><span class="hs-identifier hs-type">PAuthorisedScriptPurpose</span></a></span><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PAsData</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PInteger</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-92"></span><span>      </span><span class="hs-special">)</span><span>
-</span><span id="line-93"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221425"><span id="local-6989586621679221427"><span class="annot"><span class="annottext">(forall x.
+</span><span id="line-93"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221474"><span id="local-6989586621679221476"><span class="annot"><span class="annottext">(forall x.
  PAuthorisedScriptProofIndex s
  -&gt; Rep (PAuthorisedScriptProofIndex s) x)
 -&gt; (forall x.
@@ -372,7 +372,7 @@ to :: forall x.
 Rep (PAuthorisedScriptProofIndex s) x
 -&gt; PAuthorisedScriptProofIndex s
 </span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Generics.html#Generic"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></a></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-94"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">anyclass</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221430"><span id="local-6989586621679221436"><span class="annot"><span class="annottext">(forall (s :: S).
+</span><span id="line-94"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">anyclass</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221479"><span id="local-6989586621679221485"><span class="annot"><span class="annottext">(forall (s :: S).
  PAuthorisedScriptProofIndex s
  -&gt; Term s (PInner PAuthorisedScriptProofIndex))
 -&gt; (forall (s :: S) (b :: PType).
@@ -402,7 +402,7 @@ Term s (PInner PAuthorisedScriptProofIndex)
 pmatch' :: forall (s :: S) (b :: PType).
 Term s (PInner PAuthorisedScriptProofIndex)
 -&gt; (PAuthorisedScriptProofIndex s -&gt; Term s b) -&gt; Term s b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">PlutusType</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221440"><span id="local-6989586621679221446"><span class="annot"><span class="annottext">(forall (s :: S).
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">PlutusType</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221489"><span id="local-6989586621679221495"><span class="annot"><span class="annottext">(forall (s :: S).
  Term s (PAsData PAuthorisedScriptProofIndex)
  -&gt; Term s PAuthorisedScriptProofIndex)
 -&gt; (forall (s :: S).
@@ -428,12 +428,12 @@ pdataImpl :: forall (s :: S). Term s PAuthorisedScriptProofIndex -&gt; Term s PD
 </span><span id="line-96"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DerivePlutusType</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptProofIndex"><span class="hs-identifier hs-type">PAuthorisedScriptProofIndex</span></a></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-97"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DPTStrat"><span class="annot"><span class="hs-identifier hs-var">DPTStrat</span></span></span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlutusTypeNewtype</span></span><span>
 </span><span id="line-98"></span><span>
-</span><span id="line-99"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679221470"><span class="annot"><span class="hs-identifier hs-type">PTryFrom</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PAsData</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptProofIndex"><span class="hs-identifier hs-type">PAuthorisedScriptProofIndex</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-99"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679221519"><span class="annot"><span class="hs-identifier hs-type">PTryFrom</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PAsData</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptProofIndex"><span class="hs-identifier hs-type">PAuthorisedScriptProofIndex</span></a></span><span class="hs-special">)</span></span><span>
 </span><span id="line-100"></span><span>
 </span><span id="line-101"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PUnsafeLiftDecl</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptProofIndex"><span class="hs-identifier hs-type">PAuthorisedScriptProofIndex</span></a></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-102"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="PLifted"><span class="annot"><span class="hs-identifier hs-var">PLifted</span></span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptProofIndex"><span class="hs-identifier hs-type">PAuthorisedScriptProofIndex</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">AuthorisedScriptProofIndex</span></span><span>
 </span><span id="line-103"></span><span>
-</span><span id="line-104"></span><span id="local-6989586621679221501"><span id="local-6989586621679221509"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">via</span><span>
+</span><span id="line-104"></span><span id="local-6989586621679221550"><span id="local-6989586621679221558"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">via</span><span>
 </span><span id="line-105"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DerivePConstantViaNewtype</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AuthorisedScriptProofIndex</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptProofIndex"><span class="hs-identifier hs-type">PAuthorisedScriptProofIndex</span></a></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PBuiltinPair</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptPurpose"><span class="hs-identifier hs-type">PAuthorisedScriptPurpose</span></a></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PInteger</span></span><span class="hs-special">)</span><span class="hs-special">)</span><span>
 </span><span id="line-106"></span><span>  </span><span class="hs-keyword">instance</span><span>
 </span><span id="line-107"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PConstantDecl</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">AuthorisedScriptProofIndex</span></span><span class="hs-special">)</span></span></span><span>
@@ -442,17 +442,17 @@ pdataImpl :: forall (s :: S). Term s PAuthorisedScriptProofIndex -&gt; Term s PD
 TODO: Add haddock for PYieldingRedeemer
 -}</span><span>
 </span><span id="line-112"></span><span>
-</span><span id="line-113"></span><span class="hs-keyword">newtype</span><span> </span><span id="PYieldingRedeemer"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PYieldingRedeemer"><span class="hs-identifier hs-var">PYieldingRedeemer</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221530"><span class="annot"><a href="#local-6989586621679221530"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span>
+</span><span id="line-113"></span><span class="hs-keyword">newtype</span><span> </span><span id="PYieldingRedeemer"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PYieldingRedeemer"><span class="hs-identifier hs-var">PYieldingRedeemer</span></a></span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221579"><span class="annot"><a href="#local-6989586621679221579"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span>
 </span><span id="line-114"></span><span>  </span><span class="hs-glyph">=</span><span> </span><span id="PYieldingRedeemer"><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PYieldingRedeemer"><span class="hs-identifier hs-var">PYieldingRedeemer</span></a></span></span><span>
 </span><span id="line-115"></span><span>      </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">Term</span></span><span>
-</span><span id="line-116"></span><span>          </span><span class="annot"><a href="#local-6989586621679221530"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-116"></span><span>          </span><span class="annot"><a href="#local-6989586621679221579"><span class="hs-identifier hs-type">s</span></a></span><span>
 </span><span id="line-117"></span><span>          </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PDataRecord</span></span><span>
 </span><span id="line-118"></span><span>              </span><span class="hs-special">'</span><span class="hs-special">[</span><span> </span><span class="annot"><span class="hs-string">&quot;authorisedScriptIndex&quot;</span></span><span> </span><span class="hs-special">'</span><span class="hs-operator">:=</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptIndex"><span class="hs-identifier hs-type">PAuthorisedScriptIndex</span></a></span><span>
 </span><span id="line-119"></span><span>               </span><span class="hs-special">,</span><span> </span><span class="annot"><span class="hs-string">&quot;authorisedScriptProofIndex&quot;</span></span><span> </span><span class="hs-special">'</span><span class="hs-operator">:=</span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PAuthorisedScriptProofIndex"><span class="hs-identifier hs-type">PAuthorisedScriptProofIndex</span></a></span><span>
 </span><span id="line-120"></span><span>               </span><span class="hs-special">]</span><span>
 </span><span id="line-121"></span><span>          </span><span class="hs-special">)</span><span>
 </span><span id="line-122"></span><span>      </span><span class="hs-special">)</span><span>
-</span><span id="line-123"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221533"><span id="local-6989586621679221535"><span class="annot"><span class="annottext">(forall x. PYieldingRedeemer s -&gt; Rep (PYieldingRedeemer s) x)
+</span><span id="line-123"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">stock</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221582"><span id="local-6989586621679221584"><span class="annot"><span class="annottext">(forall x. PYieldingRedeemer s -&gt; Rep (PYieldingRedeemer s) x)
 -&gt; (forall x. Rep (PYieldingRedeemer s) x -&gt; PYieldingRedeemer s)
 -&gt; Generic (PYieldingRedeemer s)
 forall x. Rep (PYieldingRedeemer s) x -&gt; PYieldingRedeemer s
@@ -470,7 +470,7 @@ $cto :: forall (s :: S) x.
 Rep (PYieldingRedeemer s) x -&gt; PYieldingRedeemer s
 to :: forall x. Rep (PYieldingRedeemer s) x -&gt; PYieldingRedeemer s
 </span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Generics.html#Generic"><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">Generic</span></a></span></span></span><span class="hs-special">)</span><span>
-</span><span id="line-124"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">anyclass</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221538"><span id="local-6989586621679221544"><span class="annot"><span class="annottext">(forall (s :: S).
+</span><span id="line-124"></span><span>  </span><span class="hs-keyword">deriving</span><span> </span><span class="annot"><span class="hs-keyword">anyclass</span></span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221587"><span id="local-6989586621679221593"><span class="annot"><span class="annottext">(forall (s :: S).
  PYieldingRedeemer s -&gt; Term s (PInner PYieldingRedeemer))
 -&gt; (forall (s :: S) (b :: PType).
     Term s (PInner PYieldingRedeemer)
@@ -496,7 +496,7 @@ Term s (PInner PYieldingRedeemer)
 pmatch' :: forall (s :: S) (b :: PType).
 Term s (PInner PYieldingRedeemer)
 -&gt; (PYieldingRedeemer s -&gt; Term s b) -&gt; Term s b
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">PlutusType</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221548"><span id="local-6989586621679221554"><span class="annot"><span class="annottext">(forall (s :: S).
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">PlutusType</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221597"><span id="local-6989586621679221603"><span class="annot"><span class="annottext">(forall (s :: S).
  Term s (PAsData PYieldingRedeemer) -&gt; Term s PYieldingRedeemer)
 -&gt; (forall (s :: S). Term s PYieldingRedeemer -&gt; Term s PData)
 -&gt; PIsData PYieldingRedeemer
@@ -512,7 +512,7 @@ pfromDataImpl :: forall (s :: S).
 Term s (PAsData PYieldingRedeemer) -&gt; Term s PYieldingRedeemer
 $cpdataImpl :: forall (s :: S). Term s PYieldingRedeemer -&gt; Term s PData
 pdataImpl :: forall (s :: S). Term s PYieldingRedeemer -&gt; Term s PData
-</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">PIsData</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221560"><span class="annot"><span class="annottext">(forall (s :: S).
+</span><span class="hs-identifier hs-var hs-var hs-var hs-var hs-var hs-var">PIsData</span></span></span></span><span class="hs-special">,</span><span> </span><span id="local-6989586621679221609"><span class="annot"><span class="annottext">(forall (s :: S).
  Term s PYieldingRedeemer
  -&gt; Term s (PDataRecord (PFields PYieldingRedeemer)))
 -&gt; PDataFields PYieldingRedeemer
@@ -533,12 +533,12 @@ Term s PYieldingRedeemer
 </span><span id="line-126"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">DerivePlutusType</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PYieldingRedeemer"><span class="hs-identifier hs-type">PYieldingRedeemer</span></a></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-127"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="DPTStrat"><span class="annot"><span class="hs-identifier hs-var">DPTStrat</span></span></span><span> </span><span class="annot"><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PlutusTypeData</span></span><span>
 </span><span id="line-128"></span><span>
-</span><span id="line-129"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679221598"><span class="annot"><span class="hs-identifier hs-type">PTryFrom</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PAsData</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PYieldingRedeemer"><span class="hs-identifier hs-type">PYieldingRedeemer</span></a></span><span class="hs-special">)</span></span><span>
+</span><span id="line-129"></span><span class="hs-keyword">instance</span><span> </span><span id="local-6989586621679221647"><span class="annot"><span class="hs-identifier hs-type">PTryFrom</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PData</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PAsData</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PYieldingRedeemer"><span class="hs-identifier hs-type">PYieldingRedeemer</span></a></span><span class="hs-special">)</span></span><span>
 </span><span id="line-130"></span><span>
 </span><span id="line-131"></span><span class="hs-keyword">instance</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PUnsafeLiftDecl</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PYieldingRedeemer"><span class="hs-identifier hs-type">PYieldingRedeemer</span></a></span><span> </span><span class="hs-keyword">where</span><span>
 </span><span id="line-132"></span><span>  </span><span class="hs-keyword">type</span><span> </span><span id="PLifted"><span class="annot"><span class="hs-identifier hs-var">PLifted</span></span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PYieldingRedeemer"><span class="hs-identifier hs-type">PYieldingRedeemer</span></a></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="hs-identifier hs-type">YieldingRedeemer</span></span><span>
 </span><span id="line-133"></span><span>
-</span><span id="line-134"></span><span id="local-6989586621679221647"><span id="local-6989586621679221657"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">via</span><span>
+</span><span id="line-134"></span><span id="local-6989586621679221696"><span id="local-6989586621679221706"><span class="hs-keyword">deriving</span><span> </span><span class="hs-keyword">via</span><span>
 </span><span id="line-135"></span><span>  </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">DerivePConstantViaData</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">YieldingRedeemer</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PYieldingRedeemer"><span class="hs-identifier hs-type">PYieldingRedeemer</span></a></span><span class="hs-special">)</span><span>
 </span><span id="line-136"></span><span>  </span><span class="hs-keyword">instance</span><span>
 </span><span id="line-137"></span><span>    </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PConstantDecl</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">YieldingRedeemer</span></span><span class="hs-special">)</span></span></span><span>
@@ -551,9 +551,9 @@ Term s PYieldingRedeemer
 - Returning the AuthorisedScriptHash
 -}</span></span><span>
 </span><span id="line-146"></span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#getAuthorisedScriptHash"><span class="hs-identifier hs-type">getAuthorisedScriptHash</span></a></span><span> </span><span class="hs-glyph">::</span><span>
-</span><span id="line-147"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221022"><span class="annot"><a href="#local-6989586621679221022"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span class="hs-operator">.</span><span>
+</span><span id="line-147"></span><span>  </span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><span id="local-6989586621679221071"><span class="annot"><a href="#local-6989586621679221071"><span class="hs-identifier hs-type">s</span></a></span></span><span> </span><span class="hs-glyph">::</span><span> </span><span class="annot"><span class="hs-identifier hs-type">S</span></span><span class="hs-special">)</span><span class="hs-operator">.</span><span>
 </span><span id="line-148"></span><span>  </span><span class="annot"><span class="hs-identifier hs-type">Term</span></span><span>
-</span><span id="line-149"></span><span>    </span><span class="annot"><a href="#local-6989586621679221022"><span class="hs-identifier hs-type">s</span></a></span><span>
+</span><span id="line-149"></span><span>    </span><span class="annot"><a href="#local-6989586621679221071"><span class="hs-identifier hs-type">s</span></a></span><span>
 </span><span id="line-150"></span><span>    </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="hs-identifier hs-type">PCurrencySymbol</span></span><span>
 </span><span id="line-151"></span><span>        </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PBuiltinList</span></span><span> </span><span class="hs-special">(</span><span class="annot"><span class="hs-identifier hs-type">PAsData</span></span><span> </span><span class="annot"><span class="hs-identifier hs-type">PTxInInfo</span></span><span class="hs-special">)</span><span>
 </span><span id="line-152"></span><span>        </span><span class="annot"><span class="hs-operator hs-type">:--&gt;</span></span><span> </span><span class="annot"><a href="Cardano.YTxP.Control.Yielding.html#PYieldingRedeemer"><span class="hs-identifier hs-type">PYieldingRedeemer</span></a></span><span>
@@ -646,10 +646,10 @@ HasCallStack =&gt;
             :--&gt; (PYieldingRedeemer :--&gt; PScriptHash)))
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span>
-</span><span id="line-157"></span><span>    </span><span class="hs-glyph">\</span><span id="local-6989586621679221774"><span class="annot"><span class="annottext">Term s PCurrencySymbol
-</span><a href="#local-6989586621679221774"><span class="hs-identifier hs-var">psymbol</span></a></span></span><span> </span><span id="local-6989586621679221775"><span class="annot"><span class="annottext">Term s (PBuiltinList (PAsData PTxInInfo))
-</span><a href="#local-6989586621679221775"><span class="hs-identifier hs-var">txInfoRefInputs</span></a></span></span><span> </span><span id="local-6989586621679221776"><span class="annot"><span class="annottext">Term s PYieldingRedeemer
-</span><a href="#local-6989586621679221776"><span class="hs-identifier hs-var">redeemer</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">TermCont @PScriptHash s (Term s PScriptHash) -&gt; Term s PScriptHash
+</span><span id="line-157"></span><span>    </span><span class="hs-glyph">\</span><span id="local-6989586621679221823"><span class="annot"><span class="annottext">Term s PCurrencySymbol
+</span><a href="#local-6989586621679221823"><span class="hs-identifier hs-var">psymbol</span></a></span></span><span> </span><span id="local-6989586621679221824"><span class="annot"><span class="annottext">Term s (PBuiltinList (PAsData PTxInInfo))
+</span><a href="#local-6989586621679221824"><span class="hs-identifier hs-var">txInfoRefInputs</span></a></span></span><span> </span><span id="local-6989586621679221825"><span class="annot"><span class="annottext">Term s PYieldingRedeemer
+</span><a href="#local-6989586621679221825"><span class="hs-identifier hs-var">redeemer</span></a></span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">TermCont @PScriptHash s (Term s PScriptHash) -&gt; Term s PScriptHash
 forall (a :: PType) (s :: S). TermCont @a s (Term s a) -&gt; Term s a
 </span><span class="hs-identifier hs-var">unTermCont</span></span><span> </span><span class="annot"><span class="annottext">(TermCont @PScriptHash s (Term s PScriptHash)
  -&gt; Term s PScriptHash)
@@ -658,14 +658,14 @@ forall (a :: PType) (s :: S). TermCont @a s (Term s a) -&gt; Term s a
 forall a b. (a -&gt; b) -&gt; a -&gt; b
 </span><a href="../../../ghc-9.6.5/html/libraries/base-4.18.2.1/src/GHC.Base.html#%24"><span class="hs-operator hs-var">$</span></a></span><span> </span><span class="hs-keyword">do</span><span>
 </span><span id="line-158"></span><span>      </span><span class="hs-comment">-- TODO (OPTIMIZE): these values only get used once, can be a `let`</span><span>
-</span><span id="line-159"></span><span>      </span><span id="local-6989586621679221778"><span class="annot"><span class="annottext">HRec
+</span><span id="line-159"></span><span>      </span><span id="local-6989586621679221827"><span class="annot"><span class="annottext">HRec
   (BoundTerms
      (PFields PYieldingRedeemer)
      (Bindings
         (PFields PYieldingRedeemer)
         ((':) @Symbol &quot;authorisedScriptIndex&quot; ('[] @Symbol)))
      s)
-</span><a href="#local-6989586621679221778"><span class="hs-identifier hs-var">yieldingRedeemer</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><a href="#local-6989586621679221827"><span class="hs-identifier hs-var">yieldingRedeemer</span></a></span></span><span> </span><span class="hs-glyph">&lt;-</span><span>
 </span><span id="line-160"></span><span>        </span><span class="annot"><span class="annottext">forall (fs :: [Symbol]) (a :: PType) (s :: S) (b :: PType)
        (ps :: [PLabeledType]) (bs :: [ToBind]).
 (PDataFields a,
@@ -674,15 +674,15 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
  BindFields ps bs) =&gt;
 Term s a -&gt; TermCont @b s (HRec (BoundTerms ps bs s))
 </span><span class="hs-identifier hs-var">pletFieldsC</span></span><span> </span><span class="hs-glyph">@</span><span class="hs-special">'</span><span class="hs-special">[</span><span class="annot"><span class="hs-string">&quot;authorisedScriptIndex&quot;</span></span><span class="hs-special">]</span><span> </span><span class="annot"><span class="annottext">Term s PYieldingRedeemer
-</span><a href="#local-6989586621679221776"><span class="hs-identifier hs-var">redeemer</span></a></span><span>
+</span><a href="#local-6989586621679221825"><span class="hs-identifier hs-var">redeemer</span></a></span><span>
 </span><span id="line-161"></span><span>
-</span><span id="line-162"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679221780"><span class="annot"><span class="annottext">autorisedScriptRefUTxO :: Term s (PAsData PTxInInfo)
-</span><a href="#local-6989586621679221780"><span class="hs-identifier hs-var hs-var">autorisedScriptRefUTxO</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
+</span><span id="line-162"></span><span>      </span><span class="hs-keyword">let</span><span> </span><span id="local-6989586621679221829"><span class="annot"><span class="annottext">autorisedScriptRefUTxO :: Term s (PAsData PTxInInfo)
+</span><a href="#local-6989586621679221829"><span class="hs-identifier hs-var hs-var">autorisedScriptRefUTxO</span></a></span></span><span> </span><span class="hs-glyph">=</span><span>
 </span><span id="line-163"></span><span>            </span><span class="annot"><span class="annottext">Term s (PBuiltinList (PAsData PTxInInfo))
-</span><a href="#local-6989586621679221775"><span class="hs-identifier hs-var">txInfoRefInputs</span></a></span><span class="hs-cpp">
+</span><a href="#local-6989586621679221824"><span class="hs-identifier hs-var">txInfoRefInputs</span></a></span><span class="hs-cpp">
               #!! pto (pfromData $ getField @&quot;authorisedScriptIndex&quot; yieldingRedeemer)
-</span><span>          </span><span id="local-6989586621679221784"><span class="annot"><span class="annottext">output :: Term s (PAsData PTxOut)
-</span><a href="#local-6989586621679221784"><span class="hs-identifier hs-var hs-var">output</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (name :: Symbol) (b :: PType) (p :: PType) (s :: S)
+</span><span>          </span><span id="local-6989586621679221833"><span class="annot"><span class="annottext">output :: Term s (PAsData PTxOut)
+</span><a href="#local-6989586621679221833"><span class="hs-identifier hs-var hs-var">output</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (name :: Symbol) (b :: PType) (p :: PType) (s :: S)
        (a :: PType) (as :: [PLabeledType]) (n :: Nat).
 (PDataFields p,
  (as :: [PLabeledType]) ~ (PFields p :: [PLabeledType]),
@@ -695,9 +695,9 @@ Term s (p :--&gt; b)
 forall (s :: S) (a :: PType) (b :: PType).
 Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
 </span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s (PAsData PTxInInfo)
-</span><a href="#local-6989586621679221780"><span class="hs-identifier hs-var">autorisedScriptRefUTxO</span></a></span><span>
-</span><span id="line-166"></span><span>          </span><span id="local-6989586621679221787"><span class="annot"><span class="annottext">value :: Term s (PAsData (PValue 'Sorted 'Positive))
-</span><a href="#local-6989586621679221787"><span class="hs-identifier hs-var hs-var">value</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (name :: Symbol) (b :: PType) (p :: PType) (s :: S)
+</span><a href="#local-6989586621679221829"><span class="hs-identifier hs-var">autorisedScriptRefUTxO</span></a></span><span>
+</span><span id="line-166"></span><span>          </span><span id="local-6989586621679221836"><span class="annot"><span class="annottext">value :: Term s (PAsData (PValue 'Sorted 'Positive))
+</span><a href="#local-6989586621679221836"><span class="hs-identifier hs-var hs-var">value</span></a></span></span><span> </span><span class="hs-glyph">=</span><span> </span><span class="annot"><span class="annottext">forall (name :: Symbol) (b :: PType) (p :: PType) (s :: S)
        (a :: PType) (as :: [PLabeledType]) (n :: Nat).
 (PDataFields p,
  (as :: [PLabeledType]) ~ (PFields p :: [PLabeledType]),
@@ -711,7 +711,7 @@ Term s (p :--&gt; b)
 forall (s :: S) (a :: PType) (b :: PType).
 Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
 </span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s (PAsData PTxOut)
-</span><a href="#local-6989586621679221784"><span class="hs-identifier hs-var">output</span></a></span><span>
+</span><a href="#local-6989586621679221833"><span class="hs-identifier hs-var">output</span></a></span><span>
 </span><span id="line-167"></span><span>
 </span><span id="line-168"></span><span>      </span><span class="annot"><span class="annottext">Term s PScriptHash -&gt; TermCont @PScriptHash s (Term s PScriptHash)
 forall a. a -&gt; TermCont @PScriptHash s a
@@ -750,7 +750,7 @@ Term s (k :--&gt; (PMap any k v :--&gt; PBool))
 forall (s :: S) (a :: PType) (b :: PType).
 Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
 </span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s PCurrencySymbol
-</span><a href="#local-6989586621679221774"><span class="hs-identifier hs-var">psymbol</span></a></span><span> </span><span class="annot"><span class="annottext">Term
+</span><a href="#local-6989586621679221823"><span class="hs-identifier hs-var">psymbol</span></a></span><span> </span><span class="annot"><span class="annottext">Term
   s
   (PMap 'Sorted PCurrencySymbol (PMap 'Sorted PTokenName PInteger)
    :--&gt; PBool)
@@ -768,7 +768,7 @@ forall (a :: PType) (s :: S).
 PIsData a =&gt;
 Term s (PAsData a) -&gt; Term s a
 </span><span class="hs-identifier hs-var">pfromData</span></span><span> </span><span class="annot"><span class="annottext">Term s (PAsData (PValue 'Sorted 'Positive))
-</span><a href="#local-6989586621679221787"><span class="hs-identifier hs-var">value</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead</span><span>
+</span><a href="#local-6989586621679221836"><span class="hs-identifier hs-var">value</span></a></span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-comment">-- TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead</span><span>
 </span><span id="line-171"></span><span>          </span><span class="hs-special">(</span><span> </span><span class="annot"><span class="annottext">Term s (PMaybeData PScriptHash)
 -&gt; (PMaybeData PScriptHash s -&gt; Term s PScriptHash)
 -&gt; Term s PScriptHash
@@ -788,7 +788,7 @@ Term s (p :--&gt; b)
 forall (s :: S) (a :: PType) (b :: PType).
 Term s (a :--&gt; b) -&gt; Term s a -&gt; Term s b
 </span><span class="hs-operator hs-var">#</span></span><span> </span><span class="annot"><span class="annottext">Term s (PAsData PTxOut)
-</span><a href="#local-6989586621679221784"><span class="hs-identifier hs-var">output</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((PMaybeData PScriptHash s -&gt; Term s PScriptHash)
+</span><a href="#local-6989586621679221833"><span class="hs-identifier hs-var">output</span></a></span><span class="hs-special">)</span><span> </span><span class="annot"><span class="annottext">((PMaybeData PScriptHash s -&gt; Term s PScriptHash)
  -&gt; Term s PScriptHash)
 -&gt; (PMaybeData PScriptHash s -&gt; Term s PScriptHash)
 -&gt; Term s PScriptHash
@@ -802,9 +802,9 @@ forall a b. (a -&gt; b) -&gt; a -&gt; b
  (a :: PType) ~ (PUnLabel (IndexList @PLabeledType n as) :: PType),
  PFromDataable a b) =&gt;
 Term s (p :--&gt; b)
-</span><span class="hs-identifier hs-var">pfield</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;_0&quot;</span></span><span> </span><span class="hs-operator">#</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679221790"><span class="annot"><span class="annottext">Term s PScriptHash
-</span><a href="#local-6989586621679221790"><span class="hs-identifier hs-var">autorisedScript</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Term s PScriptHash
-</span><a href="#local-6989586621679221790"><span class="hs-identifier hs-var">autorisedScript</span></a></span><span>
+</span><span class="hs-identifier hs-var">pfield</span></span><span> </span><span class="hs-glyph">@</span><span class="annot"><span class="hs-string">&quot;_0&quot;</span></span><span> </span><span class="hs-operator">#</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span id="local-6989586621679221839"><span class="annot"><span class="annottext">Term s PScriptHash
+</span><a href="#local-6989586621679221839"><span class="hs-identifier hs-var">autorisedScript</span></a></span></span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="annot"><span class="annottext">Term s PScriptHash
+</span><a href="#local-6989586621679221839"><span class="hs-identifier hs-var">autorisedScript</span></a></span><span>
 </span><span id="line-173"></span><span>              </span><span class="annot"><span class="hs-identifier hs-type">PDNothing</span></span><span> </span><span class="annot"><span class="annottext">Term s (PDataRecord ('[] @PLabeledType))
 </span><span class="hs-identifier">_</span></span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><span class="annot"><span class="annottext">Term s PString -&gt; Term s PScriptHash
 forall (a :: PType) (s :: S). Term s PString -&gt; Term s a
