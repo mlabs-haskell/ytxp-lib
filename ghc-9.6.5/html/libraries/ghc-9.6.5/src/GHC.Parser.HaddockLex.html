@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# OPTIONS_GHC -fno-warn-unused-binds -fno-warn-missing-signatures #-}</span><span>
 </span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
 </span><span id="line-3"></span><span class="hs-pragma">{-# LANGUAGE MagicHash #-}</span><span>
-</span><span id="line-4"></span><span class="hs-pragma">{-# LINE 1 &quot;_build/source-dist/ghc-9.6.5-src/ghc-9.6.5/compiler/GHC/Parser/HaddockLex.x&quot; #-}</span><span>
+</span><span id="line-4"></span><span class="hs-pragma">{-# LINE 1 &quot;compiler/GHC/Parser/HaddockLex.x&quot; #-}</span><span>
 </span><span id="line-1"></span><span class="hs-pragma">{-# LANGUAGE BangPatterns #-}</span><span>
 </span><span id="line-2"></span><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving #-}</span><span>
 </span><span id="line-3"></span><span class="hs-pragma">{-# OPTIONS_GHC -funbox-strict-fields #-}</span><span>
@@ -115,7 +115,7 @@
 </span><span id="line-106"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-number">0</span><span class="hs-special">,</span><span class="hs-identifier">alex_action_1</span><span class="hs-special">)</span><span>
 </span><span id="line-107"></span><span>  </span><span class="hs-special">]</span><span>
 </span><span id="line-108"></span><span>
-</span><span id="line-109"></span><span class="hs-pragma">{-# LINE 87 &quot;_build/source-dist/ghc-9.6.5-src/ghc-9.6.5/compiler/GHC/Parser/HaddockLex.x&quot; #-}</span><span>
+</span><span id="line-109"></span><span class="hs-pragma">{-# LINE 87 &quot;compiler/GHC/Parser/HaddockLex.x&quot; #-}</span><span>
 </span><span id="line-87"></span><span class="hs-keyword">data</span><span> </span><span class="hs-identifier">AlexInput</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">AlexInput</span><span>
 </span><span id="line-88"></span><span>  </span><span class="hs-special">{</span><span> </span><span class="hs-identifier">alexInput_position</span><span>     </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-identifier">RealSrcLoc</span><span>
 </span><span id="line-89"></span><span>  </span><span class="hs-special">,</span><span> </span><span class="hs-identifier">alexInput_string</span><span>       </span><span class="hs-glyph">::</span><span> </span><span class="hs-glyph">!</span><span class="hs-identifier">ByteString</span><span>
@@ -331,7 +331,7 @@
 #if __GLASGOW_HASKELL__ &lt; 503
 </span><span class="hs-identifier">quickIndex</span><span> </span><span class="hs-identifier">arr</span><span> </span><span class="hs-identifier">i</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">arr</span><span> </span><span class="hs-operator">!</span><span> </span><span class="hs-identifier">i</span><span class="hs-cpp">
 #else
-</span><span id="alexIndexInt32OffAddr"></span><span id="local-6989586621681761741"></span><span class="hs-comment">-- GHC &gt;= 503, unsafeAt is available from Data.Array.Base.</span><span>
+</span><span id="alexIndexInt32OffAddr"></span><span id="local-6989586621681761613"></span><span class="hs-comment">-- GHC &gt;= 503, unsafeAt is available from Data.Array.Base.</span><span>
 </span><span id="line-303"></span><span class="hs-identifier">quickIndex</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">unsafeAt</span><span class="hs-cpp">
 #endif
 </span><span class="hs-cpp">#else
@@ -368,7 +368,7 @@
 </span><span id="line-336"></span><span>
 </span><span id="line-337"></span><span>  </span><span class="hs-special">(</span><span class="hs-identifier">AlexLastSkip</span><span> </span><span class="hs-identifier">input__''</span><span> </span><span class="hs-identifier">len</span><span class="hs-special">,</span><span> </span><span class="hs-identifier">_</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">-&gt;</span><span class="hs-cpp">
 #ifdef ALEX_DEBUG
-</span><span>    </span><span id="AlexReturn"></span><span class="hs-identifier">trace</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681761563"></span><span class="hs-string">&quot;Skipping.&quot;</span><span class="hs-special">)</span><span> </span><span class="hs-operator">$</span><span id="AlexEOF"></span><span class="hs-cpp">
+</span><span>    </span><span id="AlexReturn"></span><span class="hs-identifier">trace</span><span> </span><span class="hs-special">(</span><span id="local-6989586621681761506"></span><span class="hs-string">&quot;Skipping.&quot;</span><span class="hs-special">)</span><span> </span><span class="hs-operator">$</span><span id="AlexEOF"></span><span class="hs-cpp">
 #endif
 </span><span>    </span><span id="AlexError"><span class="hs-identifier">AlexSkip</span><span> </span></span><span class="hs-identifier">input__''</span><span> </span><span class="hs-identifier">len</span><span>
 </span><span id="line-342"></span><span>
