@@ -169,9 +169,9 @@ instance GHC.Classes.Eq Cardano.TestUtils.TxFCEKOutput
 
 module Cardano.YTxP
 data YTxPParams
-validatorLinker :: Linker YTxPParams (ScriptExport YTxPParams)
-stakeValidatorLinker :: Linker YTxPParams (ScriptExport YTxPParams)
-mintingPolicyLinker :: Linker YTxPParams (ScriptExport YTxPParams)
+validatorLinker :: Linker SdkParameters (ScriptExport SdkParameters)
+stakeValidatorLinker :: Linker SdkParameters (ScriptExport SdkParameters)
+mintingPolicyLinker :: Linker SdkParameters (ScriptExport SdkParameters)
 instance Data.Aeson.Types.FromJSON.FromJSON Cardano.YTxP.YTxPParams
 instance Data.Aeson.Types.ToJSON.ToJSON Cardano.YTxP.YTxPParams
 instance GHC.Classes.Eq Cardano.YTxP.YTxPParams
