@@ -40,7 +40,7 @@ data YTxPParams = YTxPParams
   deriving stock (Show, Generic, Eq)
   deriving anyclass (ToJSON, FromJSON)
 
-validatorLinker :: Linker YTxPParams (ScriptExport YTxPParams)
+validatorLinker :: Linker SdkParameters (ScriptExport SdkParameters)
 validatorLinker = do
   info <- getParam
 
@@ -52,7 +52,7 @@ validatorLinker = do
 
   let
     authorisedScriptsSymbol =
-      coerce @_ @CurrencySymbol (authorisedScriptsSTCS . params $ info)
+      coerce @_ @CurrencySymbol (authorisedScriptsSTCS info)
 
     yieldingValidator' =
       yieldingValidator Ply.# authorisedScriptsSymbol
@@ -64,7 +64,7 @@ validatorLinker = do
       )
       info
 
-mintingPolicyLinker :: Linker YTxPParams (ScriptExport YTxPParams)
+mintingPolicyLinker :: Linker SdkParameters (ScriptExport SdkParameters)
 mintingPolicyLinker = do
   info <- getParam
 
@@ -76,7 +76,7 @@ mintingPolicyLinker = do
 
   let
     authorisedScriptsSymbol =
-      coerce @_ @CurrencySymbol (authorisedScriptsSTCS . params $ info)
+      coerce @_ @CurrencySymbol (authorisedScriptsSTCS info)
 
     yieldingMPs =
       map
@@ -86,14 +86,14 @@ mintingPolicyLinker = do
                 yieldingMP Ply.# authorisedScriptsSymbol Ply.# toInteger nonce
             )
         )
-        (mintingPoliciesNonceList . params $ info)
+        (mintingPoliciesNonceList info)
 
   return $
     ScriptExport
       (fromList yieldingMPs)
       info
 
-stakeValidatorLinker :: Linker YTxPParams (ScriptExport YTxPParams)
+stakeValidatorLinker :: Linker SdkParameters (ScriptExport SdkParameters)
 stakeValidatorLinker = do
   info <- getParam
 
@@ -105,7 +105,7 @@ stakeValidatorLinker = do
 
   let
     authorisedScriptsSymbol =
-      coerce @_ @CurrencySymbol (authorisedScriptsSTCS . params $ info)
+      coerce @_ @CurrencySymbol (authorisedScriptsSTCS info)
 
     yieldingSVs =
       map
@@ -115,7 +115,7 @@ stakeValidatorLinker = do
                 yieldingSV Ply.# authorisedScriptsSymbol Ply.# toInteger nonce
             )
         )
-        (stakingValidatorsNonceList . params $ info)
+        (stakingValidatorsNonceList info)
 
   return $
     ScriptExport
