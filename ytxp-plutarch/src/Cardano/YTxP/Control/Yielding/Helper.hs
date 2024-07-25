@@ -6,6 +6,7 @@ we use to implement the logic for yielding validator, minting policy and staking
 module Cardano.YTxP.Control.Yielding.Helper (yieldingHelper) where
 
 import Cardano.YTxP.Control.Yielding (PAuthorisedScriptPurpose (PMinting, PRewarding, PSpending), getAuthorisedScriptHash)
+import Plutarch.Extra.TermCont (markInfoC)
 import Plutarch.LedgerApi.V2 (
   PCredential (PPubKeyCredential, PScriptCredential),
   PCurrencySymbol,
@@ -30,7 +31,11 @@ yieldingHelper ::
 yieldingHelper = plam $ \pylstcs redeemer ctx -> unTermCont $ do
   txInfo <- pletC $ pfromData $ pfield @"txInfo" # ctx
   let txInfoRefInputs = pfromData $ pfield @"referenceInputs" # txInfo
-  yieldingRedeemer <- pfromData . fst <$> ptryFromC redeemer
+  yieldingRedeemer <-
+    markInfoC
+      "[?yieldingHelper?] parsing redeemer"
+      "[!yieldingHelper!] parsing redeemer"
+      (pfromData . fst <$> ptryFromC redeemer)
   let authorisedScriptHash = getAuthorisedScriptHash # pylstcs # txInfoRefInputs # yieldingRedeemer
       authorisedScriptProofIndex = pto $ pfromData $ pfield @"authorisedScriptProofIndex" # yieldingRedeemer
       authorisedScriptPurpose = pfromData $ pfstBuiltin # authorisedScriptProofIndex

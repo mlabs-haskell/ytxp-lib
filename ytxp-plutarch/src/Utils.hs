@@ -6,15 +6,14 @@ module Utils (
 where
 
 import Plutarch.LedgerApi.V2 (
-  PCurrencySymbol,
+  PCurrencySymbol (PCurrencySymbol),
   PMap,
   PScriptHash,
  )
-import Plutarch.Unsafe (punsafeCoerce)
 
 -- | Convert a `ScriptHash` to a `CurrencySymbol`, which has the same representation
 pscriptHashToCurrencySymbol :: Term s PScriptHash -> Term s PCurrencySymbol
-pscriptHashToCurrencySymbol = punsafeCoerce
+pscriptHashToCurrencySymbol sc = pcon (PCurrencySymbol $ pto sc)
 
 -- TODO (OPTIMIZE): this can be turned into partial `phasMember` and `placksMember` variants
 pmember :: (PIsData k) => Term s (k :--> PMap any k v :--> PBool)
@@ -23,9 +22,10 @@ pmember = phoistAcyclic $
     precList
       ( \self x xs ->
           pif
-            (pfstBuiltin # x #== pdata key)
-            (pconstant True)
-            (self # xs)
+            (ptraceDebug "pmember: in condition"
+                ((pfstBuiltin # x) #== pdata key))
+            (ptraceDebug "pmember: in positive branch" $ pconstant True)
+            (ptraceDebug "pmember: negative branch" $ self # xs)
       )
       (const $ pconstant False)
       # pto m
