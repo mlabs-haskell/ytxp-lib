@@ -30,6 +30,11 @@ import ScriptExport.ScriptInfo (
   getParam,
   toRoledScript,
  )
+import Ply.Core.Unsafe (unsafeUnTypedScript', unsafeTypedScript)
+import UntypedPlutusCore (applyProgram)
+import Plutarch (Script(Script), compile, Config (NoTracing))
+import PlutusPrelude (unsafeFromRight)
+import Plutarch.Lift (PLifted, PUnsafeLiftDecl)
 
 --------------------------------------------------------------------------------
 
@@ -39,6 +44,14 @@ data YTxPParams = YTxPParams
   }
   deriving stock (Show, Generic, Eq)
   deriving anyclass (ToJSON, FromJSON)
+
+-- | Apply a Plutarch (Haskell lifted) term to a script
+-- | We use it instead of Ply.# due to issues with encoding encountered. 
+ap :: PUnsafeLiftDecl x => Ply.TypedScript r (PLifted x ': xs) -> PLifted x -> Ply.TypedScript r xs
+ap ts x = unsafeTypedScript ver $ unsafeFromRight $ prog `applyProgram` xc
+  where (ver, prog) = unsafeUnTypedScript' ts
+        Script xc = unsafeFromRight $ compile NoTracing $ pconstant x
+
 
 validatorLinker :: Linker SdkParameters (ScriptExport SdkParameters)
 validatorLinker = do
@@ -55,7 +68,7 @@ validatorLinker = do
       coerce @_ @CurrencySymbol (authorisedScriptsSTCS info)
 
     yieldingValidator' =
-      yieldingValidator Ply.# authorisedScriptsSymbol
+      yieldingValidator `ap` authorisedScriptsSymbol
 
   return $
     ScriptExport
@@ -83,7 +96,7 @@ mintingPolicyLinker = do
         ( \nonce ->
             ( pack ("ytxp:yieldingMintingPolicy:" <> show nonce)
             , toRoledScript $
-                yieldingMP Ply.# authorisedScriptsSymbol Ply.# toInteger nonce
+                yieldingMP `ap` authorisedScriptsSymbol `ap` toInteger nonce
             )
         )
         (mintingPoliciesNonceList info)
@@ -112,7 +125,7 @@ stakeValidatorLinker = do
         ( \nonce ->
             ( pack ("ytxp:yieldingStakeValidator:" <> show nonce)
             , toRoledScript $
-                yieldingSV Ply.# authorisedScriptsSymbol Ply.# toInteger nonce
+                yieldingSV `ap` authorisedScriptsSymbol `ap` toInteger nonce
             )
         )
         (stakingValidatorsNonceList info)
