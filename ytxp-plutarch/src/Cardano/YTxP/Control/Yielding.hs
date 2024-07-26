@@ -159,17 +159,25 @@ getAuthorisedScriptHash = phoistAcyclic $
       yieldingRedeemer <-
         pletFieldsC @'["authorisedScriptIndex"] redeemer
 
-      let autorisedScriptRefUTxO =
+      let authorisedScriptRefUTxO =
             txInfoRefInputs
               #!! pto (pfromData $ getField @"authorisedScriptIndex" yieldingRedeemer)
-          output = pfield @"resolved" # autorisedScriptRefUTxO
+          output = pfield @"resolved" # authorisedScriptRefUTxO
           value = pfield @"value" # output
+
+      ptraceC $ "getAuthorizedScriptHash: txInfoRefInputs = " <> pshow txInfoRefInputs
 
       pure $
         pif
           (pmember # psymbol # pto (pfromData value)) -- TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead
           ( pmatch (pfield @"referenceScript" # output) $ \case
-              PDJust ((pfield @"_0" #) -> autorisedScript) -> autorisedScript
+              PDJust ((pfield @"_0" #) -> authorisedScript) -> authorisedScript
               PDNothing _ -> (ptraceInfoError "getAuthorisedScriptHash: Reference input does not contain reference script")
           )
-          (ptraceInfoError "getAuthorisedScriptHash: Reference input does not contain AuthorisedScriptsSTCS")
+          ( ptraceInfoError $
+              "getAuthorisedScriptHash: Reference input does not contain AuthorisedScriptsSTCS."
+                <> "  Symbol: "
+                <> pshow psymbol
+                <> "  Value: "
+                <> pshow value
+          )

@@ -22,8 +22,10 @@ pmember = phoistAcyclic $
     precList
       ( \self x xs ->
           pif
-            (ptraceDebug "pmember: in condition"
-                ((pfstBuiltin # x) #== pdata key))
+            ( ptraceDebug
+                "pmember: in condition"
+                ((pfstBuiltin # x) #== pdata key)
+            )
             (ptraceDebug "pmember: in positive branch" $ pconstant True)
             (ptraceDebug "pmember: negative branch" $ self # xs)
       )
