@@ -42,7 +42,7 @@ TODO: Add haddock for PAuthorisedScriptIndex
 
 newtype PAuthorisedScriptIndex (s :: S) = PAuthorisedScriptIndex (Term s PInteger)
   deriving stock (Generic)
-  deriving anyclass (PlutusType, PIsData)
+  deriving anyclass (PlutusType, PIsData, PShow)
 
 instance DerivePlutusType PAuthorisedScriptIndex where
   type DPTStrat _ = PlutusTypeNewtype
@@ -63,7 +63,7 @@ TODO: Add haddock for PAuthorisedScriptPurpose
 
 data PAuthorisedScriptPurpose (s :: S) = PMinting | PSpending | PRewarding
   deriving stock (Generic, Enum, Bounded)
-  deriving anyclass (PlutusType, PIsData, PEq)
+  deriving anyclass (PlutusType, PIsData, PEq, PShow)
 
 instance DerivePlutusType PAuthorisedScriptPurpose where
   type DPTStrat _ = PlutusTypeEnumData
@@ -91,7 +91,7 @@ newtype PAuthorisedScriptProofIndex (s :: S)
           (PBuiltinPair (PAsData PAuthorisedScriptPurpose) (PAsData PInteger))
       )
   deriving stock (Generic)
-  deriving anyclass (PlutusType, PIsData)
+  deriving anyclass (PlutusType, PIsData, PShow)
 
 instance DerivePlutusType PAuthorisedScriptProofIndex where
   type DPTStrat _ = PlutusTypeNewtype
@@ -121,7 +121,7 @@ newtype PYieldingRedeemer (s :: S)
           )
       )
   deriving stock (Generic)
-  deriving anyclass (PlutusType, PIsData, PDataFields)
+  deriving anyclass (PlutusType, PIsData, PDataFields, PShow)
 
 instance DerivePlutusType PYieldingRedeemer where
   type DPTStrat _ = PlutusTypeData
@@ -166,10 +166,13 @@ getAuthorisedScriptHash = phoistAcyclic $
           value = pfield @"value" # output
 
       pure $
-        pif
-          (pmember # psymbol # pto (pfromData value)) -- TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead
-          ( pmatch (pfield @"referenceScript" # output) $ \case
-              PDJust ((pfield @"_0" #) -> autorisedScript) -> autorisedScript
-              PDNothing _ -> (ptraceInfoError "getAuthorisedScriptHash: Reference input does not contain reference script")
-          )
-          (ptraceInfoError "getAuthorisedScriptHash: Reference input does not contain AuthorisedScriptsSTCS")
+        ptraceInfo ("Yielding redeemer: " <> pshow redeemer) $
+          ptraceInfo ("Currency STCS: " <> pshow psymbol) $
+            ptraceInfo ("Value at ref input: " <> pshow value) $
+              pif
+                (pmember # psymbol # pto (pfromData value)) -- TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead
+                ( pmatch (pfield @"referenceScript" # output) $ \case
+                    PDJust ((pfield @"_0" #) -> autorisedScript) -> autorisedScript
+                    PDNothing _ -> (ptraceInfoError "getAuthorisedScriptHash: Reference input does not contain reference script")
+                )
+                (ptraceInfoError "getAuthorisedScriptHash: Reference input does not contain AuthorisedScriptsSTCS")
