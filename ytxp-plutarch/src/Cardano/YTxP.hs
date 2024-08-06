@@ -22,6 +22,10 @@ import Cardano.YTxP.SDK.SdkParameters (
 import PlutusLedgerApi.V2 (CurrencySymbol)
 import Ply qualified
 
+import Plutarch (Config (NoTracing), Script (Script), compile)
+import Plutarch.Lift (PLifted, PUnsafeLiftDecl)
+import PlutusPrelude (unsafeFromRight)
+import Ply.Core.Unsafe (unsafeTypedScript, unsafeUnTypedScript')
 import ScriptExport.ScriptInfo (
   Linker,
   ScriptExport (ScriptExport),
@@ -30,11 +34,7 @@ import ScriptExport.ScriptInfo (
   getParam,
   toRoledScript,
  )
-import Ply.Core.Unsafe (unsafeUnTypedScript', unsafeTypedScript)
 import UntypedPlutusCore (applyProgram)
-import Plutarch (Script(Script), compile, Config (NoTracing))
-import PlutusPrelude (unsafeFromRight)
-import Plutarch.Lift (PLifted, PUnsafeLiftDecl)
 
 --------------------------------------------------------------------------------
 
@@ -45,13 +45,14 @@ data YTxPParams = YTxPParams
   deriving stock (Show, Generic, Eq)
   deriving anyclass (ToJSON, FromJSON)
 
--- | Apply a Plutarch (Haskell lifted) term to a script
--- | We use it instead of Ply.# due to issues with encoding encountered. 
-ap :: PUnsafeLiftDecl x => Ply.TypedScript r (PLifted x ': xs) -> PLifted x -> Ply.TypedScript r xs
+{- | Apply a Plutarch (Haskell lifted) term to a script
+| We use it instead of Ply.# due to issues with encoding encountered.
+-}
+ap :: (PUnsafeLiftDecl x) => Ply.TypedScript r (PLifted x ': xs) -> PLifted x -> Ply.TypedScript r xs
 ap ts x = unsafeTypedScript ver $ unsafeFromRight $ prog `applyProgram` xc
-  where (ver, prog) = unsafeUnTypedScript' ts
-        Script xc = unsafeFromRight $ compile NoTracing $ pconstant x
-
+  where
+    (ver, prog) = unsafeUnTypedScript' ts
+    Script xc = unsafeFromRight $ compile NoTracing $ pconstant x
 
 validatorLinker :: Linker SdkParameters (ScriptExport SdkParameters)
 validatorLinker = do

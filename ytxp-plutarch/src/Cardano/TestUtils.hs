@@ -2,8 +2,6 @@
 {-# LANGUAGE KindSignatures #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
-{-# HLINT ignore "Redundant bracket" #-}
-
 {- | Module: Cardano.TestUtils
 Description: Construct nominal and attack test cases for unit tests
 
@@ -134,7 +132,7 @@ checkPreConditions ::
   input ->
   Maybe err
 checkPreConditions pcs args =
-  getFirst (foldMap ((\x -> (x args)) . preCondition) pcs)
+  getFirst (foldMap ((\x -> x args) . preCondition) pcs)
 
 --------------------------------------------------------------------------------
 
@@ -160,7 +158,7 @@ checkPostConditions ::
   output ->
   Maybe err
 checkPostConditions pcs args =
-  getFirst (foldMap ((\x -> (x args)) . postCondition) pcs)
+  getFirst (foldMap ((\x -> x args) . postCondition) pcs)
 
 --------------------------------------------------------------------------------
 
