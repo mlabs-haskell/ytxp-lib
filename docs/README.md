@@ -130,7 +130,7 @@ to apply all the linters and formatters. This might be useful.
 
 ### Haddock Documentation
 
-Below are instructions for generating Haddock documentation using different methods:
+The current Haddock documentation is available [here](https://mlabs-haskell.github.io/ytxp-lib/). Below are instructions for generating local Haddock documentation using various methods:
 
 #### Build
 
