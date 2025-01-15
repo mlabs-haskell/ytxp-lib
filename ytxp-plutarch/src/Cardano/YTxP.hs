@@ -1,14 +1,12 @@
 module Cardano.YTxP (
-  YTxPParams,
   validatorLinker,
   stakeValidatorLinker,
   mintingPolicyLinker,
 ) where
 
-import Data.Aeson (FromJSON, ToJSON)
 import Data.Coerce (coerce)
 import Data.Map (fromList)
-import Data.Text (Text, pack)
+import Data.Text (pack)
 
 import Cardano.YTxP.SDK.SdkParameters (
   AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
@@ -37,13 +35,6 @@ import ScriptExport.ScriptInfo (
 import UntypedPlutusCore (applyProgram)
 
 --------------------------------------------------------------------------------
-
-data YTxPParams = YTxPParams
-  { params :: SdkParameters
-  , commitHash :: Text
-  }
-  deriving stock (Show, Generic, Eq)
-  deriving anyclass (ToJSON, FromJSON)
 
 {- | Apply a Plutarch (Haskell lifted) term to a script
 | We use it instead of Ply.# due to issues with encoding encountered.
