@@ -203,7 +203,6 @@ test-suite ytxp-lib-test
     , prettyprinter
     , QuickCheck
     , regex
-    , tasty-golden
     , tasty-hunit
     , tasty-quickcheck
     , text
