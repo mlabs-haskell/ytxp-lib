@@ -19,10 +19,10 @@ Undefined.
 The following fields exist in the datum of the Offer UTxO.
 
 ```hs
-data DirectOfferDatum =
-  DirectOfferDatum
-    { doCreator :: Address
-    , doToBuy :: Value
+data OfferDatum =
+  OfferDatum
+    { creator :: Address
+    , toBuy :: Value
     }
 ```
 
@@ -32,13 +32,13 @@ Undefined.
 
 ## States
 
-The Direct Offer does not have meaningful states.
+The Offer does not have meaningful states.
 
 ## Participation in Transaction Families
 
 ### Introduction
 
-- Offer Creating
+- [Offer Creating](../transaction-families/creating.md)
 
 ### Modification
 
@@ -46,9 +46,5 @@ None.
 
 ### Termination
 
-- Offer Executing
-- Offer Reclaiming
-
-## Properties
-
-None.
+- [Offer Executing](../transaction-families/executing.md)
+- [Offer Reclaiming](../transaction-families/reclaiming.md)

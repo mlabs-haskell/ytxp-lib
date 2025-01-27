@@ -1,5 +1,9 @@
 # Direct offer
 
+> Please note that this example project has not been audited and tested.
+
+This example illustrates how to define the YTxP specification for a direct offer protocol. It is based on the direct offer example from Anatasia Lab. See [Direct Offer](https://github.com/Anastasia-Labs/direct-offer).
+
 The high-level offer flow looks like this:
 
 - Someone creates an offer.
@@ -18,4 +22,4 @@ The high-level offer flow looks like this:
 
 ## Transaction Flows
 
-> Should I define `creating-reclaiming` and `creating-executing`?
+None.
