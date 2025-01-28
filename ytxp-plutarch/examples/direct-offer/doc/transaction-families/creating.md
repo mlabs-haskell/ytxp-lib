@@ -66,7 +66,7 @@ Other outputs are permitted.
 
 ### Staking Events
 
-The withdrawal of this staking validator.
+The withdrawal from this staking validator.
 
 ### Validity Range
 
