@@ -4,10 +4,6 @@ This transaction family describes the offer revocation.
 
 ## Script Execution Specification
 
-The transactions detailed in this specification are non-composable. This design is due to assumptions regarding the order of outputs. It is defined this way for the sake of performance simplicity.
-
-Additionally, this contract assumes that the creator address of the offer component datum is a wallet address.
-
 ### Transaction Family Parameters
 
 1. `yieldingMPSymbol :: CurrencySymbol`
@@ -25,12 +21,10 @@ None.
 
 This transaction family does not check the reference inputs to determine whether the script is successful or not.
 
-However, the follow reference inputs should be present to support the YTxP, as well as for off-chain efficiency.
+However, the follow reference inputs should be present to support the YTxP.
 
 1. Authorized Reference Script UTxO (1)
 This input must contain the transaction hash for the `AuthorisedScript` script representing this transaction family.
-
-2. Offer component token minting policy reference input (1)
 
 ### Inputs
 

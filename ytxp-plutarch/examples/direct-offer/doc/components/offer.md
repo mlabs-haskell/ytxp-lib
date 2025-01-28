@@ -26,6 +26,8 @@ data OfferDatum =
     }
 ```
 
+We assume that the creator address is a wallet address.
+
 ### Reference Script
 
 Undefined.
