@@ -57,7 +57,7 @@ The outputs of this transaction family are, in order
     - The Offer component is created at the yielding validator script address with no staking address
     - The Offer component value has
       - 1 Offer component token
-    - The datum of must:
+    - The datum must:
       - Must have creator address
       - Must have a to buy value
     - The Offer component must not carry a reference script
