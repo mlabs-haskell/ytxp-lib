@@ -28,7 +28,7 @@ None.
 
 This transaction family does not check the reference inputs to determine whether the script is successful or not.
 
-However, the follow reference inputs should be present to support the YTxP, as well as for off-chain efficiency.
+However, the following reference inputs should be present to support the YTxP, as well as for off-chain efficiency.
 
 1. Authorized Reference Script UTxO (1)
 This input must contain the transaction hash for the `AuthorisedScript` script representing this transaction family.
