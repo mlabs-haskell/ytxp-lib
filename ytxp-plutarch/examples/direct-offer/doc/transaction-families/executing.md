@@ -46,7 +46,7 @@ Other mints may happen.
 
 ### Outputs
 
-The outputs of this transaction family are, in order
+The outputs of this transaction family are
 
 1. Wallet (1)
     - A single wallet UTxO is produced at the creator address defined in the datum `creator` of the consumed offer component.
