@@ -45,7 +45,7 @@ Other mints may happen.
 
 ### Outputs
 
-The outputs of this transaction family are, in order
+The outputs of this transaction family are
 
 1. Offer (1)
     - The Offer component is created at the yielding validator script address with no staking address
