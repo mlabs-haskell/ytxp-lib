@@ -32,7 +32,7 @@ If a component has multiple states, we will specify that in the documentation. H
 
 Finally, we will specify which transaction family will introduce, modify, and terminate this component. Have a look the example of the [offer component specification](/ytxp-plutarch/examples/direct-offer/doc/components/offer.md) for more details.
 
-The component specification serves only as information and does not detail the transaction validation for the offer component. Validation of the component is delegated to the authorized transaction families.
+The component specification does not detail the transaction validation for the offer component. Validation of the component is delegated to the authorised transaction families.
 
 ### Transaction families
 To determine the transaction families involved in the direct offer contract, we need to identify all atomic transactions that can take place.
