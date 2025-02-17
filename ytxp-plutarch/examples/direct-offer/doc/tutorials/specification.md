@@ -45,7 +45,7 @@ These transactions represent the transaction families: Creating, Reclaiming, and
 
 A transaction family specification outlines the details necessary for transaction validation.
 
-The transaction family itself is an authorized script that can be implemented with any validator types. However, it is recommended to use the staking validator, as it only requires a zero withdrawal to activate this validator.
+The transaction family itself is an authorised script that can be implemented with any validator types. However, it is recommended to use the staking validator, as it only requires a zero withdrawal to activate this validator.
 
 For the all possible details of how to specify a transaction validation we encourage to use the templates in the ./template/ directory.
 
