@@ -30,7 +30,7 @@ Specifically, we will define the attributes of the offer component in the follow
 
 If a component has multiple states, we will specify that in the documentation. However, the offer component has no meaningful states, so we will not provide any details.
 
-Finally, we will specify which transaction family will introduce, modify, and terminate this component. Please visit to the example of the [offer component specification](/ytxp-plutarch/examples/direct-offer/doc/components/offer.md).
+Finally, we will specify which transaction family will introduce, modify, and terminate this component. Have a look the example of the [offer component specification](/ytxp-plutarch/examples/direct-offer/doc/components/offer.md) for more details.
 
 The component specification serves only as information and does not detail the transaction validation for the offer component. Validation of the component is delegated to the authorized transaction families.
 
