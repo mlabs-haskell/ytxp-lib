@@ -25,7 +25,7 @@ Specifically, we will define the attributes of the offer component in the follow
 
 - We will not specify any particular values, as the component's value is what the consumer can keep.
 - The address must be a YTxP yielding-validator address to ensure that the yielding validator will only validate when an authorized transaction family is also validated.
-- The datum consists of two fields: the owner and the to buy value.
+- The datum consists of two fields: the "owner" and the "to buy" value.
 - No scripts are allowed to be referenced.
 
 If a component has multiple states, we will specify that in the documentation. However, the offer component has no meaningful states, so we will not provide any details.
