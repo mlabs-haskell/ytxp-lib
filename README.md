@@ -2,6 +2,7 @@
 
 The YTxP is a flexible and secure architectural approach for modeling Cardano protocols using transaction families.
 
+* [An Introduction to the Concepts Behind YTxP Architecture](https://www.mlabs.city/blog/an-introduction-to-the-concepts-behind-ytxp-architecture)
 * [Understand the core concepts of YTxP](/docs/README.md)
 * [How to write a YTxP specification](/ytxp-plutarch/examples/direct-offer/doc/tutorials/specification.md)
 * How to set up and configure the `ytxp-lib` and implement a basic protocol using the YTxP.
