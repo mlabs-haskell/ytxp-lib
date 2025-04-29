@@ -39,8 +39,10 @@ import Plutarch.LedgerApi.V2 (
 import Plutarch.Repr.Tag (DeriveAsTag (DeriveAsTag))
 import Utils (pmember)
 
-{-
-TODO: Add haddock for PAuthorisedScriptIndex
+{- | Newtype representing an index into an authorised script.
+
+This type is used to reference specific authorised scripts in a collection.
+It wraps a 'PInteger' to provide a clear semantic meaning.
 -}
 
 newtype PAuthorisedScriptIndex (s :: S) = PAuthorisedScriptIndex (Term s PInteger)
@@ -57,8 +59,16 @@ deriving via
   instance
     PLiftable PAuthorisedScriptIndex
 
-{-
-TODO: Add haddock for PAuthorisedScriptPurpose
+{- | Represents the purpose of an authorised script.
+
+This type can be one of three possibilities:
+
+- 'PMinting': Indicates the script is used for minting operations
+- 'PSpending': Indicates the script is used for spending operations
+- 'PRewarding': Indicates the script is used for rewarding operations
+
+The type is designed to be used with 'Plutarch' and provides proper serialization
+and deserialization between Haskell and Plutarch representations.
 -}
 
 data PAuthorisedScriptPurpose (s :: S) = PMinting | PSpending | PRewarding
@@ -93,8 +103,16 @@ instance PTryFrom PData (PAsData PAuthorisedScriptProofIndex)
 --   instance
 --     PLiftable PAuthorisedScriptProofIndex
 
-{-
-TODO: Add haddock for PYieldingRedeemer
+{- | Redeemer type for yielding operations.
+
+This type represents the data needed to validate a yielding transaction.
+It contains:
+
+1. 'authorisedScriptIndex': The index of the authorised script
+2. 'authorisedScriptProofIndex': The proof index for the authorised script
+
+The type is designed to work with both on-chain and off-chain code,
+providing a consistent interface for handling yielding operations.
 -}
 
 newtype PYieldingRedeemer (s :: S)
