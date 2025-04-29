@@ -1,3 +1,6 @@
+packages: 
+  ./*
+
 repository cardano-haskell-packages
   url: https://chap.intersectmbo.org/
   secure: True
@@ -9,55 +12,47 @@ repository cardano-haskell-packages
     c00aae8461a256275598500ea0e187588c35a5d5d7454fb57eac18d9edb86a56
     d4a35cd3121aa00d18544bb0ac01c3e1691d618f462c46129271bccf39f7e8ee
 
-source-repository-package
-    type: git
-    location: https://github.com/j-mueller/sc-tools
-    tag: 188933df37fdcc11e6b91f83a7acdbeac4a09c2f
-    subdir:
-     src/optics
+-- index-state: 2024-10-09T22:38:57Z
+
+-- source-repository-package
+--   type: git
+--   location: https://github.com/j-mueller/sc-tools
+--   tag: 188933df37fdcc11e6b91f83a7acdbeac4a09c2f
+--   --sha256: sha256-Lv3jjXdlwGxG05rckpgolp6ruWkO76E/xpEdpBVyBEA=
+--   subdir:
+--    src/optics
 
 source-repository-package
-    type: git
-    location: https://github.com/input-output-hk/xsy-liqwid-libs
-    tag: d63f0d52bc1c5d55c7056fdb6f01a08d49eced95
-    subdir:
-      plutarch-context-builder
-      liqwid-plutarch-extra
-      liqwid-script-export
-      plutarch-unit
-      plutarch-quickcheck
+  type: git
+  location: https://github.com/mlabs-haskell/ytxp-sdk
+  tag: c589c23c366edc883196b0f4814cf79e3ab61130
+  --sha256: sha256-6dZf+Lyf2bR2MQHXj/MI/7PRl25CkTKf7m4YkTazlok=
+  subdir:
+    ytxp-sdk
 
 source-repository-package
-    type: git
-    location: https://github.com/Plutonomicon/plutarch-plutus
-    tag: 7913e2d883530f569b16c02878989d3394bab727
-    subdir:
-      .
-      plutarch-ledger-api
-      plutarch-extra
-      plutarch-ledger-api
+  type: git
+  location: https://github.com/Plutonomicon/plutarch-plutus
+  tag: 93881d63bfe02ea12329fe3d5521935bb7dce18c
+  --sha256: sha256-WSESLdKZttm2EBNv5SY6sZXT+ks87rY3y0gatf1m3Lo=
+  subdir:
+    .
+    plutarch-ledger-api
+    plutarch-orphanage
+    plutarch-testlib
 
 source-repository-package
-    type: git
-    location: https://github.com/mlabs-haskell/ply
-    tag: 7fb83df1397eba057d00fd03f0af04a61512d9ef
-    subdir:
-      ply-core
-      ply-plutarch
-
-
-source-repository-package
-    type: git
-    location: https://github.com/mlabs-haskell/ytxp-sdk
-    tag: c589c23c366edc883196b0f4814cf79e3ab61130
-    subdir:
-      ytxp-sdk
-
-
-packages:
-  ytxp-plutarch/
+  type: git
+  location: https://github.com/mlabs-haskell/ply
+  tag: 1e87c0cd8ae64f6913fb0ec31ddb6c70edde6678
+  --sha256: sha256-XofLt0+OyE3IisBh6faHqsJFTPEHODSnioHOhntdPDQ=
+  subdir:
+    ply-core
+    ply-plutarch
 
 tests: true
 
+test-show-details: direct
+
 constraints:
-  , plutus-core == 1.30.0.0
+  , plutus-core ^>= 1.36.0.0

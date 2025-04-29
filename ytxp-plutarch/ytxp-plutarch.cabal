@@ -5,7 +5,7 @@ synopsis:
   Control scripts, types, and utilities for the YTxP architecture
 
 author:        Peter Dragos, Koz Ross
-maintainer:    peter@mlabs.city, koz@mlabs.city
+maintainer:    edi@mlabs.city, peter@mlabs.city, koz@mlabs.city
 
 flag dev
   description: Enable non-strict compilation for development
@@ -119,7 +119,7 @@ library pprelude
     , base16-bytestring
     , bytestring
     , plutarch
-    , plutus-core
+    , plutus-core        >=1.36.0.0
     , text
     , ytxp-sdk
 
@@ -130,15 +130,12 @@ library
   import:          common-language
   build-depends:
     , aeson
-    , base                   ^>=4.18.1.0
+    , base                 ^>=4.18.1.0
     , containers
     , generics-sop
-    , liqwid-plutarch-extra
-    , liqwid-script-export
     , plutarch
-    , plutarch-extra
     , plutarch-ledger-api
-    , plutus-core
+    , plutus-core          >=1.36.0.0
     , plutus-ledger-api
     , plutus-tx
     , ply-core
@@ -153,14 +150,13 @@ library
   hs-source-dirs:  src
   exposed-modules:
     Cardano.TestUtils
-    Cardano.YTxP
     Cardano.YTxP.Control.Stubs
-    Cardano.YTxP.Control.Vendored
     Cardano.YTxP.Control.Yielding
     Cardano.YTxP.Control.Yielding.Helper
     Cardano.YTxP.Control.Yielding.Scripts
     Utils
 
+-- Cardano.YTxP TODO: replace linkers
 -- Examples
 
 library direct-offer-example
@@ -169,7 +165,6 @@ library direct-offer-example
   hs-source-dirs:   examples/direct-offer
   build-depends:
     , base
-    , liqwid-plutarch-extra
     , plutarch
     , plutus-ledger-api
     , pprelude
@@ -184,17 +179,17 @@ library direct-offer-example
 
 -- Executables
 
-executable export
-  import:         common-language
-  main-is:        Main.hs
-  build-depends:
-    , base
-    , liqwid-script-export
-    , plutarch
-    , pprelude
-    , ytxp-plutarch
+-- TODO: replace ScriptExport
+-- executable export
+--   import:         common-language
+--   main-is:        Main.hs
+--   build-depends:
+--     , base
+--     , plutarch
+--     , pprelude
+--     , ytxp-plutarch
 
-  hs-source-dirs: app/export
+--   hs-source-dirs: app/export
 
 -- Tests
 
@@ -213,12 +208,8 @@ test-suite ytxp-lib-test
   build-depends:
     , aeson
     , bytestring
-    , convex-optics
     , lens
-    , liqwid-plutarch-extra
     , mtl
-    , plutarch-context-builder
-    , plutarch-unit
     , plutus-ledger-api
     , plutus-tx
     , prettyprinter
@@ -229,5 +220,4 @@ test-suite ytxp-lib-test
     , text
     , ytxp-sdk
 
-  -- , convex-plutarch
   hs-source-dirs: test

@@ -1,6 +1,7 @@
 module Cardano.YTxP.Control.Yielding.Scripts (
   -- * RawScriptExport exporter
-  scripts,
+
+  -- scripts,
 
   -- * Plutarch validators
   yieldingV,
@@ -15,14 +16,14 @@ import Plutarch (Config)
 import Plutarch.LedgerApi.V2 (PCurrencySymbol, PScriptContext)
 import Ply (TypedScriptEnvelope)
 import Ply.Plutarch.TypedWriter (TypedWriter, mkEnvelope)
-import ScriptExport.ScriptInfo (RawScriptExport (RawScriptExport))
+
+-- import ScriptExport.ScriptInfo (RawScriptExport (RawScriptExport))
 
 --------------------------------------------------------------------------------
 -- Raw Script Export
 
 {- | Exports the yielding validator, yielding minting policy and yielding staking validator
 from a given Plutarch @Config@
--}
 scripts :: Config -> RawScriptExport
 scripts conf =
   RawScriptExport $
@@ -39,6 +40,7 @@ scripts conf =
       ClosedTerm pt ->
       (Text, TypedScriptEnvelope)
     envelope d t = (d, either (error . unpack) id $ mkEnvelope conf d t)
+-}
 
 --------------------------------------------------------------------------------
 -- Plutarch level terms

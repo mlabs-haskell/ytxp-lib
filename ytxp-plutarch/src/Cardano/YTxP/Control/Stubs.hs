@@ -9,6 +9,7 @@ module Cardano.YTxP.Control.Stubs (
   noncedTwoArgumentScriptWrapper,
 ) where
 
+import Data.Kind (Type)
 import Plutarch.LedgerApi.V2 (PScriptContext)
 
 --------------------------------------------------------------------------------
@@ -18,7 +19,7 @@ import Plutarch.LedgerApi.V2 (PScriptContext)
 alwaysSucceedsValidator ::
   forall (s :: S).
   Term s (PData :--> PData :--> PScriptContext :--> POpaque)
-alwaysSucceedsValidator = plam $ \_ _ _ -> popaque (pconstant ())
+alwaysSucceedsValidator = plam $ \_ _ _ -> popaque (pconstant @PUnit ())
 
 {- | Compile a nonce into the script, changing the script hash. This can be useful if you need
 many stubbed validators with different addresses.
@@ -40,7 +41,7 @@ noncedValidatorWrapper nonce wrappedScript =
 alwaysSucceedsTwoArgumentScript ::
   forall (s :: S).
   Term s (PData :--> PScriptContext :--> POpaque)
-alwaysSucceedsTwoArgumentScript = plam $ \_ _ -> popaque (pconstant ())
+alwaysSucceedsTwoArgumentScript = plam $ \_ _ -> popaque (pconstant @PUnit ())
 
 {- | Compiles a nonce into the script, changing the script hashes.
 This is useful if you need many stubbed validators with different addresses

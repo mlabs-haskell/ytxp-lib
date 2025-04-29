@@ -11,7 +11,7 @@ import ScriptExport.Types (
   insertScriptExportWithLinker,
  )
 
-import Cardano.YTxP qualified as YTxP
+import qualified Cardano.YTxP as YTxP
 import Cardano.YTxP.Control.Yielding.Scripts (scripts)
 
 main :: IO ()

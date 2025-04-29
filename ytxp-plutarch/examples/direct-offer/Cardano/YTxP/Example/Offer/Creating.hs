@@ -83,4 +83,4 @@ creatingTxF params = phoistAcyclic $ plam $ \_redeemer context -> unTermCont $ d
         # offerOutputFields.datum
         # getField @"data" txInfoFields
 
-  pure . popaque $ pconstant ()
+  pure . popaque $ pconstant @PUnit ()

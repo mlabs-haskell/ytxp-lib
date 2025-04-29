@@ -107,7 +107,7 @@ executingTxF params = phoistAcyclic $ plam $ \_redeemer context -> unTermCont $ 
         offerInputDatumFields.toBuy
         (pfromData txInfoFields.outputs)
 
-  pure . popaque $ pconstant ()
+  pure . popaque $ pconstant @PUnit ()
 
 -- | Find the first valid wallet output
 tryGetWalletOutput ::

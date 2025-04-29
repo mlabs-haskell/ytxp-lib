@@ -37,5 +37,5 @@ pcheck ::
 pcheck b =
   pif
     b
-    (popaque $ pconstant ())
+    (popaque $ pconstant @PUnit ())
     perror

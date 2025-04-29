@@ -86,4 +86,4 @@ reclaimingTxF params = phoistAcyclic $ plam $ \_redeemer context -> unTermCont $
   pguardC "Expect signature of the offer creator" $
     pelem # offerInputDatumFields.creator # txInfoFields.signatories
 
-  pure . popaque $ pconstant ()
+  pure . popaque $ pconstant @PUnit ()

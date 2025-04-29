@@ -17,10 +17,10 @@ import Cardano.YTxP.SDK.SdkParameters (
   ),
  )
 
-import PlutusLedgerApi.V2 (CurrencySymbol)
-import Ply qualified
+import PlutusLedgerApi.V3 (CurrencySymbol)
+import qualified Ply
 
-import Plutarch (Config (NoTracing), Script (Script), compile)
+import Plutarch.Internal.Term (Config (NoTracing), Script (Script), compile)
 import Plutarch.Lift (PLifted, PUnsafeLiftDecl)
 import PlutusPrelude (unsafeFromRight)
 import Ply.Core.Unsafe (unsafeTypedScript, unsafeUnTypedScript')

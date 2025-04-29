@@ -77,12 +77,12 @@ module Cardano.TestUtils (
 
 import Control.Arrow (Kleisli (Kleisli), runKleisli, (>>>))
 import Data.Foldable (fold, foldl')
+import Data.Kind (Type)
 import Data.List (intercalate)
 import Data.Monoid (First (First), getFirst)
 import Data.Text (Text)
-import Plutarch (Script)
-import Plutarch.Evaluate (EvalError, evalScriptHuge)
-import Plutarch.Extra.Script (applyArguments)
+import Plutarch.Evaluate (EvalError, applyArguments, evalScriptHuge)
+import Plutarch.Internal.Term (Script)
 import PlutusCore.Data qualified as PLC
 import PlutusLedgerApi.V2 (Datum, ExBudget, Redeemer, ScriptContext, toData)
 import Test.Tasty (TestTree)
