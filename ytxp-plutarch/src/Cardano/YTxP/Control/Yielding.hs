@@ -1,11 +1,18 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-{- | Module: Caradno.YTxP.Control.Stubs
-Description: TODO
+{- | Module: Cardano.YTxP.Control.Yielding
+Description: This module provides types and utilities for handling yielding scripts in the YTxP protocol.
 
-Add note on orphan instances. We want to have the haskell types come from the shared SDK
-so that other onchain implementations can reuse those same types. This however,
-forces us to declare orphan instances for haskell -> plutarch conversion
+The module exports types related to authorised scripts and their purposes, as well as
+redeemer types for yielding operations. The primary function 'getAuthorisedScriptHash'
+provides a way to retrieve the authorised script hash from reference inputs.
+
+The types in this module are designed to work with both Haskell and Plutarch representations,
+facilitating code reuse across different implementations.
+
+The module also contains orphan instances necessary for converting between Haskell types
+and Plutarch types. These instances are carefully implemented to maintain type safety
+and proper serialization between the two languages.
 -}
 module Cardano.YTxP.Control.Yielding (
   getAuthorisedScriptHash,
@@ -113,12 +120,26 @@ deriving via
   instance
     PLiftable PYieldingRedeemer
 
-{- | Given a list of reference inputs and a Yielding Redeemer, dig out the authorised script hash
- by:
+{- | Given a list of reference inputs and a Yielding Redeemer, retrieves the authorised script hash.
 
-- Indexing the reference inputs according to the redeemer
-- Checking the fetched reference input for the correct AuthorisedScriptsSTCS
-- Returning the AuthorisedScriptHash
+This function performs the following steps:
+
+1. Extracts the authorised script index from the redeemer
+2. Looks up the reference input at that index
+3. Verifies that the reference input contains the correct script
+4. Returns the script hash if found, or throws an error otherwise
+
+The function is designed to work with both Haskell and Plutarch types seamlessly,
+providing a safe and efficient way to handle script hash retrieval.
+
+Parameters:
+- `psymbol`: The currency symbol
+- `txInfoRefInputs`: List of reference inputs to search
+- `redeemer`: The yielding redeemer containing the index information
+
+Returns:
+- The authorised script hash if found
+- An error if the reference input is missing or invalid
 -}
 getAuthorisedScriptHash ::
   forall (s :: S).
