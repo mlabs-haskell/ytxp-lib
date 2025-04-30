@@ -38,9 +38,11 @@ import Plutarch.Repr.Data (DeriveAsDataStruct (DeriveAsDataStruct))
 import Plutarch.Repr.Tag (DeriveAsTag (DeriveAsTag))
 import Utils (pmember)
 
-{- | Newtype representing an index into an authorised script.
+{- | Newtype representing an index used to find the authorised script
 
 This type is used to reference specific authorised scripts in a collection.
+    This index has a different meaning depending on if the authorised script is a valdiator,
+    minting policy, or staking validator.
 It wraps a 'PInteger' to provide a clear semantic meaning.
 -}
 newtype PAuthorisedScriptIndex (s :: S) = PAuthorisedScriptIndex (Term s PInteger)
@@ -95,6 +97,10 @@ instance PTryFrom PData (PAsData PAuthorisedScriptPurpose)
 
 -- TODO: Why do we need to wrap the args in PAsData here?
 -- If we don' there is some issues with the derivation of plutus types
+{-
+This pair indicates the authorised script type and the index at which to find proof of the script execution.
+This index has a different meaning depending on if the authorised script is a valdiator, minting policy, or staking validator.
+-}
 newtype PAuthorisedScriptProofIndex (s :: S)
   = PAuthorisedScriptProofIndex
       ( Term
