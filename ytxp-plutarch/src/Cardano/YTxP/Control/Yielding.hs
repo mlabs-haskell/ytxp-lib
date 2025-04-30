@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -fno-warn-orphans #-}
-
 {- | Module: Cardano.YTxP.Control.Yielding
 Description: This module provides types and utilities for handling yielding scripts in the YTxP protocol.
 
@@ -9,10 +7,6 @@ provides a way to retrieve the authorised script hash from reference inputs.
 
 The types in this module are designed to work with both Haskell and Plutarch representations,
 facilitating code reuse across different implementations.
-
-The module also contains orphan instances necessary for converting between Haskell types
-and Plutarch types. These instances are carefully implemented to maintain type safety
-and proper serialization between the two languages.
 -}
 module Cardano.YTxP.Control.Yielding (
   getAuthorisedScriptHash,
@@ -24,18 +18,23 @@ where
 import Cardano.YTxP.SDK.Redeemers (
   AuthorisedScriptIndex (AuthorisedScriptIndex),
   AuthorisedScriptProofIndex (AuthorisedScriptProofIndex),
-  AuthorisedScriptPurpose,
+  AuthorisedScriptPurpose (Minting, Rewarding, Spending),
   YieldingRedeemer,
  )
+import Data.Coerce (coerce)
 import GHC.Generics (Generic)
-import GHC.Records (HasField (getField))
 import Generics.SOP qualified as SOP
+import Plutarch.Internal.Lift (LiftError (OtherLiftError))
 import Plutarch.LedgerApi.Utils (PMaybeData (PDJust, PDNothing))
 import Plutarch.LedgerApi.V2 (
   PCurrencySymbol,
   PScriptHash,
   PTxInInfo,
+  PTxOut (ptxOut'value),
+  ptxInInfo'resolved,
+  ptxOut'referenceScript,
  )
+import Plutarch.Repr.Data (DeriveAsDataStruct (DeriveAsDataStruct))
 import Plutarch.Repr.Tag (DeriveAsTag (DeriveAsTag))
 import Utils (pmember)
 
@@ -44,7 +43,6 @@ import Utils (pmember)
 This type is used to reference specific authorised scripts in a collection.
 It wraps a 'PInteger' to provide a clear semantic meaning.
 -}
-
 newtype PAuthorisedScriptIndex (s :: S) = PAuthorisedScriptIndex (Term s PInteger)
   deriving stock (Generic)
   deriving anyclass (PlutusType, PIsData)
@@ -70,15 +68,28 @@ This type can be one of three possibilities:
 The type is designed to be used with 'Plutarch' and provides proper serialization
 and deserialization between Haskell and Plutarch representations.
 -}
-
 data PAuthorisedScriptPurpose (s :: S) = PMinting | PSpending | PRewarding
   deriving stock (Generic, Enum, Bounded)
-  deriving anyclass (PIsData, PEq)
+  deriving anyclass (SOP.Generic, PIsData, PEq)
   deriving
-    (PlutusType, PLiftable)
+    (PlutusType)
     via DeriveAsTag PAuthorisedScriptPurpose
 
-instance SOP.Generic (PAuthorisedScriptPurpose s)
+instance PLiftable PAuthorisedScriptPurpose where
+  type AsHaskell PAuthorisedScriptPurpose = AuthorisedScriptPurpose
+  type PlutusRepr PAuthorisedScriptPurpose = Integer
+
+  haskToRepr = toInteger . SOP.hindex . SOP.from
+
+  reprToPlut idx = PLifted $ popaque $ pconstant @PInteger idx
+
+  plutToRepr p = plutToRepr @PInteger $ coerce p
+
+  reprToHask idx
+    | idx == haskToRepr @PAuthorisedScriptPurpose Minting = Right Minting
+    | idx == haskToRepr @PAuthorisedScriptPurpose Spending = Right Spending
+    | idx == haskToRepr @PAuthorisedScriptPurpose Rewarding = Right Rewarding
+    | otherwise = Left (OtherLiftError "Invalid Index")
 
 instance PTryFrom PData (PAsData PAuthorisedScriptPurpose)
 
@@ -91,17 +102,11 @@ newtype PAuthorisedScriptProofIndex (s :: S)
           (PBuiltinPair (PAsData PAuthorisedScriptPurpose) (PAsData PInteger))
       )
   deriving stock (Generic)
-  deriving anyclass (PlutusType, PIsData)
-
-instance DerivePlutusType PAuthorisedScriptProofIndex where
-  type DPTStrat _ = PlutusTypeNewtype
+  deriving anyclass (SOP.Generic, PIsData)
+  deriving (PlutusType) via (DeriveNewtypePlutusType PAuthorisedScriptProofIndex)
+  deriving (PLiftable) via (DeriveNewtypePLiftable PAuthorisedScriptProofIndex AuthorisedScriptProofIndex)
 
 instance PTryFrom PData (PAsData PAuthorisedScriptProofIndex)
-
--- deriving via
---   DeriveNewtypePLiftable PAuthorisedScriptProofIndex AuthorisedScriptProofIndex
---   instance
---     PLiftable PAuthorisedScriptProofIndex
 
 {- | Redeemer type for yielding operations.
 
@@ -114,29 +119,16 @@ It contains:
 The type is designed to work with both on-chain and off-chain code,
 providing a consistent interface for handling yielding operations.
 -}
-
-newtype PYieldingRedeemer (s :: S)
-  = PYieldingRedeemer
-      ( Term
-          s
-          ( PDataRecord
-              '[ "authorisedScriptIndex" ':= PAuthorisedScriptIndex
-               , "authorisedScriptProofIndex" ':= PAuthorisedScriptProofIndex
-               ]
-          )
-      )
+data PYieldingRedeemer (s :: S) = PYieldingRedeemer
+  { authorisedScriptIndex :: Term s (PAsData PAuthorisedScriptIndex)
+  , authorisedScriptProofIndex :: Term s (PAsData PAuthorisedScriptProofIndex)
+  }
   deriving stock (Generic)
-  deriving anyclass (PlutusType, PIsData)
-
-instance DerivePlutusType PYieldingRedeemer where
-  type DPTStrat _ = PlutusTypeData
+  deriving anyclass (SOP.Generic, PIsData)
+  deriving (PlutusType) via (DeriveAsDataStruct PYieldingRedeemer)
+  deriving (PLiftable) via (DeriveDataPLiftable PYieldingRedeemer YieldingRedeemer)
 
 instance PTryFrom PData (PAsData PYieldingRedeemer)
-
-deriving via
-  (DeriveDataPLiftable PYieldingRedeemer YieldingRedeemer)
-  instance
-    PLiftable PYieldingRedeemer
 
 {- | Given a list of reference inputs and a Yielding Redeemer, retrieves the authorised script hash.
 
@@ -172,20 +164,25 @@ getAuthorisedScriptHash = phoistAcyclic $
   plam $
     \psymbol txInfoRefInputs redeemer -> unTermCont $ do
       -- TODO (OPTIMIZE): these values only get used once, can be a `let`
-      yieldingRedeemer <-
-        pletFieldsC @'["authorisedScriptIndex"] redeemer
+      PYieldingRedeemer authorisedScriptIndex _ <- pmatchC redeemer
 
       let autorisedScriptRefUTxO =
             txInfoRefInputs
-              #!! pto (pfromData $ getField @"authorisedScriptIndex" yieldingRedeemer)
-          output = pfield @"resolved" # autorisedScriptRefUTxO
-          value = pfield @"value" # output
+              #!! pto (pfromData authorisedScriptIndex)
+
+      scriptRefFields <- pmatchC $ pfromData autorisedScriptRefUTxO
+      resolved' <- pletC $ ptxInInfo'resolved scriptRefFields
+      resolved <- pmatchC resolved'
+
+      let
+        value = ptxOut'value resolved
+        referenceScript = ptxOut'referenceScript resolved
 
       pure $
         pif
           (pmember # psymbol # pto (pfromData value)) -- TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead
-          ( pmatch (pfield @"referenceScript" # output) $ \case
-              PDJust ((pfield @"_0" #) -> autorisedScript) -> autorisedScript
+          ( pmatch referenceScript $ \case
+              PDJust autorisedScript -> pfromData autorisedScript
               PDNothing -> (ptraceInfoError "getAuthorisedScriptHash: Reference input does not contain reference script")
           )
           (ptraceInfoError "getAuthorisedScriptHash: Reference input does not contain AuthorisedScriptsSTCS")

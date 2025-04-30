@@ -25,8 +25,8 @@ repository cardano-haskell-packages
 source-repository-package
   type: git
   location: https://github.com/mlabs-haskell/ytxp-sdk
-  tag: c589c23c366edc883196b0f4814cf79e3ab61130
-  --sha256: sha256-6dZf+Lyf2bR2MQHXj/MI/7PRl25CkTKf7m4YkTazlok=
+  tag: afeadabcf1e5afbc447efb2193b3e3992427944a
+  --sha256: sha256-Z8XTpmj1DO8eJouEzhNYlcUIBVRABz4FgSUXo5kTxFw=
   subdir:
     ytxp-sdk
 
