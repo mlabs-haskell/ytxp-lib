@@ -6,7 +6,7 @@ redeemer types for yielding operations. The primary function 'getAuthorisedScrip
 provides a way to retrieve the authorised script hash from reference inputs.
 
 The types in this module are designed to work with both Haskell and Plutarch representations,
-facilitating code reuse across different implementations.
+facilitating seamless integration between on-chain validation and off-chain application logic.
 -}
 module Cardano.YTxP.Control.Yielding (
   getAuthorisedScriptHash,
@@ -65,8 +65,8 @@ This type can be one of three possibilities:
 - 'PSpending': Indicates the script is used for spending operations
 - 'PRewarding': Indicates the script is used for rewarding operations
 
-The type is designed to be used with 'Plutarch' and provides proper serialization
-and deserialization between Haskell and Plutarch representations.
+The type provides a clear semantic distinction between different script purposes,
+which is essential for proper transaction validation and script execution.
 -}
 data PAuthorisedScriptPurpose (s :: S) = PMinting | PSpending | PRewarding
   deriving stock (Generic, Enum, Bounded)
@@ -111,13 +111,13 @@ instance PTryFrom PData (PAsData PAuthorisedScriptProofIndex)
 {- | Redeemer type for yielding operations.
 
 This type represents the data needed to validate a yielding transaction.
-It contains:
 
-1. 'authorisedScriptIndex': The index of the authorised script
+It contains:
+1. 'authorisedScriptIndex': The index referencing the authorised script
 2. 'authorisedScriptProofIndex': The proof index for the authorised script
 
-The type is designed to work with both on-chain and off-chain code,
-providing a consistent interface for handling yielding operations.
+The type provides a consistent interface for handling yielding operations across
+both on-chain validation and off-chain transaction construction.
 -}
 data PYieldingRedeemer (s :: S) = PYieldingRedeemer
   { authorisedScriptIndex :: Term s (PAsData PAuthorisedScriptIndex)
@@ -130,7 +130,7 @@ data PYieldingRedeemer (s :: S) = PYieldingRedeemer
 
 instance PTryFrom PData (PAsData PYieldingRedeemer)
 
-{- | Given a list of reference inputs and a Yielding Redeemer, retrieves the authorised script hash.
+{- | Retrieves the authorised script hash from reference inputs using a Yielding Redeemer.
 
 This function performs the following steps:
 
@@ -139,17 +139,17 @@ This function performs the following steps:
 3. Verifies that the reference input contains the correct script
 4. Returns the script hash if found, or throws an error otherwise
 
-The function is designed to work with both Haskell and Plutarch types seamlessly,
-providing a safe and efficient way to handle script hash retrieval.
-
 Parameters:
-- `psymbol`: The currency symbol
+- `psymbol`: The currency symbol to check against
 - `txInfoRefInputs`: List of reference inputs to search
 - `redeemer`: The yielding redeemer containing the index information
 
 Returns:
 - The authorised script hash if found
-- An error if the reference input is missing or invalid
+- An error if:
+  - The reference input is missing
+  - The reference input does not contain the expected script
+  - The script hash does not match the expected currency symbol
 -}
 getAuthorisedScriptHash ::
   forall (s :: S).
