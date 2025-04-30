@@ -1,12 +1,13 @@
 {- | Module: Cardano.YTxP.Control.Yielding
-Description: This module provides types and utilities for handling yielding scripts in the YTxP protocol.
+Description: This module provides core types and utilities for handling yielding scripts in the YTxP protocol.
 
-The module exports types related to authorised scripts and their purposes, as well as
-redeemer types for yielding operations. The primary function 'getAuthorisedScriptHash'
-provides a way to retrieve the authorised script hash from reference inputs.
+The module exports:
+- Types for authorised script indexes and purposes
+- Redeemer types for yielding operations
+- Utility functions for working with reference inputs
 
-The types in this module are designed to work with both Haskell and Plutarch representations,
-facilitating seamless integration between on-chain validation and off-chain application logic.
+The types in this module are carefully designed to work seamlessly with both Haskell and Plutarch representations,
+enabling consistent validation logic both on-chain and off-chain.
 -}
 module Cardano.YTxP.Control.Yielding (
   getAuthorisedScriptHash,
@@ -40,10 +41,13 @@ import Utils (pmember)
 
 {- | Newtype representing an index used to find the authorised script
 
-This type is used to reference specific authorised scripts in a collection.
-    This index has a different meaning depending on if the authorised script is a valdiator,
-    minting policy, or staking validator.
-It wraps a 'PInteger' to provide a clear semantic meaning.
+This type serves as a clear semantic wrapper for an index used to locate authorised scripts
+in a collection of reference inputs. The specific interpretation of the index depends on:
+- Whether the script is a validator
+- Whether it's a minting policy
+- Whether it's a staking validator
+
+The wrapper provides better type safety and documentation compared to using a raw integer.
 -}
 newtype PAuthorisedScriptIndex (s :: S) = PAuthorisedScriptIndex (Term s PInteger)
   deriving stock (Generic)
@@ -61,14 +65,14 @@ deriving via
 
 {- | Represents the purpose of an authorised script.
 
-This type can be one of three possibilities:
+This type provides a clear enumeration of the possible purposes an authorised script can serve:
 
-- 'PMinting': Indicates the script is used for minting operations
-- 'PSpending': Indicates the script is used for spending operations
-- 'PRewarding': Indicates the script is used for rewarding operations
+- 'PMinting': Scripts involved in minting new assets
+- 'PSpending': Scripts that handle spending of assets
+- 'PRewarding': Scripts that manage reward distribution
 
-The type provides a clear semantic distinction between different script purposes,
-which is essential for proper transaction validation and script execution.
+Having explicit purpose types helps prevent invalid script usage and ensures that
+the correct validation logic is applied depending on the script's purpose.
 -}
 data PAuthorisedScriptPurpose (s :: S) = PMinting | PSpending | PRewarding
   deriving stock (Generic, Enum, Bounded)
@@ -116,14 +120,15 @@ instance PTryFrom PData (PAsData PAuthorisedScriptProofIndex)
 
 {- | Redeemer type for yielding operations.
 
-This type represents the data needed to validate a yielding transaction.
+This type captures all necessary information needed to validate a yielding transaction.
 
-It contains:
-1. 'authorisedScriptIndex': The index referencing the authorised script
-2. 'authorisedScriptProofIndex': The proof index for the authorised script
+The fields are:
 
-The type provides a consistent interface for handling yielding operations across
-both on-chain validation and off-chain transaction construction.
+1. 'authorisedScriptIndex': Index pointing to the authorised script in the reference inputs
+2. 'authorisedScriptProofIndex': Proof index containing additional verification data
+
+This type provides a uniform interface that works seamlessly both on-chain and off-chain,
+ensuring consistent validation logic across different execution contexts.
 -}
 data PYieldingRedeemer (s :: S) = PYieldingRedeemer
   { authorisedScriptIndex :: Term s (PAsData PAuthorisedScriptIndex)
@@ -141,21 +146,23 @@ instance PTryFrom PData (PAsData PYieldingRedeemer)
 This function performs the following steps:
 
 1. Extracts the authorised script index from the redeemer
-2. Looks up the reference input at that index
-3. Verifies that the reference input contains the correct script
-4. Returns the script hash if found, or throws an error otherwise
+2. Looks up the reference input at that specific index
+3. Verifies that the reference input contains the expected script
+4. Validates that the script hash matches the expected currency symbol
+5. Returns the authorised script hash if all checks pass
 
 Parameters:
-- `psymbol`: The currency symbol to check against
-- `txInfoRefInputs`: List of reference inputs to search
+- `psymbol`: Currency symbol to verify against
+- `txInfoRefInputs`: List of reference inputs to search through
 - `redeemer`: The yielding redeemer containing the index information
 
 Returns:
-- The authorised script hash if found
-- An error if:
-  - The reference input is missing
-  - The reference input does not contain the expected script
-  - The script hash does not match the expected currency symbol
+- The authorised script hash if successfully found and validated
+
+Throws an error in the following cases:
+- If the reference input at the specified index is missing
+- If the reference input does not contain the expected script
+- If the script hash does not match the expected currency symbol
 -}
 getAuthorisedScriptHash ::
   forall (s :: S).
