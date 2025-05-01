@@ -20,7 +20,7 @@ import Plutarch (
   TracingMode (DetTracing),
   compile,
  )
-import Plutarch.LedgerApi.V2 (PScriptContext)
+import Plutarch.LedgerApi.V3 (PScriptContext)
 
 -- | Helper that produces a @Reader@ that yields a compiled Script, throws an error is compilation fails
 yieldingMPScriptR :: Reader ScriptsTestsParams Script

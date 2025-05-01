@@ -12,7 +12,7 @@ enabling consistent validation logic both on-chain and off-chain.
 module Cardano.YTxP.Control.Yielding (
   getAuthorisedScriptHash,
   PAuthorisedScriptPurpose (PMinting, PSpending, PRewarding),
-  PYieldingRedeemer,
+  PYieldingRedeemer (..),
 )
 where
 
@@ -27,7 +27,7 @@ import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
 import Plutarch.Internal.Lift (LiftError (OtherLiftError))
 import Plutarch.LedgerApi.Utils (PMaybeData (PDJust, PDNothing))
-import Plutarch.LedgerApi.V2 (
+import Plutarch.LedgerApi.V3 (
   PCurrencySymbol,
   PScriptHash,
   PTxInInfo,

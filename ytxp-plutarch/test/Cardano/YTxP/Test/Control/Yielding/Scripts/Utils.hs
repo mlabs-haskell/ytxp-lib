@@ -32,7 +32,7 @@ import Plutarch (
   TracingMode (DetTracing),
  )
 import Plutarch.Context (Builder, MintingBuilder, RewardingBuilder, SpendingBuilder, input, mintSingletonWith, referenceInput, script, withMinting, withReferenceScript, withRewarding, withSpendingUTXO, withValue, withdrawal)
-import PlutusLedgerApi.V2 (
+import PlutusLedgerApi.V3 (
   Credential (ScriptCredential),
   CurrencySymbol (CurrencySymbol),
   Redeemer (Redeemer),

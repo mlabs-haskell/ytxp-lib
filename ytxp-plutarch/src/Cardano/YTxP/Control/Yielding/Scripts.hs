@@ -13,7 +13,7 @@ import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
 import Data.Map (fromList)
 import Data.Text (Text, unpack)
 import Plutarch (Config)
-import Plutarch.LedgerApi.V2 (PCurrencySymbol, PScriptContext)
+import Plutarch.LedgerApi.V3 (PCurrencySymbol, PScriptContext)
 import Ply (TypedScriptEnvelope)
 import Ply.Plutarch.TypedWriter (TypedWriter, mkEnvelope)
 

@@ -10,7 +10,7 @@ module Cardano.YTxP.Control.Stubs (
 ) where
 
 import Data.Kind (Type)
-import Plutarch.LedgerApi.V2 (PScriptContext)
+import Plutarch.LedgerApi.V3 (PScriptContext)
 
 --------------------------------------------------------------------------------
 -- Validator stubs

@@ -20,7 +20,7 @@ import Cardano.YTxP.Test.Control.Yielding.Scripts.ScriptsBuilders (
 import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (ScriptsTestsParams, authorisedScriptRefInputContext, mintContext, rewardContext, spendContext, toLedgerRedeemer)
 import Control.Monad.Reader (Reader)
 import Plutarch.Context (Builder, buildMinting', buildRewarding', buildSpending', mkOutRefIndices)
-import PlutusLedgerApi.V2 (
+import PlutusLedgerApi.V3 (
   Datum (Datum),
   ScriptContext,
   ToData (toBuiltinData),

@@ -33,7 +33,7 @@ import Control.Monad.Reader (Reader, asks)
 import Convex.PlutusLedgerApi.Optics qualified as PlutusLedgerApiOptics
 import Data.Bifunctor (Bifunctor (second))
 import Data.Monoid (Endo (Endo, appEndo))
-import PlutusLedgerApi.V2 (Credential (ScriptCredential), CurrencySymbol (CurrencySymbol), Datum (Datum), ScriptContext, ScriptHash, StakingCredential (StakingHash), ToData (toBuiltinData), TxInInfo, Value (Value, getValue), getScriptHash, unsafeFromBuiltinData)
+import PlutusLedgerApi.V3 (Credential (ScriptCredential), CurrencySymbol (CurrencySymbol), Datum (Datum), ScriptContext, ScriptHash, StakingCredential (StakingHash), ToData (toBuiltinData), TxInInfo, Value (Value, getValue), getScriptHash, unsafeFromBuiltinData)
 import PlutusTx.AssocMap qualified as PTx.Map
 import PlutusTx.Eq qualified
 import Test.Tasty (TestTree, testGroup)
