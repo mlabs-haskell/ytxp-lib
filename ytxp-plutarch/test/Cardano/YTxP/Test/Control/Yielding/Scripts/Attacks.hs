@@ -4,13 +4,21 @@
 
 module Cardano.YTxP.Test.Control.Yielding.Scripts.Attacks (testAttacksR) where
 
-import Cardano.TestUtils (PreProcessor, TxFCEKInput (TxFCEKInput), attackCaseBasicRegex, mkPreProcessor, txfCEKUnitCase)
+import Cardano.TestUtils (
+  PreProcessor,
+  TxFCEKInput (TxFCEKInput),
+  attackCaseBasicRegex,
+  mkPreProcessor,
+  txfCEKUnitCase,
+ )
 import Cardano.YTxP.SDK.Optics qualified as SDKOptics
 import Cardano.YTxP.SDK.Redeemers (
   AuthorisedScriptPurpose (Minting, Rewarding, Spending),
   YieldingRedeemer,
  )
-import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS (AuthorisedScriptsSTCS))
+import Cardano.YTxP.SDK.SdkParameters (
+  AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
+ )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (
   mintNominalCaseBuilderR,
   rewardNominalCaseBuilderR,
@@ -33,7 +41,19 @@ import Control.Monad.Reader (Reader, asks)
 import Convex.PlutusLedgerApi.Optics qualified as PlutusLedgerApiOptics
 import Data.Bifunctor (Bifunctor (second))
 import Data.Monoid (Endo (Endo, appEndo))
-import PlutusLedgerApi.V3 (Credential (ScriptCredential), CurrencySymbol (CurrencySymbol), Datum (Datum), ScriptContext, ScriptHash, StakingCredential (StakingHash), ToData (toBuiltinData), TxInInfo, Value (Value, getValue), getScriptHash, unsafeFromBuiltinData)
+import PlutusLedgerApi.V3 (
+  Credential (ScriptCredential),
+  CurrencySymbol (CurrencySymbol),
+  Datum (Datum),
+  ScriptContext,
+  ScriptHash,
+  StakingCredential (StakingHash),
+  ToData (toBuiltinData),
+  TxInInfo,
+  Value (Value, getValue),
+  getScriptHash,
+  unsafeFromBuiltinData,
+ )
 import PlutusTx.AssocMap qualified as PTx.Map
 import PlutusTx.Eq qualified
 import Test.Tasty (TestTree, testGroup)
@@ -56,14 +76,19 @@ testAttacksR = do
   ppRefInputNoAuth <- mkAttack attackRefInputNotAuthorised
   ppAuthorisedScriptIndexInvalid <- mkAttack attackAuthorisedScriptIndexInvalid
 
-  ppAttackAuthorisedMPProofIndexInvalid <- mkAttack attackAuthorisedProofIndexInvalidIndex
-  ppAttackAuthorisedMPProofMismatch <- mkAttack attackAuthorisedMPProofIndexMismatch
+  ppAttackAuthorisedMPProofIndexInvalid <-
+    mkAttack attackAuthorisedProofIndexInvalidIndex
+  ppAttackAuthorisedMPProofMismatch <-
+    mkAttack attackAuthorisedMPProofIndexMismatch
 
-  ppAttackAuthorisedVProofIndexInvalid <- mkAttack attackAuthorisedProofIndexInvalidIndex
+  ppAttackAuthorisedVProofIndexInvalid <-
+    mkAttack attackAuthorisedProofIndexInvalidIndex
   ppAttackAuthorisedVProofMismatch <- mkAttack attackAuthorisedVProofIndexMismatch
 
-  ppAttackAuthorisedSVProofIndexInvalid <- mkAttack attackAuthorisedProofIndexInvalidIndex
-  ppAttackAuthorisedSVProofMismatch <- mkAttack attackAuthorisedSVProofIndexMismatch
+  ppAttackAuthorisedSVProofIndexInvalid <-
+    mkAttack attackAuthorisedProofIndexInvalidIndex
+  ppAttackAuthorisedSVProofMismatch <-
+    mkAttack attackAuthorisedSVProofIndexMismatch
 
   pure $
     testGroup
@@ -171,7 +196,8 @@ attackHelper attack (TxFCEKInput md r sc script) =
    in
     Right (TxFCEKInput md badLedgerRedeemer sc' script)
 
-replaceIfPresent :: (PlutusTx.Eq.Eq k) => k -> k -> PTx.Map.Map k v -> PTx.Map.Map k v
+replaceIfPresent ::
+  (PlutusTx.Eq.Eq k) => k -> k -> PTx.Map.Map k v -> PTx.Map.Map k v
 replaceIfPresent oldKey newKey m =
   case PTx.Map.lookup oldKey m of
     Just v ->
@@ -200,7 +226,10 @@ updateScriptCredential oldScriptHash newScriptHash cred
 replaceInput :: ScriptHash -> ScriptHash -> TxInInfo -> TxInInfo
 replaceInput oldScriptHash newScriptHash =
   over
-    (PlutusLedgerApiOptics.txOut . PlutusLedgerApiOptics.address . PlutusLedgerApiOptics.credential)
+    ( PlutusLedgerApiOptics.txOut
+        . PlutusLedgerApiOptics.address
+        . PlutusLedgerApiOptics.credential
+    )
     (updateScriptCredential oldScriptHash newScriptHash)
 
 -- | Replace an @ScriptHash@ for withdrawal with a provided one (if present)
@@ -219,7 +248,8 @@ replaceWdrl oldScript newScript =
 -----------------------------------------------------------------------
 -- Attacks
 
-attackRefInputNotPresent :: Reader ScriptsTestsParams (Endo (YieldingRedeemer, ScriptContext))
+attackRefInputNotPresent ::
+  Reader ScriptsTestsParams (Endo (YieldingRedeemer, ScriptContext))
 attackRefInputNotPresent =
   pure
     . Endo
@@ -228,7 +258,8 @@ attackRefInputNotPresent =
       (PlutusLedgerApiOptics.txInfo . PlutusLedgerApiOptics.referenceInputs)
       []
 
-attackRefInputNotAuthorised :: Reader ScriptsTestsParams (Endo (YieldingRedeemer, ScriptContext))
+attackRefInputNotAuthorised ::
+  Reader ScriptsTestsParams (Endo (YieldingRedeemer, ScriptContext))
 attackRefInputNotAuthorised = do
   AuthorisedScriptsSTCS authorisedScriptsSTCS' <- asks authorisedScriptsSTCS
   pure $
@@ -294,7 +325,8 @@ attackAuthorisedProofIndexInvalidIndex =
 attackAuthorisedMPProofIndexMismatch ::
   Reader ScriptsTestsParams (Endo (YieldingRedeemer, ScriptContext))
 attackAuthorisedMPProofIndexMismatch = do
-  authorisedMintingPolicy <- asks $ CurrencySymbol . getScriptHash . authorisedScriptHash
+  authorisedMintingPolicy <-
+    asks $ CurrencySymbol . getScriptHash . authorisedScriptHash
   let
     -- NOTE: this is arbitrary but different from the one in the test params
     differentMintingPolicy :: CurrencySymbol

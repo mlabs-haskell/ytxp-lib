@@ -20,6 +20,7 @@ import Plutarch.LedgerApi.V3 (
   ptxOut'value,
  )
 import Plutarch.LedgerApi.Value (pvalueOf)
+import PlutusLedgerApi.V3 (TokenName (TokenName))
 
 -- | Return False if script purpose is not rewarding
 pisRewarding :: Term s (PScriptInfo :--> PBool)
@@ -47,7 +48,7 @@ tryGetOfferOutput yieldingMPSymbol yieldingValidatorAddress outputs =
           ( ( pvalueOf
                 # pfromData (ptxOut'value offerOutput)
                 # yieldingMPSymbol
-                # pconstant ""
+                # pconstant (TokenName "")
             )
               #== pconstant 1
               #&& yieldingValidatorAddress
@@ -82,7 +83,7 @@ tryGetOfferInput yieldingMPSymbol inputs =
           ( ( pvalueOf
                 # pfromData (ptxOut'value resolved)
                 # yieldingMPSymbol
-                # pconstant ""
+                # pconstant (TokenName "")
             )
               #== pconstant 1
           )

@@ -14,7 +14,7 @@ repository cardano-haskell-packages
 
 -- index-state: 2024-10-09T22:38:57Z
 
--- source-repository-package
+source-repository-package
 --   type: git
 --   location: https://github.com/j-mueller/sc-tools
 --   tag: 188933df37fdcc11e6b91f83a7acdbeac4a09c2f
@@ -24,17 +24,26 @@ repository cardano-haskell-packages
 
 source-repository-package
   type: git
+  location: https://github.com/mlabs-haskell/plutus-test
+  tag: 648adbd910e7e9ae0efb082bc936eb304c610ef0
+  --sha256: sha256-YVHoY4Pg+v0S+2isuEpZ5Krg9o3+wQcWX9zo6DtgDb8=
+  subdir:
+    plutus-context-builder
+    plutus-unit
+
+source-repository-package
+  type: git
   location: https://github.com/mlabs-haskell/ytxp-sdk
-  tag: afeadabcf1e5afbc447efb2193b3e3992427944a
-  --sha256: sha256-Z8XTpmj1DO8eJouEzhNYlcUIBVRABz4FgSUXo5kTxFw=
+  tag: 8aff5092a058e2b5eaa3da6dc8ec2a89bfa39e66
+  --sha256: sha256-R3+1PdSmykWor87NH+THMRI5gqi2FoR6CI+j4qk4JGk=
   subdir:
     ytxp-sdk
 
 source-repository-package
   type: git
   location: https://github.com/Plutonomicon/plutarch-plutus
-  tag: 93881d63bfe02ea12329fe3d5521935bb7dce18c
-  --sha256: sha256-WSESLdKZttm2EBNv5SY6sZXT+ks87rY3y0gatf1m3Lo=
+  tag: f84a46287b06f36abf8d2d63bec7ff75d32f3e91
+  --sha256: sha256-gKBk9D6DHSEudq7P9+07yXWcgM/QX7NFp0tJXBodopM=
   subdir:
     .
     plutarch-ledger-api
@@ -53,6 +62,3 @@ source-repository-package
 tests: true
 
 test-show-details: direct
-
-constraints:
-  , plutus-core ^>= 1.36.0.0

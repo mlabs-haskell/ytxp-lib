@@ -10,12 +10,7 @@ module Cardano.YTxP.Control.Yielding.Scripts (
 ) where
 
 import Cardano.YTxP.Control.Yielding.Helper (yieldingHelper)
-import Data.Map (fromList)
-import Data.Text (Text, unpack)
-import Plutarch (Config)
 import Plutarch.LedgerApi.V3 (PCurrencySymbol, PScriptContext)
-import Ply (TypedScriptEnvelope)
-import Ply.Plutarch.TypedWriter (TypedWriter, mkEnvelope)
 
 -- import ScriptExport.ScriptInfo (RawScriptExport (RawScriptExport))
 

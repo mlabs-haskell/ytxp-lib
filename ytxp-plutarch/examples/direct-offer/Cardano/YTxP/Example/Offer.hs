@@ -9,7 +9,6 @@ import Generics.SOP qualified as SOP
 import Plutarch.LedgerApi.AssocMap (KeyGuarantees (Sorted))
 import Plutarch.LedgerApi.V3 (PPubKeyHash)
 import Plutarch.LedgerApi.Value (AmountGuarantees (Positive), PValue)
-import Plutarch.Repr.Data (DeriveAsDataStruct (DeriveAsDataStruct))
 
 -- | The datum of the offer component
 data POfferDatum (s :: S) = POfferDatum

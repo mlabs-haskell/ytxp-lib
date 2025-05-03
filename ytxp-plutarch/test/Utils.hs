@@ -42,7 +42,9 @@ pmemberTestOne :: Term s PBool
 pmemberTestOne =
   pmember
     # (pconstant 1 :: Term s PInteger)
-    # (pconstant (PlutusMap.safeFromList []) :: Term s (PMap 'Unsorted PInteger PInteger))
+    # ( pconstant (PlutusMap.safeFromList []) ::
+          Term s (PMap 'Unsorted PInteger PInteger)
+      )
     #== pexpectedResultFalse
 
 pmemberTestTwo :: Term s PBool

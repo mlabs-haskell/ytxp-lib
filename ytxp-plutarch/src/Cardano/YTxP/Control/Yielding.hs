@@ -35,7 +35,6 @@ import Plutarch.LedgerApi.V3 (
   ptxInInfo'resolved,
   ptxOut'referenceScript,
  )
-import Plutarch.Repr.Data (DeriveAsDataStruct (DeriveAsDataStruct))
 import Plutarch.Repr.Tag (DeriveAsTag (DeriveAsTag))
 import Utils (pmember)
 
@@ -51,17 +50,13 @@ The wrapper provides better type safety and documentation compared to using a ra
 -}
 newtype PAuthorisedScriptIndex (s :: S) = PAuthorisedScriptIndex (Term s PInteger)
   deriving stock (Generic)
-  deriving anyclass (PlutusType, PIsData)
-
-instance DerivePlutusType PAuthorisedScriptIndex where
-  type DPTStrat _ = PlutusTypeNewtype
+  deriving anyclass (SOP.Generic, PIsData)
+  deriving (PlutusType) via (DeriveNewtypePlutusType PAuthorisedScriptIndex)
+  deriving
+    (PLiftable)
+    via (DeriveNewtypePLiftable PAuthorisedScriptIndex AuthorisedScriptIndex)
 
 instance PTryFrom PData (PAsData PAuthorisedScriptIndex)
-
-deriving via
-  DeriveNewtypePLiftable PAuthorisedScriptIndex AuthorisedScriptIndex
-  instance
-    PLiftable PAuthorisedScriptIndex
 
 {- | Represents the purpose of an authorised script.
 

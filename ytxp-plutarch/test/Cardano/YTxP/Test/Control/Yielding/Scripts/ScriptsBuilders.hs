@@ -9,11 +9,16 @@ import Cardano.YTxP.Control.Yielding.Scripts (
   yieldingSV,
   yieldingV,
  )
-import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS (AuthorisedScriptsSTCS))
-import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (ScriptsTestsParams, authorisedScriptsSTCS)
+import Cardano.YTxP.SDK.SdkParameters (
+  AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
+ )
+import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
+  ScriptsTestsParams,
+  authorisedScriptsSTCS,
+ )
 import Control.Monad.Reader (Reader, asks)
 import Data.Text qualified as T
-import Plutarch (
+import Plutarch.Internal.Term (
   Config (Tracing),
   LogLevel (LogInfo),
   Script,

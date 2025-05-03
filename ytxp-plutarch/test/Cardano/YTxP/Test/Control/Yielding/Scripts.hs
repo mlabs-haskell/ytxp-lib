@@ -3,9 +3,13 @@
 
 module Cardano.YTxP.Test.Control.Yielding.Scripts (tests) where
 
-import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS (AuthorisedScriptsSTCS))
+import Cardano.YTxP.SDK.SdkParameters (
+  AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
+ )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.Attacks (testAttacksR)
-import Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (testNominalCasesR)
+import Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (
+  testNominalCasesR,
+ )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   ScriptsTestsParams (
     ScriptsTestsParams,
@@ -20,9 +24,12 @@ import Test.Tasty (TestTree, testGroup)
 dummyParams :: ScriptsTestsParams
 dummyParams =
   ScriptsTestsParams
-    { authorisedScriptHash = "22222222222222222222222222222222222222222222222222222222"
-    , authorisedScriptsSTCS = AuthorisedScriptsSTCS "33333333333333333333333333333333333333333333333333333333"
-    , authorisedScriptsManagerHash = "11111111111111111111111111111111111111111111111111111111"
+    { authorisedScriptHash =
+        "22222222222222222222222222222222222222222222222222222222"
+    , authorisedScriptsSTCS =
+        AuthorisedScriptsSTCS "33333333333333333333333333333333333333333333333333333333"
+    , authorisedScriptsManagerHash =
+        "11111111111111111111111111111111111111111111111111111111"
     }
 
 tests :: TestTree
