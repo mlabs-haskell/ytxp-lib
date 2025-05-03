@@ -114,7 +114,9 @@ newtype PAuthorisedScriptProofIndex (s :: S)
   deriving stock (Generic)
   deriving anyclass (SOP.Generic, PIsData)
   deriving (PlutusType) via (DeriveNewtypePlutusType PAuthorisedScriptProofIndex)
-  deriving (PLiftable) via (DeriveNewtypePLiftable PAuthorisedScriptProofIndex AuthorisedScriptProofIndex)
+  deriving
+    (PLiftable)
+    via (DeriveNewtypePLiftable PAuthorisedScriptProofIndex AuthorisedScriptProofIndex)
 
 instance PTryFrom PData (PAsData PAuthorisedScriptProofIndex)
 
@@ -137,7 +139,9 @@ data PYieldingRedeemer (s :: S) = PYieldingRedeemer
   deriving stock (Generic)
   deriving anyclass (SOP.Generic, PIsData)
   deriving (PlutusType) via (DeriveAsDataStruct PYieldingRedeemer)
-  deriving (PLiftable) via (DeriveDataPLiftable PYieldingRedeemer YieldingRedeemer)
+  deriving
+    (PLiftable)
+    via (DeriveDataPLiftable PYieldingRedeemer YieldingRedeemer)
 
 instance PTryFrom PData (PAsData PYieldingRedeemer)
 
@@ -196,6 +200,11 @@ getAuthorisedScriptHash = phoistAcyclic $
           (pmember # psymbol # pto (pfromData value)) -- TODO (OPTIMIZE): make partial (`has`/`lacks`) variants and use those instead
           ( pmatch referenceScript $ \case
               PDJust autorisedScript -> pfromData autorisedScript
-              PDNothing -> (ptraceInfoError "getAuthorisedScriptHash: Reference input does not contain reference script")
+              PDNothing ->
+                ( ptraceInfoError
+                    "getAuthorisedScriptHash: Reference input does not contain reference script"
+                )
           )
-          (ptraceInfoError "getAuthorisedScriptHash: Reference input does not contain AuthorisedScriptsSTCS")
+          ( ptraceInfoError
+              "getAuthorisedScriptHash: Reference input does not contain AuthorisedScriptsSTCS"
+          )

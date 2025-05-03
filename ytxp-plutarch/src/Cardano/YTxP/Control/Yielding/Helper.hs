@@ -3,7 +3,11 @@ we use to implement the logic for yielding validator, minting policy and staking
 -}
 module Cardano.YTxP.Control.Yielding.Helper (yieldingHelper) where
 
-import Cardano.YTxP.Control.Yielding (PAuthorisedScriptPurpose (PMinting, PRewarding, PSpending), authorisedScriptProofIndex, getAuthorisedScriptHash)
+import Cardano.YTxP.Control.Yielding (
+  PAuthorisedScriptPurpose (PMinting, PRewarding, PSpending),
+  authorisedScriptProofIndex,
+  getAuthorisedScriptHash,
+ )
 import Plutarch.LedgerApi.AssocMap (PMap (PMap))
 import Plutarch.LedgerApi.V3 (
   PCredential (PPubKeyCredential, PScriptCredential),
@@ -37,7 +41,8 @@ yieldingHelper = plam $ \pylstcs redeemer ctx -> unTermCont $ do
   txInfo <- pmatchC txInfo'
   yieldingRedeemer <- pfromData . fst <$> ptryFromC redeemer
   yieldingRedeemer' <- pmatchC yieldingRedeemer
-  scriptProofIndex <- pletC $ pto $ pfromData $ authorisedScriptProofIndex yieldingRedeemer'
+  scriptProofIndex <-
+    pletC $ pto $ pfromData $ authorisedScriptProofIndex yieldingRedeemer'
 
   let txInfoRefInputs = pfromData $ ptxInfo'referenceInputs txInfo
       authorisedScriptHash = getAuthorisedScriptHash # pylstcs # txInfoRefInputs # yieldingRedeemer
@@ -51,11 +56,13 @@ yieldingHelper = plam $ \pylstcs redeemer ctx -> unTermCont $ do
           let txInfoMints = pfromData $ ptxInfo'mint txInfo
               authorisedScriptMint = pto (pto txInfoMints) #!! authorisedScriptIndex
               currencySymbol = pscriptHashToCurrencySymbol authorisedScriptHash
-           in ptraceInfoIfFalse "Minting policy does not match expected authorised minting policy" $
-                pfromData (pfstBuiltin # authorisedScriptMint) #== currencySymbol
+           in ptraceInfoIfFalse
+                "Minting policy does not match expected authorised minting policy"
+                $ pfromData (pfstBuiltin # authorisedScriptMint) #== currencySymbol
         PSpending -> unTermCont $ do
           let txInfoInputs = pfromData $ ptxInfo'inputs txInfo
-          authorisedScriptInput <- pmatchC $ pfromData $ txInfoInputs #!! authorisedScriptIndex
+          authorisedScriptInput <-
+            pmatchC $ pfromData $ txInfoInputs #!! authorisedScriptIndex
           out <- pmatchC $ ptxInInfo'resolved authorisedScriptInput
           address <- pmatchC $ ptxOut'address out
           let credential = paddress'credential address
@@ -72,7 +79,9 @@ yieldingHelper = plam $ \pylstcs redeemer ctx -> unTermCont $ do
           return $
             pmatch (pfromData $ pfstBuiltin # authorisedScriptWithdrawal) $ \case
               PScriptCredential hash ->
-                ptraceInfoIfFalse "Withdrawal does not match expected authorised staking validator" $
-                  pfromData hash #== authorisedScriptHash
+                ptraceInfoIfFalse
+                  "Withdrawal does not match expected authorised staking validator"
+                  $ pfromData hash #== authorisedScriptHash
               PPubKeyCredential _ ->
-                ptraceInfoError "Staking credential at specified index is not a script credential"
+                ptraceInfoError
+                  "Staking credential at specified index is not a script credential"

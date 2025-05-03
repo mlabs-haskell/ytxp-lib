@@ -39,7 +39,11 @@ import UntypedPlutusCore (applyProgram)
 {- | Apply a Plutarch (Haskell lifted) term to a script
 | We use it instead of Ply.# due to issues with encoding encountered.
 -}
-ap :: (PUnsafeLiftDecl x) => Ply.TypedScript r (PLifted x ': xs) -> PLifted x -> Ply.TypedScript r xs
+ap ::
+  (PUnsafeLiftDecl x) =>
+  Ply.TypedScript r (PLifted x ': xs) ->
+  PLifted x ->
+  Ply.TypedScript r xs
 ap ts x = unsafeTypedScript ver $ unsafeFromRight $ prog `applyProgram` xc
   where
     (ver, prog) = unsafeUnTypedScript' ts
