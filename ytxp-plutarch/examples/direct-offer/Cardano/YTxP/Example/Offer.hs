@@ -4,26 +4,20 @@ module Cardano.YTxP.Example.Offer (
   POfferDatum (..),
 ) where
 
-import Plutarch.DataRepr (PDataFields)
+import GHC.Generics (Generic)
+import Generics.SOP qualified as SOP
 import Plutarch.LedgerApi.AssocMap (KeyGuarantees (Sorted))
 import Plutarch.LedgerApi.V3 (PPubKeyHash)
 import Plutarch.LedgerApi.Value (AmountGuarantees (Positive), PValue)
+import Plutarch.Repr.Data (DeriveAsDataStruct (DeriveAsDataStruct))
 
 -- | The datum of the offer component
-data POfferDatum (s :: S)
-  = POfferDatum
-      ( Term
-          s
-          ( PDataRecord
-              '[ "creator" ':= PPubKeyHash
-               , "toBuy" ':= PValue 'Sorted 'Positive
-               ]
-          )
-      )
+data POfferDatum (s :: S) = POfferDatum
+  { creator :: Term s (PAsData PPubKeyHash)
+  , toBuy :: Term s (PAsData (PValue 'Sorted 'Positive))
+  }
   deriving stock (Generic)
-  deriving anyclass (PlutusType, PIsData, PDataFields)
+  deriving anyclass (SOP.Generic, PIsData)
+  deriving (PlutusType) via (DeriveAsDataStruct POfferDatum)
 
-instance DerivePlutusType POfferDatum where
-  type DPTStrat _ = PlutusTypeData
-
-instance PTryFrom PData POfferDatum
+instance PTryFrom PData (PAsData POfferDatum)

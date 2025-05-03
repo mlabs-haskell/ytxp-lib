@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedRecordDot #-}
-{-# LANGUAGE PackageImports #-}
 
 module Cardano.YTxP.Example.Offer.Creating (
   -- * TxF Params
@@ -10,12 +9,28 @@ module Cardano.YTxP.Example.Offer.Creating (
 ) where
 
 import Cardano.YTxP.Example.Offer (POfferDatum)
-import Cardano.YTxP.Example.Offer.PUtils (pisRewarding, ptraceDebugC, tryGetOfferOutput)
+import Cardano.YTxP.Example.Offer.PUtils (
+  pisRewarding,
+  ptraceDebugC,
+  tryGetOfferOutput,
+ )
 import Control.Monad (void)
-import Plutarch.LedgerApi.V3 (PScriptContext)
+import Plutarch.LedgerApi.V3 (
+  PDatum (PDatum),
+  POutputDatum (POutputDatum),
+  PScriptContext (pscriptContext'scriptInfo),
+  pscriptContext'txInfo,
+  ptxInfo'mint,
+  ptxInfo'outputs,
+  ptxOut'datum,
+ )
 import Plutarch.LedgerApi.Value (pvalueOf)
-import PlutusLedgerApi.V3 (Address (Address), Credential (ScriptCredential), CurrencySymbol, ScriptHash)
-import "liqwid-plutarch-extra" Plutarch.Extra.ScriptContext (ptryFromOutputDatum)
+import PlutusLedgerApi.V3 (
+  Address (Address),
+  Credential (ScriptCredential),
+  CurrencySymbol,
+  ScriptHash,
+ )
 
 -- * Parameters
 
@@ -33,30 +48,24 @@ Refer to the transaction family specification (examples/direct-offer/doc/transac
 for a complete description.
 -}
 creatingTxF :: Params -> Term s (PData :--> PScriptContext :--> POpaque)
-creatingTxF params = phoistAcyclic $ plam $ \_redeemer context -> unTermCont $ do
+creatingTxF params = phoistAcyclic $ plam $ \_redeemer context' -> unTermCont $ do
   -- ScriptContext extraction
 
   ptraceDebugC "ScriptContext extraction"
 
-  contextFields <- pletFieldsC @'["txInfo", "scriptInfo"] context
+  context <- pmatchC context'
 
   -- Ensures that this script is activated by the rewarding event
   void $
     pguardC "The current script is expected to be activated by a rewarding event" $
-      pisRewarding # contextFields.scriptInfo
+      pisRewarding # pscriptContext'scriptInfo context
 
-  txInfoFields <-
-    pletFieldsC
-      @'[ "outputs"
-        , "mint"
-        , "data"
-        ]
-      contextFields.txInfo
+  txInfo <- pmatchC $ pscriptContext'txInfo context
 
   -- The component token must be minted
   pguardC "The component token is expected to be minted" $
     pvalueOf
-      # txInfoFields.mint
+      # pfromData (ptxInfo'mint txInfo)
       # pconstant params.yieldingMPSymbol
       # pconstant ""
       #== 1
@@ -66,21 +75,22 @@ creatingTxF params = phoistAcyclic $ plam $ \_redeemer context -> unTermCont $ d
   ptraceDebugC "Offer output extraction"
 
   offerOutput <-
-    pletC $
-      tryGetOfferOutput
-        (pconstant params.yieldingMPSymbol)
-        ( pconstant . flip Address Nothing . ScriptCredential $
-            params.yieldingValidatorScriptHash
-        )
-        (pfromData txInfoFields.outputs)
-
-  offerOutputFields <- pletFieldsC @'["datum"] offerOutput
+    pmatchC $
+      pfromData $
+        tryGetOfferOutput
+          (pconstant params.yieldingMPSymbol)
+          ( pconstant . flip Address Nothing . ScriptCredential $
+              params.yieldingValidatorScriptHash
+          )
+          (pfromData $ ptxInfo'outputs txInfo)
 
   -- Ensures that the value guarantees are met
+  -- TODO fix this
+  POutputDatum offerInputDatum <- pmatchC $ ptxOut'datum offerOutput
+  PDatum offerInputData <- pmatchC offerInputDatum
   void $
     pmatchC $
-      ptryFromOutputDatum @POfferDatum
-        # offerOutputFields.datum
-        # getField @"data" txInfoFields
+      pfromData $
+        ptryFrom @(PAsData POfferDatum) (pto offerInputData) fst
 
   pure . popaque $ pconstant @PUnit ()
