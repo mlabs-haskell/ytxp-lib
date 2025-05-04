@@ -30,6 +30,7 @@ import PlutusLedgerApi.V3 (
   Credential (ScriptCredential),
   CurrencySymbol,
   ScriptHash,
+  TokenName (TokenName),
  )
 
 -- * Parameters
@@ -67,7 +68,7 @@ creatingTxF params = phoistAcyclic $ plam $ \_redeemer context' -> unTermCont $ 
     pvalueOf
       # pfromData (ptxInfo'mint txInfo)
       # pconstant params.yieldingMPSymbol
-      # pconstant ""
+      # pconstant (TokenName "")
       #== 1
 
   -- Offer output extraction

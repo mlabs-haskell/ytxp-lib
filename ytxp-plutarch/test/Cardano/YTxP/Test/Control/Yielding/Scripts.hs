@@ -19,6 +19,7 @@ import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   ),
  )
 import Control.Monad.Reader (Reader, runReader)
+import PlutusLedgerApi.V3 (CurrencySymbol (CurrencySymbol))
 import Test.Tasty (TestTree, testGroup)
 
 dummyParams :: ScriptsTestsParams
@@ -27,7 +28,8 @@ dummyParams =
     { authorisedScriptHash =
         "22222222222222222222222222222222222222222222222222222222"
     , authorisedScriptsSTCS =
-        AuthorisedScriptsSTCS "33333333333333333333333333333333333333333333333333333333"
+        AuthorisedScriptsSTCS $
+          CurrencySymbol "33333333333333333333333333333333333333333333333333333333"
     , authorisedScriptsManagerHash =
         "11111111111111111111111111111111111111111111111111111111"
     }

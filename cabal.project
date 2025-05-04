@@ -15,14 +15,6 @@ repository cardano-haskell-packages
 -- index-state: 2024-10-09T22:38:57Z
 
 source-repository-package
---   type: git
---   location: https://github.com/j-mueller/sc-tools
---   tag: 188933df37fdcc11e6b91f83a7acdbeac4a09c2f
---   --sha256: sha256-Lv3jjXdlwGxG05rckpgolp6ruWkO76E/xpEdpBVyBEA=
---   subdir:
---    src/optics
-
-source-repository-package
   type: git
   location: https://github.com/mlabs-haskell/plutus-test
   tag: 648adbd910e7e9ae0efb082bc936eb304c610ef0

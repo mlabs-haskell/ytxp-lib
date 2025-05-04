@@ -27,7 +27,7 @@ import Plutarch.LedgerApi.V3 (
   ptxOut'datum,
  )
 import Plutarch.LedgerApi.Value (pvalueOf)
-import PlutusLedgerApi.V3 (CurrencySymbol)
+import PlutusLedgerApi.V3 (CurrencySymbol, TokenName (TokenName))
 
 -- * Parameters
 
@@ -63,7 +63,7 @@ reclaimingTxF params = phoistAcyclic $ plam $ \_redeemer context' -> unTermCont 
     pvalueOf
       # pfromData (ptxInfo'mint txInfo)
       # pconstant params.yieldingMPSymbol
-      # pconstant ""
+      # pconstant (TokenName "")
       #== -1
 
   -- Offer input extraction

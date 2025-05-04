@@ -38,21 +38,25 @@ import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
  )
 import Control.Lens (over, set, traversed, view, (&), _1, _2, _Wrapped)
 import Control.Monad.Reader (Reader, asks)
-import Convex.PlutusLedgerApi.Optics qualified as PlutusLedgerApiOptics
 import Data.Bifunctor (Bifunctor (second))
 import Data.Monoid (Endo (Endo, appEndo))
+import Optics qualified as PlutusLedgerApiOptics
 import PlutusLedgerApi.V3 (
   Credential (ScriptCredential),
   CurrencySymbol (CurrencySymbol),
   Datum (Datum),
+  Lovelace,
   ScriptContext,
   ScriptHash,
-  StakingCredential (StakingHash),
   ToData (toBuiltinData),
   TxInInfo,
   Value (Value, getValue),
   getScriptHash,
   unsafeFromBuiltinData,
+ )
+import PlutusLedgerApi.V3.MintValue (
+  MintValue (UnsafeMintValue),
+  mintValueToMap,
  )
 import PlutusTx.AssocMap qualified as PTx.Map
 import PlutusTx.Eq qualified
@@ -208,8 +212,8 @@ replaceIfPresent oldKey newKey m =
 {- | Replace all tokens with the given currency symbol from a value with a different currency symbol
 Does nothing if the CS to replace is not found
 -}
-replaceTokenByCS :: CurrencySymbol -> CurrencySymbol -> Value -> Value
-replaceTokenByCS oldCS newCS = Value . replaceIfPresent oldCS newCS . getValue
+replaceTokenByCS :: CurrencySymbol -> CurrencySymbol -> MintValue -> MintValue
+replaceTokenByCS oldCS newCS = UnsafeMintValue . replaceIfPresent oldCS newCS . mintValueToMap
 
 -- | Remove all tokens with the given currency symbol from a value
 removeTokenByCS :: CurrencySymbol -> Value -> Value
@@ -236,12 +240,12 @@ replaceInput oldScriptHash newScriptHash =
 replaceWdrl ::
   ScriptHash ->
   ScriptHash ->
-  PTx.Map.Map StakingCredential Integer ->
-  PTx.Map.Map StakingCredential Integer
+  PTx.Map.Map Credential Lovelace ->
+  PTx.Map.Map Credential Lovelace
 replaceWdrl oldScript newScript =
   let
-    oldCredential = StakingHash $ ScriptCredential oldScript
-    newCredential = StakingHash $ ScriptCredential newScript
+    oldCredential = ScriptCredential oldScript
+    newCredential = ScriptCredential newScript
    in
     replaceIfPresent oldCredential newCredential
 
@@ -298,7 +302,7 @@ getTooLargeIndexForProof ::
 getTooLargeIndexForProof purpose =
   let
     accessor = case purpose of
-      Minting -> length . PTx.Map.toList . getValue . view PlutusLedgerApiOptics.mint
+      Minting -> length . PTx.Map.toList . mintValueToMap . view PlutusLedgerApiOptics.mint
       Spending -> length . view PlutusLedgerApiOptics.inputs
       Rewarding -> length . PTx.Map.toList . view PlutusLedgerApiOptics.wdrl
    in
@@ -330,7 +334,7 @@ attackAuthorisedMPProofIndexMismatch = do
   let
     -- NOTE: this is arbitrary but different from the one in the test params
     differentMintingPolicy :: CurrencySymbol
-    differentMintingPolicy = "42424242424242424242424242424242424242424242424242424242"
+    differentMintingPolicy = CurrencySymbol "42424242424242424242424242424242424242424242424242424242"
   pure $
     Endo $
       second $

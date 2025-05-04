@@ -204,6 +204,7 @@ test-suite ytxp-lib-test
     Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases
     Cardano.YTxP.Test.Control.Yielding.Scripts.ScriptsBuilders
     Cardano.YTxP.Test.Control.Yielding.Scripts.Utils
+    Optics
     Utils
 
   main-is:        Main.hs
