@@ -100,7 +100,7 @@ testAttacksR = do
       [ txfCEKUnitCase $
           attackCaseBasicRegex
             "ref input not present"
-            [re|.*|]
+            [re|^(.*)$|]
             Nothing
             (toLedgerRedeemer mintNominalRedeemer)
             mintNominalContext
@@ -118,7 +118,7 @@ testAttacksR = do
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "attackAuthorisedScriptIndex does not points to valid reference input"
-            [re|.*|]
+            [re|^(.*)$|]
             Nothing
             (toLedgerRedeemer mintNominalRedeemer)
             mintNominalContext
@@ -127,7 +127,7 @@ testAttacksR = do
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(MP) AuthorisedScriptProofIndex does not index to valid proof"
-            [re|.*|]
+            [re|^(.*)$|]
             Nothing
             (toLedgerRedeemer mintNominalRedeemer)
             mintNominalContext
@@ -145,7 +145,7 @@ testAttacksR = do
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(V) AuthorisedScriptProofIndex does not index to valid proof"
-            [re|.*|]
+            [re|^(.*)$|]
             (Just $ Datum $ toBuiltinData ())
             (toLedgerRedeemer spendNominalRedeemer)
             spendNominalContext
@@ -163,7 +163,7 @@ testAttacksR = do
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(SV) AuthorisedScriptProofIndex does not index to valid proof"
-            [re|.*|]
+            [re|^(.*)$|]
             Nothing
             (toLedgerRedeemer rewardNominalRedeemer)
             rewardNominalContext
@@ -307,6 +307,7 @@ getTooLargeIndexForProof purpose =
       Rewarding -> length . PTx.Map.toList . view PlutusLedgerApiOptics.wdrl
    in
     fromIntegral . accessor
+
 attackAuthorisedProofIndexInvalidIndex ::
   Reader ScriptsTestsParams (Endo (YieldingRedeemer, ScriptContext))
 attackAuthorisedProofIndexInvalidIndex =

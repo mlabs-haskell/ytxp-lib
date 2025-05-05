@@ -94,7 +94,7 @@ mintNominalCaseBuilderR =
   let redeemer =
         YieldingRedeemer
           (AuthorisedScriptIndex 0)
-          (AuthorisedScriptProofIndex (Minting, 1))
+          (AuthorisedScriptProofIndex (Minting, 0))
    in mkNominalCaseBuilderR redeemer (mintContext redeemer) buildMinting'
 
 spendNominalCaseBuilderR ::

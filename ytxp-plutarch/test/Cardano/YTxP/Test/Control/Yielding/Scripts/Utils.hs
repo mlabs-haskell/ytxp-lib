@@ -64,7 +64,6 @@ import PlutusLedgerApi.V3 (
   singleton,
   toBuiltinData,
  )
-import PlutusTx.Builtins.HasOpaque (stringToBuiltinByteStringHex)
 
 -- | Yielding Script tests static parameters
 data ScriptsTestsParams = ScriptsTestsParams
@@ -102,9 +101,8 @@ spendContext = do
         script authorisedValidator
           <> withValue
             ( singleton
-                ( CurrencySymbol $
-                    stringToBuiltinByteStringHex
-                      "33333333333333333333333333333333333333333333333333333333"
+                ( CurrencySymbol
+                    "33333333333333333333333333333333333333333333333333333333"
                 )
                 (TokenName "token name")
                 43
