@@ -1,5 +1,23 @@
-{- | Module: Caradno.YTxP.Control.Stubs
-Description: TODO
+{- | Module: Cardano.YTxP.Control.Yielding
+Description: This module provides functionality for managing yielding transactions
+in the Yielding Transaction Protocol (YTxP). It includes types and functions for
+working with authorised scripts, yielding redeemers, and retrieving script hashes.
+
+The module defines the following key components:
+
+- 'PAuthorisedScriptPurpose': An enumeration representing the purpose of an
+  authorised script, which can be minting, spending, or rewarding.
+
+- 'PYieldingRedeemer': A data type representing the redeemer for yielding
+  transactions. It includes an index for the authorised script and a proof index.
+
+- 'getAuthorisedScriptHash': A function that retrieves the hash of an authorised
+  script based on the provided currency symbol, transaction reference inputs,
+  and yielding redeemer.
+
+This module is part of the YTxP SDK and is designed to be used in conjunction
+with other modules in the SDK to facilitate the creation and validation of
+yielding transactions.
 -}
 module Cardano.YTxP.Control.Yielding (
   getAuthorisedScriptHash,
