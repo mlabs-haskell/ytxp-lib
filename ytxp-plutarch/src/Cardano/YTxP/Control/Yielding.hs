@@ -48,8 +48,7 @@ import Plutarch.LedgerApi.V3 (
 import Plutarch.Repr.Tag (DeriveAsTag (DeriveAsTag))
 import Utils (pmember)
 
-{- | A newtype wrapper for 'AuthorisedScriptIndex'.
--}
+-- | A newtype wrapper for 'AuthorisedScriptIndex'.
 newtype PAuthorisedScriptIndex (s :: S) = PAuthorisedScriptIndex (Term s PInteger)
   deriving stock (Generic)
   deriving anyclass (SOP.Generic, PIsData)
@@ -60,8 +59,7 @@ newtype PAuthorisedScriptIndex (s :: S) = PAuthorisedScriptIndex (Term s PIntege
 
 instance PTryFrom PData (PAsData PAuthorisedScriptIndex)
 
-{- | A data type representing the purpose of an authorised script.
--}
+-- | A data type representing the purpose of an authorised script.
 data PAuthorisedScriptPurpose (s :: S) = PMinting | PSpending | PRewarding
   deriving stock (Generic, Enum, Bounded)
   deriving anyclass (SOP.Generic, PIsData, PEq)
@@ -87,8 +85,7 @@ instance PLiftable PAuthorisedScriptPurpose where
 
 instance PTryFrom PData (PAsData PAuthorisedScriptPurpose)
 
-{- | A newtype wrapper for 'AuthorisedScriptProofIndex'.
--}
+-- | A newtype wrapper for 'AuthorisedScriptProofIndex'.
 newtype PAuthorisedScriptProofIndex (s :: S)
   = PAuthorisedScriptProofIndex
       ( Term
@@ -104,8 +101,7 @@ newtype PAuthorisedScriptProofIndex (s :: S)
 
 instance PTryFrom PData (PAsData PAuthorisedScriptProofIndex)
 
-{- | A data type representing the redeemer for yielding transactions.
--}
+-- | A data type representing the redeemer for yielding transactions.
 data PYieldingRedeemer (s :: S) = PYieldingRedeemer
   { authorisedScriptIndex :: Term s (PAsData PAuthorisedScriptIndex)
   , authorisedScriptProofIndex :: Term s (PAsData PAuthorisedScriptProofIndex)
