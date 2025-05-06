@@ -12,6 +12,7 @@ import Plutarch.LedgerApi.AssocMap (PMap (PMap))
 import Plutarch.LedgerApi.V3 (
   PCredential (PPubKeyCredential, PScriptCredential),
   PCurrencySymbol,
+  PRedeemer (PRedeemer),
   PScriptContext (PScriptContext),
   paddress'credential,
   ptxInInfo'resolved,
@@ -35,9 +36,10 @@ import Utils (pcheck, pscriptHashToCurrencySymbol)
 
 yieldingHelper ::
   forall (s :: S).
-  Term s (PCurrencySymbol :--> PData :--> PScriptContext :--> POpaque)
-yieldingHelper = plam $ \pylstcs redeemer ctx -> unTermCont $ do
-  PScriptContext txInfo' _ _ <- pmatchC ctx
+  Term s (PCurrencySymbol :--> PScriptContext :--> POpaque)
+yieldingHelper = plam $ \pylstcs ctx -> unTermCont $ do
+  PScriptContext txInfo' redeemer' _ <- pmatchC ctx
+  PRedeemer redeemer <- pmatchC redeemer'
   txInfo <- pmatchC txInfo'
   yieldingRedeemer <- pfromData . fst <$> ptryFromC redeemer
   yieldingRedeemer' <- pmatchC yieldingRedeemer

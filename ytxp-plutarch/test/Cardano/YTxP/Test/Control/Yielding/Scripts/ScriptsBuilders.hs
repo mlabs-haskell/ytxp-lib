@@ -4,11 +4,7 @@ module Cardano.YTxP.Test.Control.Yielding.Scripts.ScriptsBuilders (
   yieldingSVScriptR,
 ) where
 
-import Cardano.YTxP.Control.Yielding.Scripts (
-  yieldingMP,
-  yieldingSV,
-  yieldingV,
- )
+import Cardano.YTxP.Control.Yielding.Scripts (yielding)
 import Cardano.YTxP.SDK.SdkParameters (
   AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
  )
@@ -34,8 +30,8 @@ yieldingMPScriptR = do
   let
     closedTerm ::
       forall (s :: S).
-      Term s (PData :--> (PScriptContext :--> POpaque))
-    closedTerm = yieldingMP # pconstant authorisedScriptsSTCS' # pconstant 42
+      Term s (PScriptContext :--> POpaque)
+    closedTerm = yielding # pconstant authorisedScriptsSTCS' # pconstant 42
   case compile (Tracing LogInfo DetTracing) closedTerm of
     Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
     Right script' -> pure script'
@@ -46,8 +42,8 @@ yieldingVScriptR = do
   let
     closedTerm ::
       forall (s :: S).
-      Term s (PData :--> (PData :--> (PScriptContext :--> POpaque)))
-    closedTerm = yieldingV # pconstant authorisedScriptsSTCS'
+      Term s (PScriptContext :--> POpaque)
+    closedTerm = yielding # pconstant authorisedScriptsSTCS' # pconstant 0
   case compile (Tracing LogInfo DetTracing) closedTerm of
     Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
     Right script' -> pure script'
@@ -58,8 +54,8 @@ yieldingSVScriptR = do
   let
     closedTerm ::
       forall (s :: S).
-      Term s (PData :--> (PScriptContext :--> POpaque))
-    closedTerm = yieldingSV # pconstant authorisedScriptsSTCS' # pconstant 42
+      Term s (PScriptContext :--> POpaque)
+    closedTerm = yielding # pconstant authorisedScriptsSTCS' # pconstant 42
   case compile (Tracing LogInfo DetTracing) closedTerm of
     Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
     Right script' -> pure script'

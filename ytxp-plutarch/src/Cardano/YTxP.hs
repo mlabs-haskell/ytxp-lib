@@ -1,132 +1,156 @@
+{-# LANGUAGE OverloadedLists #-}
+
 module Cardano.YTxP (
-  validatorLinker,
-  stakeValidatorLinker,
-  mintingPolicyLinker,
+  apply,
 ) where
 
-import Data.Coerce (coerce)
-import Data.Map (fromList)
-import Data.Text (pack)
-
+import Cardano.Binary qualified as CBOR
+import Cardano.YTxP.Control.Yielding.Scripts (yielding)
 import Cardano.YTxP.SDK.SdkParameters (
   AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
   SdkParameters (
-    authorisedScriptsSTCS,
-    mintingPoliciesNonceList,
-    stakingValidatorsNonceList
+    SdkParameters
   ),
  )
-
-import PlutusLedgerApi.V3 (CurrencySymbol)
-import qualified Ply
-
-import Plutarch.Internal.Term (Config (NoTracing), Script (Script), compile)
-import Plutarch.Lift (PLifted, PUnsafeLiftDecl)
-import PlutusPrelude (unsafeFromRight)
-import Ply.Core.Unsafe (unsafeTypedScript, unsafeUnTypedScript')
-import ScriptExport.ScriptInfo (
-  Linker,
-  ScriptExport (ScriptExport),
-  ScriptRole (ThreeArgumentScript, TwoArgumentScript),
-  fetchTS,
-  getParam,
-  toRoledScript,
+import Data.ByteString.Short qualified as SBS
+import Data.Coerce (coerce)
+import Data.Data (Proxy (Proxy))
+import Data.Text qualified as T
+import GHC.Natural (naturalToInteger)
+import Plutarch.Internal.Term (Config, compile)
+import Plutarch.LedgerApi.V3 (PScriptContext, scriptHash)
+import Plutarch.Script (serialiseScript)
+import PlutusLedgerApi.V3 (ScriptHash (ScriptHash))
+import PlutusTx.Blueprint (
+  ArgumentBlueprint (
+    MkArgumentBlueprint,
+    argumentDescription,
+    argumentPurpose,
+    argumentSchema,
+    argumentTitle
+  ),
+  CompiledValidator (
+    MkCompiledValidator,
+    compiledValidatorCode,
+    compiledValidatorHash
+  ),
+  ContractBlueprint (
+    MkContractBlueprint,
+    contractDefinitions,
+    contractId,
+    contractPreamble,
+    contractValidators
+  ),
+  ParameterBlueprint (
+    MkParameterBlueprint,
+    parameterDescription,
+    parameterPurpose,
+    parameterSchema,
+    parameterTitle
+  ),
+  Preamble (
+    MkPreamble,
+    preambleDescription,
+    preambleLicense,
+    preamblePlutusVersion,
+    preambleTitle,
+    preambleVersion
+  ),
+  Purpose (Mint, Spend, Withdraw),
+  ValidatorBlueprint (
+    MkValidatorBlueprint,
+    validatorCompiled,
+    validatorDatum,
+    validatorDescription,
+    validatorParameters,
+    validatorRedeemer,
+    validatorTitle
+  ),
+  definitionRef,
  )
-import UntypedPlutusCore (applyProgram)
+import PlutusTx.Builtins qualified as PlutusTx
+import Ply (reifyVersion)
+import Ply.Plutarch (
+  ParamsOf,
+  PlyArgOf,
+  ReferencedTypesOf,
+  VersionOf,
+  derivePDefinitions,
+  mkParamSchemas,
+ )
 
 --------------------------------------------------------------------------------
 
-{- | Apply a Plutarch (Haskell lifted) term to a script
-| We use it instead of Ply.# due to issues with encoding encountered.
--}
-ap ::
-  (PUnsafeLiftDecl x) =>
-  Ply.TypedScript r (PLifted x ': xs) ->
-  PLifted x ->
-  Ply.TypedScript r xs
-ap ts x = unsafeTypedScript ver $ unsafeFromRight $ prog `applyProgram` xc
-  where
-    (ver, prog) = unsafeUnTypedScript' ts
-    Script xc = unsafeFromRight $ compile NoTracing $ pconstant x
-
-validatorLinker :: Linker SdkParameters (ScriptExport SdkParameters)
-validatorLinker = do
-  info <- getParam
-
-  yieldingValidator <-
-    fetchTS
-      @'ThreeArgumentScript
-      @'[CurrencySymbol]
-      "ytxp:yieldingValidator"
-
-  let
-    authorisedScriptsSymbol =
-      coerce @_ @CurrencySymbol (authorisedScriptsSTCS info)
-
-    yieldingValidator' =
-      yieldingValidator `ap` authorisedScriptsSymbol
-
-  return $
-    ScriptExport
-      ( fromList
-          [("ytxp:yieldingValidator", toRoledScript yieldingValidator')]
+apply :: Config -> SdkParameters -> [ContractBlueprint]
+apply config (SdkParameters svNonces mpNonces stcs) =
+  mkBlueprint
+    config
+    Spend
+    (yielding # pconstant (coerce stcs) # pzero)
+    : fmap
+      ( \nonce ->
+          mkBlueprint config Withdraw $
+            yielding # pconstant (coerce stcs) # pconstant (naturalToInteger nonce)
       )
-      info
-
-mintingPolicyLinker :: Linker SdkParameters (ScriptExport SdkParameters)
-mintingPolicyLinker = do
-  info <- getParam
-
-  yieldingMP <-
-    fetchTS
-      @'TwoArgumentScript
-      @'[CurrencySymbol, Integer]
-      "ytxp:yieldingMintingPolicy"
-
-  let
-    authorisedScriptsSymbol =
-      coerce @_ @CurrencySymbol (authorisedScriptsSTCS info)
-
-    yieldingMPs =
-      map
+      svNonces
+      <> fmap
         ( \nonce ->
-            ( pack ("ytxp:yieldingMintingPolicy:" <> show nonce)
-            , toRoledScript $
-                yieldingMP `ap` authorisedScriptsSymbol `ap` toInteger nonce
-            )
+            mkBlueprint config Mint $
+              yielding # pconstant (coerce stcs) # pconstant (naturalToInteger nonce)
         )
-        (mintingPoliciesNonceList info)
+        mpNonces
 
-  return $
-    ScriptExport
-      (fromList yieldingMPs)
-      info
+type PType = PScriptContext :--> POpaque
 
-stakeValidatorLinker :: Linker SdkParameters (ScriptExport SdkParameters)
-stakeValidatorLinker = do
-  info <- getParam
-
-  yieldingSV <-
-    fetchTS
-      @'TwoArgumentScript
-      @'[CurrencySymbol, Integer]
-      "ytxp:yieldingStakeValidator"
-
-  let
-    authorisedScriptsSymbol =
-      coerce @_ @CurrencySymbol (authorisedScriptsSTCS info)
-
-    yieldingSVs =
-      map
-        ( \nonce ->
-            ( pack ("ytxp:yieldingStakeValidator:" <> show nonce)
-            , toRoledScript $
-                yieldingSV `ap` authorisedScriptsSymbol `ap` toInteger nonce
-            )
-        )
-        (stakingValidatorsNonceList info)
-
-  return $
-    ScriptExport
-      (fromList yieldingSVs)
-      info
+mkBlueprint :: Config -> Purpose -> ClosedTerm PType -> ContractBlueprint
+mkBlueprint config purpose ct =
+  MkContractBlueprint
+    { contractId = Nothing
+    , contractPreamble =
+        MkPreamble
+          { preambleTitle = "Example Contract" -- TODO:
+          , preambleDescription = Nothing
+          , preambleVersion = "1.0.0"
+          , preamblePlutusVersion =
+              reifyVersion $ Proxy @(VersionOf PType)
+          , preambleLicense = Nothing
+          }
+    , contractValidators = [scriptBP]
+    , contractDefinitions =
+        -- Note: We have to manually prepend datum/redeemer to the types because it does not exist on the Plutarch type.
+        derivePDefinitions @(PData ': ParamsOf PType)
+    }
+  where
+    scriptBP =
+      MkValidatorBlueprint
+        { validatorTitle = "Example" -- TODO
+        , validatorDescription = Nothing
+        , validatorParameters =
+            map
+              ( \sch ->
+                  MkParameterBlueprint
+                    { parameterTitle = Nothing
+                    , parameterDescription = Nothing
+                    , parameterPurpose = [purpose]
+                    , parameterSchema = sch
+                    }
+              )
+              -- Note: When using 'mkParamSchemas', the second type argument should only contain the params (i.e from 'ParamsOf'), not the datum/redeemer.
+              $ mkParamSchemas @(ReferencedTypesOf (PData ': ParamsOf PType)) @(ParamsOf PType)
+        , validatorRedeemer =
+            MkArgumentBlueprint
+              { argumentTitle = Nothing
+              , argumentDescription = Nothing
+              , argumentPurpose = [purpose]
+              , argumentSchema = definitionRef @(PlyArgOf PData) -- TODO PYieldingRedeemer
+              }
+        , validatorDatum = Nothing
+        , validatorCompiled =
+            Just
+              MkCompiledValidator
+                { compiledValidatorHash = PlutusTx.fromBuiltin hash
+                , compiledValidatorCode = CBOR.serialize' . SBS.fromShort $ serialiseScript script
+                }
+        }
+    script = either (error . T.unpack) id $ compile config ct
+    ScriptHash hash = scriptHash script
