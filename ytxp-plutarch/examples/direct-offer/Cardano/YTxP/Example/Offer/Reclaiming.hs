@@ -44,8 +44,8 @@ newtype Params = Params
 Refer to the transaction family specification (examples/direct-offer/doc/transaction-families/reclaiming.md)
 for a complete description.
 -}
-reclaimingTxF :: Params -> Term s (PData :--> PScriptContext :--> POpaque)
-reclaimingTxF params = phoistAcyclic $ plam $ \_redeemer context' -> unTermCont $ do
+reclaimingTxF :: Params -> Term s (PScriptContext :--> POpaque)
+reclaimingTxF params = phoistAcyclic $ plam $ \context' -> unTermCont $ do
   -- ScriptContext extraction
 
   ptraceDebugC "ScriptContext extraction"

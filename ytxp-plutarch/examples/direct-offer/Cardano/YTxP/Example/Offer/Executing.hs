@@ -53,8 +53,8 @@ newtype Params = Params
 Refer to the transaction family specification (examples/direct-offer/doc/transaction-families/executing.md)
 for a complete description.
 -}
-executingTxF :: Params -> Term s (PData :--> PScriptContext :--> POpaque)
-executingTxF params = phoistAcyclic $ plam $ \_redeemer context' -> unTermCont $ do
+executingTxF :: Params -> Term s (PScriptContext :--> POpaque)
+executingTxF params = phoistAcyclic $ plam $ \context' -> unTermCont $ do
   -- ScriptContext extraction
 
   ptraceDebugC "ScriptContext extraction"

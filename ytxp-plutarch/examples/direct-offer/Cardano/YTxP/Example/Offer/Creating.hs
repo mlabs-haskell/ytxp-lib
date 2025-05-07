@@ -49,8 +49,8 @@ data Params = Params
 Refer to the transaction family specification (examples/direct-offer/doc/transaction-families/creating.md)
 for a complete description.
 -}
-creatingTxF :: Params -> Term s (PData :--> PScriptContext :--> POpaque)
-creatingTxF params = phoistAcyclic $ plam $ \_redeemer context' -> unTermCont $ do
+creatingTxF :: Params -> Term s (PScriptContext :--> POpaque)
+creatingTxF params = phoistAcyclic $ plam $ \context' -> unTermCont $ do
   -- ScriptContext extraction
 
   ptraceDebugC "ScriptContext extraction"
