@@ -15,6 +15,7 @@ import Cardano.YTxP.Example.Offer.PUtils (
   tryGetOfferInput,
  )
 import Control.Monad (void)
+import Plutarch.Builtin.Unit (punit)
 import Plutarch.LedgerApi.V3 (
   AmountGuarantees (Positive),
   KeyGuarantees (Sorted),
@@ -105,7 +106,7 @@ executingTxF params = phoistAcyclic $ plam $ \_redeemer context' -> unTermCont $
         (pfromData $ toBuy offerDatum)
         (pfromData $ ptxInfo'outputs txInfo)
 
-  pure . popaque $ pconstant @PUnit ()
+  pure $ popaque punit
 
 -- | Find the first valid wallet output
 tryGetWalletOutput ::

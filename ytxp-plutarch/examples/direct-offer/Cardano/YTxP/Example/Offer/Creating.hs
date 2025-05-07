@@ -15,6 +15,7 @@ import Cardano.YTxP.Example.Offer.PUtils (
   tryGetOfferOutput,
  )
 import Control.Monad (void)
+import Plutarch.Builtin.Unit (punit)
 import Plutarch.LedgerApi.V3 (
   PDatum (PDatum),
   POutputDatum (POutputDatum),
@@ -94,4 +95,4 @@ creatingTxF params = phoistAcyclic $ plam $ \_redeemer context' -> unTermCont $ 
       pfromData $
         ptryFrom @(PAsData POfferDatum) (pto offerInputData) fst
 
-  pure . popaque $ pconstant @PUnit ()
+  pure $ popaque punit

@@ -5,6 +5,7 @@ module Utils (
 )
 where
 
+import Plutarch.Builtin.Unit (punit)
 import Plutarch.LedgerApi.V3 (
   PCurrencySymbol,
   PMap,
@@ -37,5 +38,5 @@ pcheck ::
 pcheck b =
   pif
     b
-    (popaque $ pconstant @PUnit ())
+    (popaque punit)
     perror

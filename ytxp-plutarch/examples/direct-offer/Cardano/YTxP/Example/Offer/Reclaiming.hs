@@ -15,6 +15,7 @@ import Cardano.YTxP.Example.Offer.PUtils (
   tryGetOfferInput,
  )
 import Control.Monad (void)
+import Plutarch.Builtin.Unit (punit)
 import Plutarch.LedgerApi.V3 (
   PDatum (PDatum),
   POutputDatum (POutputDatum),
@@ -87,4 +88,4 @@ reclaimingTxF params = phoistAcyclic $ plam $ \_redeemer context' -> unTermCont 
   pguardC "Expect signature of the offer creator" $
     pelem # creator offerDatum # pfromData (ptxInfo'signatories txInfo)
 
-  pure . popaque $ pconstant @PUnit ()
+  pure $ popaque punit
