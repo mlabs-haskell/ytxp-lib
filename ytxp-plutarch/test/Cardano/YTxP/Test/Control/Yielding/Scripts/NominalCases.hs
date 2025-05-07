@@ -23,7 +23,6 @@ import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   mintContext,
   rewardContext,
   spendContext,
-  toLedgerRedeemer,
  )
 import Control.Monad.Reader (Reader)
 import Plutus.ContextBuilder (
@@ -32,47 +31,38 @@ import Plutus.ContextBuilder (
   buildRewarding',
   buildSpending',
   mkOutRefIndices,
+  scriptRedeemer,
  )
-import PlutusLedgerApi.V3 (
-  Datum (Datum),
-  ScriptContext,
-  ToData (toBuiltinData),
- )
+import PlutusLedgerApi.V3 (ScriptContext)
 import Test.Tasty (TestTree, testGroup)
 
 testNominalCasesR :: Reader ScriptsTestsParams TestTree
 testNominalCasesR = do
   -- Mint
   yieldingMPScript <- yieldingMPScriptR
-  (mintRedeemer, mintContext') <- mintNominalCaseBuilderR
+  mintContext' <- mintNominalCaseBuilderR
   -- Spend
   yieldingVScript <- yieldingVScriptR
-  (spendRedeemer, spendContext') <- spendNominalCaseBuilderR
+  spendContext' <- spendNominalCaseBuilderR
   -- Spend
   yieldingSVScript <- yieldingSVScriptR
-  (rewardRedeemer, rewardContext') <- rewardNominalCaseBuilderR
+  rewardContext' <- rewardNominalCaseBuilderR
   pure $
     testGroup
       "Nominal Case"
       [ txfCEKUnitCase $
           nominalCaseBasic
             "Mint Case"
-            Nothing
-            (toLedgerRedeemer mintRedeemer)
             mintContext'
             yieldingMPScript
       , txfCEKUnitCase $
           nominalCaseBasic
             "Spend Case"
-            (Just $ Datum $ toBuiltinData ())
-            (toLedgerRedeemer spendRedeemer)
             spendContext'
             yieldingVScript
       , txfCEKUnitCase $
           nominalCaseBasic
             "Reward Case"
-            Nothing
-            (toLedgerRedeemer rewardRedeemer)
             rewardContext'
             yieldingSVScript
       ]
@@ -83,13 +73,13 @@ mkNominalCaseBuilderR ::
   YieldingRedeemer ->
   Reader ScriptsTestsParams a ->
   (a -> ScriptContext) ->
-  Reader ScriptsTestsParams (YieldingRedeemer, ScriptContext)
+  Reader ScriptsTestsParams ScriptContext
 mkNominalCaseBuilderR redeemer builder contextBuilder = do
   context <- (<>) <$> authorisedScriptRefInputContext <*> builder
-  pure (redeemer, contextBuilder $ mkOutRefIndices context)
+  pure $ contextBuilder $ scriptRedeemer redeemer <> mkOutRefIndices context
 
 mintNominalCaseBuilderR ::
-  Reader ScriptsTestsParams (YieldingRedeemer, ScriptContext)
+  Reader ScriptsTestsParams ScriptContext
 mintNominalCaseBuilderR =
   let redeemer =
         YieldingRedeemer
@@ -98,7 +88,7 @@ mintNominalCaseBuilderR =
    in mkNominalCaseBuilderR redeemer (mintContext redeemer) buildMinting'
 
 spendNominalCaseBuilderR ::
-  Reader ScriptsTestsParams (YieldingRedeemer, ScriptContext)
+  Reader ScriptsTestsParams ScriptContext
 spendNominalCaseBuilderR =
   let redeemer =
         YieldingRedeemer
@@ -107,7 +97,7 @@ spendNominalCaseBuilderR =
    in mkNominalCaseBuilderR redeemer spendContext buildSpending'
 
 rewardNominalCaseBuilderR ::
-  Reader ScriptsTestsParams (YieldingRedeemer, ScriptContext)
+  Reader ScriptsTestsParams ScriptContext
 rewardNominalCaseBuilderR =
   let redeemer =
         YieldingRedeemer

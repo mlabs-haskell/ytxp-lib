@@ -13,8 +13,10 @@ import Plutarch.LedgerApi.V3 (
   PCredential (PPubKeyCredential, PScriptCredential),
   PCurrencySymbol,
   PRedeemer (PRedeemer),
-  PScriptContext (PScriptContext),
+  PScriptContext,
   paddress'credential,
+  pscriptContext'redeemer,
+  pscriptContext'txInfo,
   ptxInInfo'resolved,
   ptxInfo'inputs,
   ptxInfo'mint,
@@ -37,10 +39,11 @@ import Utils (pcheck, pscriptHashToCurrencySymbol)
 yieldingHelper ::
   forall (s :: S).
   Term s (PCurrencySymbol :--> PScriptContext :--> POpaque)
-yieldingHelper = plam $ \pylstcs ctx -> unTermCont $ do
-  PScriptContext txInfo' redeemer' _ <- pmatchC ctx
+yieldingHelper = plam $ \pylstcs ctx' -> unTermCont $ do
+  ctx <- pmatchC ctx'
+  redeemer' <- pletC $ pscriptContext'redeemer ctx
+  txInfo <- pmatchC $ pscriptContext'txInfo ctx
   PRedeemer redeemer <- pmatchC redeemer'
-  txInfo <- pmatchC txInfo'
   yieldingRedeemer <- pfromData . fst <$> ptryFromC redeemer
   yieldingRedeemer' <- pmatchC yieldingRedeemer
   scriptProofIndex <-

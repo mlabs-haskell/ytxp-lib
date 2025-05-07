@@ -153,7 +153,6 @@ library
   exposed-modules:
     Cardano.TestUtils
     Cardano.YTxP
-    Cardano.YTxP.Control.Stubs
     Cardano.YTxP.Control.Yielding
     Cardano.YTxP.Control.Yielding.Helper
     Cardano.YTxP.Control.Yielding.Scripts
