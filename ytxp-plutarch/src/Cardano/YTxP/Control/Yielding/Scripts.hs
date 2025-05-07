@@ -13,7 +13,7 @@ yielding ::
   forall (s :: S).
   Term
     s
-    ( PCurrencySymbol :--> PInteger :--> PScriptContext :--> POpaque
+    ( PCurrencySymbol :--> PInteger :--> PScriptContext :--> PUnit
     )
 yielding = plam $ \psymbol _nonce ctx ->
   yieldingHelper # psymbol # ctx

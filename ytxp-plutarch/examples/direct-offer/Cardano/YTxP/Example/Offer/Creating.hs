@@ -49,7 +49,7 @@ data Params = Params
 Refer to the transaction family specification (examples/direct-offer/doc/transaction-families/creating.md)
 for a complete description.
 -}
-creatingTxF :: Params -> Term s (PScriptContext :--> POpaque)
+creatingTxF :: Params -> Term s (PScriptContext :--> PUnit)
 creatingTxF params = phoistAcyclic $ plam $ \context' -> unTermCont $ do
   -- ScriptContext extraction
 
@@ -95,4 +95,4 @@ creatingTxF params = phoistAcyclic $ plam $ \context' -> unTermCont $ do
       pfromData $
         ptryFrom @(PAsData POfferDatum) (pto offerInputData) fst
 
-  pure $ popaque punit
+  pure punit

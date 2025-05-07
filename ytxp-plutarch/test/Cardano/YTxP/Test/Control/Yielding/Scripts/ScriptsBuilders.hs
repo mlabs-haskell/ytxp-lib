@@ -30,7 +30,7 @@ yieldingMPScriptR = do
   let
     closedTerm ::
       forall (s :: S).
-      Term s (PScriptContext :--> POpaque)
+      Term s (PScriptContext :--> PUnit)
     closedTerm = yielding # pconstant authorisedScriptsSTCS' # pconstant 42
   case compile (Tracing LogInfo DetTracing) closedTerm of
     Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
@@ -42,7 +42,7 @@ yieldingVScriptR = do
   let
     closedTerm ::
       forall (s :: S).
-      Term s (PScriptContext :--> POpaque)
+      Term s (PScriptContext :--> PUnit)
     closedTerm = yielding # pconstant authorisedScriptsSTCS' # pconstant 0
   case compile (Tracing LogInfo DetTracing) closedTerm of
     Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
@@ -54,7 +54,7 @@ yieldingSVScriptR = do
   let
     closedTerm ::
       forall (s :: S).
-      Term s (PScriptContext :--> POpaque)
+      Term s (PScriptContext :--> PUnit)
     closedTerm = yielding # pconstant authorisedScriptsSTCS' # pconstant 42
   case compile (Tracing LogInfo DetTracing) closedTerm of
     Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]

@@ -34,9 +34,9 @@ pmember = phoistAcyclic $
 pcheck ::
   forall (s :: S).
   Term s PBool ->
-  Term s POpaque
+  Term s PUnit
 pcheck b =
   pif
     b
-    (popaque punit)
+    punit
     perror

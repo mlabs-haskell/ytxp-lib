@@ -38,7 +38,7 @@ import Utils (pcheck, pscriptHashToCurrencySymbol)
 
 yieldingHelper ::
   forall (s :: S).
-  Term s (PCurrencySymbol :--> PScriptContext :--> POpaque)
+  Term s (PCurrencySymbol :--> PScriptContext :--> PUnit)
 yieldingHelper = plam $ \pylstcs ctx' -> unTermCont $ do
   ctx <- pmatchC ctx'
   redeemer' <- pletC $ pscriptContext'redeemer ctx

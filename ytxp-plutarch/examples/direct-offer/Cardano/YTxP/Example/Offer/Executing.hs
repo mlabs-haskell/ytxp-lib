@@ -53,7 +53,7 @@ newtype Params = Params
 Refer to the transaction family specification (examples/direct-offer/doc/transaction-families/executing.md)
 for a complete description.
 -}
-executingTxF :: Params -> Term s (PScriptContext :--> POpaque)
+executingTxF :: Params -> Term s (PScriptContext :--> PUnit)
 executingTxF params = phoistAcyclic $ plam $ \context' -> unTermCont $ do
   -- ScriptContext extraction
 
@@ -106,7 +106,7 @@ executingTxF params = phoistAcyclic $ plam $ \context' -> unTermCont $ do
         (pfromData $ toBuy offerDatum)
         (pfromData $ ptxInfo'outputs txInfo)
 
-  pure $ popaque punit
+  pure punit
 
 -- | Find the first valid wallet output
 tryGetWalletOutput ::

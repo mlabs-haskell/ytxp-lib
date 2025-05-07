@@ -100,7 +100,7 @@ apply config (SdkParameters svNonces mpNonces stcs) =
         )
         mpNonces
 
-type PType = PScriptContext :--> POpaque
+type PType = PScriptContext :--> PUnit
 
 mkBlueprint :: Config -> Purpose -> ClosedTerm PType -> ContractBlueprint
 mkBlueprint config purpose ct =

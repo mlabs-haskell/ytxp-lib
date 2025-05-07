@@ -44,7 +44,7 @@ newtype Params = Params
 Refer to the transaction family specification (examples/direct-offer/doc/transaction-families/reclaiming.md)
 for a complete description.
 -}
-reclaimingTxF :: Params -> Term s (PScriptContext :--> POpaque)
+reclaimingTxF :: Params -> Term s (PScriptContext :--> PUnit)
 reclaimingTxF params = phoistAcyclic $ plam $ \context' -> unTermCont $ do
   -- ScriptContext extraction
 
@@ -88,4 +88,4 @@ reclaimingTxF params = phoistAcyclic $ plam $ \context' -> unTermCont $ do
   pguardC "Expect signature of the offer creator" $
     pelem # creator offerDatum # pfromData (ptxInfo'signatories txInfo)
 
-  pure $ popaque punit
+  pure punit
