@@ -100,7 +100,7 @@ type YieldingReferenceTypes = ReferencedTypesOf (PData ': ParamsOf PType)
 {-|
 Generates the blueprint for the Yielding Transaction Pattern Library.
 
-@since 1.0.0
+@since 0.1.0
 -}
 ytxpBlueprint :: Config -> SdkParameters -> ContractBlueprint
 ytxpBlueprint config params =
@@ -125,7 +125,7 @@ ytxpBlueprint config params =
 {-|
 Generates the validator blueprints.
 
-@since 1.0.0
+@since 0.1.0
 -}
 yieldingBlueprints ::
   Config -> SdkParameters -> [ValidatorBlueprint YieldingReferenceTypes]
@@ -150,7 +150,7 @@ yieldingBlueprints config (SdkParameters svNonces mpNonces stcs) =
 {-|
 Creates a validator blueprint.
 
-@since 1.0.0
+@since 0.1.0
 -}
 mkYieldingBlueprint ::
   Config ->
