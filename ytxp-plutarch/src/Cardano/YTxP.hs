@@ -1,5 +1,11 @@
 {-# LANGUAGE OverloadedLists #-}
 
+{-|
+Module      : Cardano.YTxP
+Description : Yielding Transaction Pattern Library (ytxp-lib)
+
+This module provides the blueprint for the Yielding Transaction Pattern Library (ytxp-lib).
+-}
 module Cardano.YTxP (
   ytxpBlueprint,
 ) where
@@ -81,10 +87,21 @@ import Ply.Plutarch (
   mkParamSchemas,
  )
 
+{-|
+Type alias for the Plutarch type used in the Yielding Transaction Pattern Library.
+-}
 type PType = PScriptContext :--> PUnit
 
+{-|
+Type alias for the referenced types used in the Yielding Transaction Pattern Library.
+-}
 type YieldingReferenceTypes = ReferencedTypesOf (PData ': ParamsOf PType)
 
+{-|
+Generates the blueprint for the Yielding Transaction Pattern Library.
+
+@since 1.0.0
+-}
 ytxpBlueprint :: Config -> SdkParameters -> ContractBlueprint
 ytxpBlueprint config params =
   MkContractBlueprint
@@ -105,6 +122,11 @@ ytxpBlueprint config params =
         derivePDefinitions @(PData ': ParamsOf PType)
     }
 
+{-|
+Generates the validator blueprints for the Yielding Transaction Pattern Library.
+
+@since 1.0.0
+-}
 yieldingBlueprints ::
   Config -> SdkParameters -> [ValidatorBlueprint YieldingReferenceTypes]
 yieldingBlueprints config (SdkParameters svNonces mpNonces stcs) =
@@ -125,6 +147,11 @@ yieldingBlueprints config (SdkParameters svNonces mpNonces stcs) =
         )
         mpNonces
 
+{-|
+Creates a validator blueprint for the Yielding Transaction Pattern Library.
+
+@since 1.0.0
+-}
 mkYieldingBlueprint ::
   Config ->
   Purpose ->
