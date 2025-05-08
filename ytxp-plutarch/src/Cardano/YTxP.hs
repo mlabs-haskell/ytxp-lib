@@ -88,12 +88,12 @@ import Ply.Plutarch (
  )
 
 {-|
-Type alias for the Plutarch type used in the Yielding Transaction Pattern Library.
+Type alias for the Plutarch type.
 -}
 type PType = PScriptContext :--> PUnit
 
 {-|
-Type alias for the referenced types used in the Yielding Transaction Pattern Library.
+Type alias for the referenced types.
 -}
 type YieldingReferenceTypes = ReferencedTypesOf (PData ': ParamsOf PType)
 
@@ -123,7 +123,7 @@ ytxpBlueprint config params =
     }
 
 {-|
-Generates the validator blueprints for the Yielding Transaction Pattern Library.
+Generates the validator blueprints.
 
 @since 1.0.0
 -}
@@ -148,7 +148,7 @@ yieldingBlueprints config (SdkParameters svNonces mpNonces stcs) =
         mpNonces
 
 {-|
-Creates a validator blueprint for the Yielding Transaction Pattern Library.
+Creates a validator blueprint.
 
 @since 1.0.0
 -}
