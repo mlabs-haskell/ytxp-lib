@@ -59,11 +59,11 @@ params2SdkParameters :: Params -> SdkParameters
 params2SdkParameters Params {numYieldingSV, numYieldingMP, initialNonce, stcs} =
   SdkParameters
     (f initialNonce numYieldingSV)
-    (f (initialNonce + numYieldingSV + signum numYieldingSV) numYieldingMP)
+    (f (initialNonce + numYieldingSV) numYieldingMP)
     (AuthorisedScriptsSTCS stcs)
   where
     f :: Natural -> Natural -> [Natural]
-    f n k = if k == 0 then [] else [n .. n + k]
+    f n k = [n .. n + k - 1]
 
 -- CLI Parser
 

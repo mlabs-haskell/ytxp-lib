@@ -111,17 +111,17 @@ yieldingBlueprints config (SdkParameters svNonces mpNonces stcs) =
   mkYieldingBlueprint
     config
     Spend
-    (yielding # pconstant (coerce stcs) # pzero)
+    (yielding # pconstant (coerce stcs) # pdata pzero)
     : fmap
       ( \nonce ->
           mkYieldingBlueprint config Withdraw $
-            yielding # pconstant (coerce stcs) # pconstant (naturalToInteger nonce)
+            yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
       )
       svNonces
       <> fmap
         ( \nonce ->
             mkYieldingBlueprint config Mint $
-              yielding # pconstant (coerce stcs) # pconstant (naturalToInteger nonce)
+              yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
         )
         mpNonces
 
