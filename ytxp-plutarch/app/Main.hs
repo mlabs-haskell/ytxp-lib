@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 
-{-|
+{- |
 Module      : Main
 Description : Main module for the YTxP compiler.
 
@@ -8,7 +8,6 @@ This module provides the entry point for the YTxP compiler, which generates a bl
 for the Yielding Transaction Protocol (YTxP). It includes command-line options for
 configuring the compiler and generating the blueprint.
 -}
-
 module Main (main) where
 
 import Cardano.YTxP (ytxpBlueprint)
@@ -44,7 +43,7 @@ import PlutusLedgerApi.V3 (CurrencySymbol (CurrencySymbol))
 import PlutusTx.Blueprint (writeBlueprint)
 import PlutusTx.Builtins.HasOpaque (stringToBuiltinByteStringHex)
 
-{-|
+{- |
 Data type representing the parameters for the YTxP compiler.
 -}
 data Params = Params
@@ -56,7 +55,7 @@ data Params = Params
   , traces :: !Bool
   }
 
-{-|
+{- |
 Starts the YTxP compiler with the given parameters.
 -}
 start :: Params -> IO ()
@@ -70,7 +69,7 @@ start p =
       (outputFile p)
       (ytxpBlueprint config sdkParams)
 
-{-|
+{- |
 Converts the given parameters to SDK parameters.
 -}
 params2SdkParameters :: Params -> SdkParameters
@@ -85,7 +84,7 @@ params2SdkParameters Params {numYieldingSV, numYieldingMP, initialNonce, stcs} =
 
 -- CLI Parser
 
-{-|
+{- |
 Entry point for the YTxP compiler.
 -}
 main :: IO ()
@@ -98,14 +97,14 @@ main = start =<< execParser opts
             <> header "ytxp-lib - YTxP Compiler"
         )
 
-{-|
+{- |
 Instance of the Read type class for CurrencySymbol.
 -}
 instance Read CurrencySymbol where
   readsPrec _ cs =
     [(CurrencySymbol . stringToBuiltinByteStringHex $ cs, mempty)]
 
-{-|
+{- |
 Parser for the command-line parameters.
 -}
 params :: Parser Params
