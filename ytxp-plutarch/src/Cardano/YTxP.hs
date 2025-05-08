@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedLists #-}
 
-{-|
+{- |
 Module      : Cardano.YTxP
 Description : Yielding Transaction Pattern Library (ytxp-lib)
 
@@ -87,17 +87,17 @@ import Ply.Plutarch (
   mkParamSchemas,
  )
 
-{-|
+{- |
 Type alias for the Plutarch type.
 -}
 type PType = PScriptContext :--> PUnit
 
-{-|
+{- |
 Type alias for the referenced types.
 -}
 type YieldingReferenceTypes = ReferencedTypesOf (PData ': ParamsOf PType)
 
-{-|
+{- |
 Generates the blueprint for the Yielding Transaction Pattern Library.
 
 @since 0.1.0
@@ -122,7 +122,7 @@ ytxpBlueprint config params =
         derivePDefinitions @(PData ': ParamsOf PType)
     }
 
-{-|
+{- |
 Generates the validator blueprints.
 
 @since 0.1.0
@@ -147,7 +147,7 @@ yieldingBlueprints config (SdkParameters svNonces mpNonces stcs) =
         )
         mpNonces
 
-{-|
+{- |
 Creates a validator blueprint.
 
 @since 0.1.0
