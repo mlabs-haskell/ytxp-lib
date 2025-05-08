@@ -52,7 +52,9 @@ import PlutusLedgerApi.V3 (
 makeClassyFor
   "HasScriptContext"
   "scriptContext"
-  [("scriptContextPurpose", "purpose")]
+  [ ("scriptContextPurpose", "purpose")
+  , ("scriptContextRedeemer", "redeemer")
+  ]
   ''ScriptContext
 
 makeClassyPrisms ''ScriptPurpose
