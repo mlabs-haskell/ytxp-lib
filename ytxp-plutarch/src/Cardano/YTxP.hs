@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedLists #-}
 
 module Cardano.YTxP (
-  apply,
+  ytxpBlueprint,
 ) where
 
 import Cardano.Binary qualified as CBOR
@@ -15,9 +15,11 @@ import Cardano.YTxP.SDK.SdkParameters (
 import Data.ByteString.Short qualified as SBS
 import Data.Coerce (coerce)
 import Data.Data (Proxy (Proxy))
+import Data.Maybe (isJust)
+import Data.Set qualified as Set
 import Data.Text qualified as T
 import GHC.Natural (naturalToInteger)
-import Plutarch.Internal.Term (Config, compile)
+import Plutarch.Internal.Term (Config, compile, tracingMode)
 import Plutarch.LedgerApi.V3 (PScriptContext, scriptHash)
 import Plutarch.Script (serialiseScript)
 import PlutusLedgerApi.V3 (ScriptHash (ScriptHash))
@@ -79,78 +81,90 @@ import Ply.Plutarch (
   mkParamSchemas,
  )
 
---------------------------------------------------------------------------------
-
-apply :: Config -> SdkParameters -> [ContractBlueprint]
-apply config (SdkParameters svNonces mpNonces stcs) =
-  mkBlueprint
-    config
-    Spend
-    (yielding # pconstant (coerce stcs) # pzero)
-    : fmap
-      ( \nonce ->
-          mkBlueprint config Withdraw $
-            yielding # pconstant (coerce stcs) # pconstant (naturalToInteger nonce)
-      )
-      svNonces
-      <> fmap
-        ( \nonce ->
-            mkBlueprint config Mint $
-              yielding # pconstant (coerce stcs) # pconstant (naturalToInteger nonce)
-        )
-        mpNonces
-
 type PType = PScriptContext :--> PUnit
 
-mkBlueprint :: Config -> Purpose -> ClosedTerm PType -> ContractBlueprint
-mkBlueprint config purpose ct =
+type YieldingReferenceTypes = ReferencedTypesOf (PData ': ParamsOf PType)
+
+ytxpBlueprint :: Config -> SdkParameters -> ContractBlueprint
+ytxpBlueprint config params =
   MkContractBlueprint
     { contractId = Nothing
     , contractPreamble =
         MkPreamble
-          { preambleTitle = "Example Contract" -- TODO:
+          { preambleTitle = "Yielding Transaction Pattern Library (ytxp-lib)"
           , preambleDescription = Nothing
           , preambleVersion = "1.0.0"
           , preamblePlutusVersion =
               reifyVersion $ Proxy @(VersionOf PType)
           , preambleLicense = Nothing
           }
-    , contractValidators = [scriptBP]
+    , contractValidators =
+        Set.fromList $ yieldingBlueprints config params
     , contractDefinitions =
-        -- Note: We have to manually prepend datum/redeemer to the types because it does not exist on the Plutarch type.
+        -- Note (see Ply example): We have to manually prepend datum/redeemer to the types because it does not exist on the Plutarch type.
         derivePDefinitions @(PData ': ParamsOf PType)
     }
-  where
-    scriptBP =
-      MkValidatorBlueprint
-        { validatorTitle = "Example" -- TODO
-        , validatorDescription = Nothing
-        , validatorParameters =
-            map
-              ( \sch ->
-                  MkParameterBlueprint
-                    { parameterTitle = Nothing
-                    , parameterDescription = Nothing
-                    , parameterPurpose = [purpose]
-                    , parameterSchema = sch
-                    }
-              )
-              -- Note: When using 'mkParamSchemas', the second type argument should only contain the params (i.e from 'ParamsOf'), not the datum/redeemer.
-              $ mkParamSchemas @(ReferencedTypesOf (PData ': ParamsOf PType)) @(ParamsOf PType)
-        , validatorRedeemer =
-            MkArgumentBlueprint
-              { argumentTitle = Nothing
-              , argumentDescription = Nothing
-              , argumentPurpose = [purpose]
-              , argumentSchema = definitionRef @(PlyArgOf PData) -- TODO PYieldingRedeemer
-              }
-        , validatorDatum = Nothing
-        , validatorCompiled =
-            Just
-              MkCompiledValidator
-                { compiledValidatorHash = PlutusTx.fromBuiltin hash
-                , compiledValidatorCode = CBOR.serialize' . SBS.fromShort $ serialiseScript script
+
+yieldingBlueprints ::
+  Config -> SdkParameters -> [ValidatorBlueprint YieldingReferenceTypes]
+yieldingBlueprints config (SdkParameters svNonces mpNonces stcs) =
+  mkYieldingBlueprint
+    config
+    Spend
+    (yielding # pconstant (coerce stcs) # pzero)
+    : fmap
+      ( \nonce ->
+          mkYieldingBlueprint config Withdraw $
+            yielding # pconstant (coerce stcs) # pconstant (naturalToInteger nonce)
+      )
+      svNonces
+      <> fmap
+        ( \nonce ->
+            mkYieldingBlueprint config Mint $
+              yielding # pconstant (coerce stcs) # pconstant (naturalToInteger nonce)
+        )
+        mpNonces
+
+mkYieldingBlueprint ::
+  Config ->
+  Purpose ->
+  ClosedTerm PType ->
+  ValidatorBlueprint YieldingReferenceTypes
+mkYieldingBlueprint config purpose ct =
+  MkValidatorBlueprint
+    { validatorTitle = "Yielding " <> T.pack (show purpose)
+    , validatorDescription =
+        Just $
+          if isJust (tracingMode config)
+            then "Compiled with traces"
+            else "Compiled without traces"
+    , validatorParameters =
+        map
+          ( \sch ->
+              MkParameterBlueprint
+                { parameterTitle = Nothing
+                , parameterDescription = Nothing
+                , parameterPurpose = [purpose]
+                , parameterSchema = sch
                 }
-        }
+          )
+          -- Note (see Ply example): When using 'mkParamSchemas', the second type argument should only contain the params (i.e from 'ParamsOf'), not the datum/redeemer.
+          $ mkParamSchemas @YieldingReferenceTypes @(ParamsOf PType)
+    , validatorRedeemer =
+        MkArgumentBlueprint
+          { argumentTitle = Just "Yielding redeemer"
+          , argumentDescription = Nothing
+          , argumentPurpose = [purpose]
+          , argumentSchema = definitionRef @(PlyArgOf PData) -- TODO PYieldingRedeemer
+          }
+    , validatorDatum = Nothing
+    , validatorCompiled =
+        Just
+          MkCompiledValidator
+            { compiledValidatorHash = PlutusTx.fromBuiltin hash
+            , compiledValidatorCode = CBOR.serialize' . SBS.fromShort $ serialiseScript script
+            }
+    }
+  where
     script = either (error . T.unpack) id $ compile config ct
     ScriptHash hash = scriptHash script

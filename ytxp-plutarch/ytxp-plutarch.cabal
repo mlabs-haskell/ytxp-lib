@@ -182,18 +182,21 @@ library direct-offer-example
 
 -- Executables
 
-executable export
+executable ytxp
   import:         common-language
   main-is:        Main.hs
   build-depends:
     , base
     , filepath
-    , opt-env-conf
+    , optparse-applicative
+    , plutus-ledger-api
+    , plutus-tx
     , pprelude
     , text
     , ytxp-plutarch
+    , ytxp-sdk
 
-  hs-source-dirs: app/export
+  hs-source-dirs: app
 
 -- Tests
 
