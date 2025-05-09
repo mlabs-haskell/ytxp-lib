@@ -26,7 +26,6 @@ usage:
 	@echo "    build_ytxp-plutarch                                         -- Build ytxp-plutarch"
 	@echo "    build_testlib                                               -- Build testlib"
 	@echo "    build_pprelude                                              -- Build pprelude"
-	@echo "    build_export                                                -- Build export"
 	@echo ""
 	# Test
 	@echo "    test_all                                                    -- Run all the tests"
@@ -44,8 +43,6 @@ usage:
 	@echo "    lint_markdown_check                                         -- Check markdownlint suggestions"
 	@echo "    lint_markdown                                               -- Apply markdownlint suggestions"
 	@echo ""
-	# Export
-	@echo "    export_scripts                                               -- Export scripts"
 
 ################################################################################
 # Code
@@ -142,10 +139,6 @@ build_testlib:
 build_pprelude:
 	cabal build -j pprelude
 
-.PHONY: build_export
-build_export:
-	cabal build -j export
-
 ################################################################################
 # Test
 .PHONY: test_all
@@ -186,14 +179,3 @@ lint_markdown_check:
 .PHONY: lint_markdown
 lint_markdown: 
 	$(call find_exec_all_fn, $(FIND_MARKDOWN_SOURCES), markdownlint -f)
-
-################################################################################
-# Export scripts
-.PHONY: export_scripts
-export_scripts:
-	cabal run export file -- -o ./exported-scripts/ -p ./ytxp-params.json -b "ytxp-validator"
-	cabal run export file -- -o ./exported-scripts/ -p ./ytxp-params.json -b "ytxp-mintingPolicy"
-	cabal run export file -- -o ./exported-scripts/ -p ./ytxp-params.json -b "ytxp-stakeValidator"
-	cabal run export file -- -o ./exported-scripts/ -p ./ytxp-params.json -b "ytxp-validator-tracing"
-	cabal run export file -- -o ./exported-scripts/ -p ./ytxp-params.json -b "ytxp-mintingPolicy-tracing"
-	cabal run export file -- -o ./exported-scripts/ -p ./ytxp-params.json -b "ytxp-stakeValidator-tracing"
