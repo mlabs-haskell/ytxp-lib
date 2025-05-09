@@ -63,6 +63,29 @@ make serve_docs
 
 The resulting documentation will be accessible within the `result-doc` directory.
 
+### ytxp Executable
+
+The `ytxp` executable is a command-line tool for compiling the yielding validators for the YTxP.
+
+#### Options
+
+The `ytxp` executable supports the following command-line options:
+
+* `--output` or `-o`: Specifies the output blueprint file.
+* `--yielding-staking-validator-number` or `-s`: Specifies the number of yielding staking validators.
+* `--yielding-minting-policy-number` or `-m`: Specifies the number of yielding minting policies.
+* `--stcs`: Specifies the authorised scripts STCS.
+* `--initial-nonce`: Specifies the initial nonce value.
+* `--traces`: Enables tracing for the compiler.
+
+#### Example
+
+To generate a blueprint with five yielding staking validators, one yielding minting policy, and a yielding spending validator:
+
+```bash
+cabal run ytxp -- -o blueprint.json -s 5 -m 1 --stcs "333333"
+```
+
 ## Tests
 Tests will run in CI thanks to some specific checks in the Nix flake.
 
