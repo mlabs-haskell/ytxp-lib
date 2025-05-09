@@ -18,7 +18,7 @@ The high-level offer flow looks like this:
 
 - [Offer Creating](transaction-families/creating.md)
 - [Offer Executing](transaction-families/executing.md)
-- [Offer Reclaiming](transaction-famlies/reclaiming.md)
+- [Offer Reclaiming](transaction-families/reclaiming.md)
 
 ## Transaction Flows
 
