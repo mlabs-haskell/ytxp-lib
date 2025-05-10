@@ -5,7 +5,7 @@ In this tutorial, we learn how to specify a specification for a direct-offer con
 Prerequisites:
 
 - Understanding of Cardano's EUTxO model and smart contract architecture.
-- [A solid understanding of the core concepts of the YTxP.](/docs/README.md)
+- [A solid understanding of the core concepts of the YTxP.](/docs/)
 
 ## What is the direct offer contract?
 
