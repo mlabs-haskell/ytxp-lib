@@ -71,12 +71,12 @@ The `ytxp` executable is a command-line tool for compiling the yielding validato
 
 The `ytxp` executable supports the following command-line options:
 
-* `--output` or `-o`: Specifies the output blueprint file.
-* `--yielding-staking-validator-number` or `-s`: Specifies the number of yielding staking validators.
-* `--yielding-minting-policy-number` or `-m`: Specifies the number of yielding minting policies.
-* `--stcs`: Specifies the authorised scripts STCS.
-* `--initial-nonce`: Specifies the initial nonce value.
-* `--traces`: Enables tracing for the compiler.
+* `--output` or `-o`: Specifies the output blueprint file. **Required**.
+* `--yielding-staking-validator-number` or `-s`: Specifies the number of yielding staking validators. **Optional**.
+* `--yielding-minting-policy-number` or `-m`: Specifies the number of yielding minting policies. **Optional**.
+* `--stcs`: Specifies the authorised scripts STCS. **Required**.
+* `--initial-nonce`: Specifies the initial nonce value. **Optional**. Default value is `42`.
+* `--traces`: Enables tracing for the compiler. **Optional**.
 
 #### Example
 
