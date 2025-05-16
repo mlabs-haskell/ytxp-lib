@@ -12,6 +12,7 @@ module Cardano.YTxP (
 
 import Cardano.Binary qualified as CBOR
 import Cardano.YTxP.Control.Yielding.Scripts (yielding)
+import Cardano.YTxP.SDK.Redeemers (AuthorisedScriptPurpose)
 import Cardano.YTxP.SDK.SdkParameters (
   AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
   SdkParameters (
@@ -64,7 +65,6 @@ import PlutusTx.Blueprint (
     preambleTitle,
     preambleVersion
   ),
-  Purpose (Mint, Spend, Withdraw),
   ValidatorBlueprint (
     MkValidatorBlueprint,
     validatorCompiled,
@@ -102,8 +102,9 @@ Generates the blueprint for the Yielding Transaction Pattern Library.
 
 @since 0.1.0
 -}
-ytxpBlueprint :: Config -> SdkParameters -> ContractBlueprint
-ytxpBlueprint config params =
+ytxpBlueprint ::
+  Config -> AuthorisedScriptPurpose -> SdkParameters -> ContractBlueprint
+ytxpBlueprint config purpose params =
   MkContractBlueprint
     { contractId = Nothing
     , contractPreamble =
@@ -116,7 +117,7 @@ ytxpBlueprint config params =
           , preambleLicense = Nothing
           }
     , contractValidators =
-        Set.fromList $ yieldingBlueprints config params
+        Set.fromList $ yieldingBlueprints config purpose params
     , contractDefinitions =
         -- Note (see Ply example): We have to manually prepend datum/redeemer to the types because it does not exist on the Plutarch type.
         derivePDefinitions @(PData ': ParamsOf PType)
@@ -128,22 +129,29 @@ Generates the validator blueprints.
 @since 0.1.0
 -}
 yieldingBlueprints ::
-  Config -> SdkParameters -> [ValidatorBlueprint YieldingReferenceTypes]
-yieldingBlueprints config (SdkParameters svNonces mpNonces stcs) =
+  Config ->
+  AuthorisedScriptPurpose ->
+  SdkParameters ->
+  [ValidatorBlueprint YieldingReferenceTypes]
+yieldingBlueprints config purpose (SdkParameters svNonces mpNonces stcs) =
   mkYieldingBlueprint
     config
-    Spend
-    (yielding # pconstant (coerce stcs) # pdata pzero)
+    "Yielding Spending"
+    (yielding purpose # pconstant (coerce stcs) # pdata pzero)
     : fmap
       ( \nonce ->
-          mkYieldingBlueprint config Withdraw $
-            yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
+          mkYieldingBlueprint config "Yielding Rewarding" $
+            yielding purpose
+              # pconstant (coerce stcs)
+              # pdata (pconstant $ naturalToInteger nonce)
       )
       svNonces
       <> fmap
         ( \nonce ->
-            mkYieldingBlueprint config Mint $
-              yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
+            mkYieldingBlueprint config "Yielding Minting" $
+              yielding purpose
+                # pconstant (coerce stcs)
+                # pdata (pconstant $ naturalToInteger nonce)
         )
         mpNonces
 
@@ -154,12 +162,12 @@ Creates a validator blueprint.
 -}
 mkYieldingBlueprint ::
   Config ->
-  Purpose ->
+  T.Text ->
   ClosedTerm PType ->
   ValidatorBlueprint YieldingReferenceTypes
-mkYieldingBlueprint config purpose ct =
+mkYieldingBlueprint config title ct =
   MkValidatorBlueprint
-    { validatorTitle = "Yielding " <> T.pack (show purpose)
+    { validatorTitle = title
     , validatorDescription =
         Just $
           if isJust (tracingMode config)
@@ -171,7 +179,7 @@ mkYieldingBlueprint config purpose ct =
               MkParameterBlueprint
                 { parameterTitle = Nothing
                 , parameterDescription = Nothing
-                , parameterPurpose = [purpose]
+                , parameterPurpose = []
                 , parameterSchema = sch
                 }
           )
@@ -181,7 +189,7 @@ mkYieldingBlueprint config purpose ct =
         MkArgumentBlueprint
           { argumentTitle = Just "Yielding redeemer"
           , argumentDescription = Nothing
-          , argumentPurpose = [purpose]
+          , argumentPurpose = []
           , argumentSchema = definitionRef @(PlyArgOf PData) -- TODO PYieldingRedeemer
           }
     , validatorDatum = Nothing
