@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name:          ytxp-plutarch
-version:       0.1.0
+version:       0.2.0
 synopsis:
   Control scripts, types, and utilities for the YTxP architecture
 
