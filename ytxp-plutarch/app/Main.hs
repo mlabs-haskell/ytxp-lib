@@ -50,6 +50,9 @@ data Params = Params
   { outputFile :: !FilePath
   , numYieldingSV :: !Natural
   , numYieldingMP :: !Natural
+  , numYieldingCV :: !Natural
+  , numYieldingVV :: !Natural
+  , numYieldingPV :: !Natural
   , initialNonce :: !Natural
   , stcs :: !CurrencySymbol
   , traces :: !Bool
@@ -73,14 +76,52 @@ start p =
 Converts the given parameters to SDK parameters.
 -}
 params2SdkParameters :: Params -> SdkParameters
-params2SdkParameters Params {numYieldingSV, numYieldingMP, initialNonce, stcs} =
-  SdkParameters
-    (f initialNonce numYieldingSV)
-    (f (initialNonce + numYieldingSV) numYieldingMP)
-    (AuthorisedScriptsSTCS stcs)
-  where
-    f :: Natural -> Natural -> [Natural]
-    f n k = [n .. n + k - 1]
+params2SdkParameters
+  Params
+    { numYieldingSV
+    , numYieldingMP
+    , numYieldingCV
+    , numYieldingVV
+    , numYieldingPV
+    , initialNonce
+    , stcs
+    } =
+    SdkParameters
+      (f initialNonce numYieldingSV)
+      ( f
+          ( initialNonce
+              + numYieldingSV
+          )
+          numYieldingMP
+      )
+      ( f
+          ( initialNonce
+              + numYieldingSV
+              + numYieldingMP
+          )
+          numYieldingCV
+      )
+      ( f
+          ( initialNonce
+              + numYieldingSV
+              + numYieldingMP
+              + numYieldingCV
+          )
+          numYieldingVV
+      )
+      ( f
+          ( initialNonce
+              + numYieldingSV
+              + numYieldingMP
+              + numYieldingCV
+              + numYieldingVV
+          )
+          numYieldingPV
+      )
+      (AuthorisedScriptsSTCS stcs)
+    where
+      f :: Natural -> Natural -> [Natural]
+      f n k = [n .. n + k - 1]
 
 -- CLI Parser
 
@@ -127,6 +168,27 @@ params =
       ( long "yielding-minting-policy-number"
           <> short 'm'
           <> help "The number of yielding minting policies"
+          <> value 0
+      )
+    <*> option
+      auto
+      ( long "yielding-certifying-validator-number"
+          <> short 'c'
+          <> help "The number of yielding certifying validators"
+          <> value 0
+      )
+    <*> option
+      auto
+      ( long "yielding-voting-validator-number"
+          <> short 'v'
+          <> help "The number of yielding voting validators"
+          <> value 0
+      )
+    <*> option
+      auto
+      ( long "yielding-proposing-validator-number"
+          <> short 'p'
+          <> help "The number of yielding proposing validators"
           <> value 0
       )
     <*> option

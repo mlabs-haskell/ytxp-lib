@@ -64,7 +64,6 @@ import PlutusTx.Blueprint (
     preambleTitle,
     preambleVersion
   ),
-  Purpose (Mint, Spend, Withdraw),
   ValidatorBlueprint (
     MkValidatorBlueprint,
     validatorCompiled,
@@ -129,23 +128,41 @@ Generates the validator blueprints.
 -}
 yieldingBlueprints ::
   Config -> SdkParameters -> [ValidatorBlueprint YieldingReferenceTypes]
-yieldingBlueprints config (SdkParameters svNonces mpNonces stcs) =
+yieldingBlueprints config (SdkParameters svNonces mpNonces cvNonces vvNonces pvNonces stcs) =
   mkYieldingBlueprint
     config
-    Spend
+    "Yielding Spending"
     (yielding # pconstant (coerce stcs) # pdata pzero)
     : fmap
       ( \nonce ->
-          mkYieldingBlueprint config Withdraw $
+          mkYieldingBlueprint config "Yielding Rewarding" $
             yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
       )
       svNonces
       <> fmap
         ( \nonce ->
-            mkYieldingBlueprint config Mint $
+            mkYieldingBlueprint config "Yielding Minting" $
               yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
         )
         mpNonces
+      <> fmap
+        ( \nonce ->
+            mkYieldingBlueprint config "Yielding Certifying" $
+              yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
+        )
+        cvNonces
+      <> fmap
+        ( \nonce ->
+            mkYieldingBlueprint config "Yielding Voting" $
+              yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
+        )
+        vvNonces
+      <> fmap
+        ( \nonce ->
+            mkYieldingBlueprint config "Yielding Proposing" $
+              yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
+        )
+        pvNonces
 
 {- |
 Creates a validator blueprint.
@@ -154,12 +171,12 @@ Creates a validator blueprint.
 -}
 mkYieldingBlueprint ::
   Config ->
-  Purpose ->
+  T.Text ->
   ClosedTerm PType ->
   ValidatorBlueprint YieldingReferenceTypes
-mkYieldingBlueprint config purpose ct =
+mkYieldingBlueprint config title ct =
   MkValidatorBlueprint
-    { validatorTitle = "Yielding " <> T.pack (show purpose)
+    { validatorTitle = title
     , validatorDescription =
         Just $
           if isJust (tracingMode config)
@@ -171,7 +188,7 @@ mkYieldingBlueprint config purpose ct =
               MkParameterBlueprint
                 { parameterTitle = Nothing
                 , parameterDescription = Nothing
-                , parameterPurpose = [purpose]
+                , parameterPurpose = []
                 , parameterSchema = sch
                 }
           )
@@ -181,7 +198,7 @@ mkYieldingBlueprint config purpose ct =
         MkArgumentBlueprint
           { argumentTitle = Just "Yielding redeemer"
           , argumentDescription = Nothing
-          , argumentPurpose = [purpose]
+          , argumentPurpose = []
           , argumentSchema = definitionRef @(PlyArgOf PData) -- TODO PYieldingRedeemer
           }
     , validatorDatum = Nothing
