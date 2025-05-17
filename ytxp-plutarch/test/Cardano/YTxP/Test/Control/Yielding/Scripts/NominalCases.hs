@@ -13,9 +13,7 @@ import Cardano.YTxP.SDK.Redeemers (
   YieldingRedeemer (YieldingRedeemer),
  )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.ScriptsBuilders (
-  yieldingMPScriptR,
-  yieldingSVScriptR,
-  yieldingVScriptR,
+  yieldingScriptR,
  )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   ScriptsTestsParams,
@@ -38,33 +36,16 @@ import Test.Tasty (TestTree, testGroup)
 
 testNominalCasesR :: Reader ScriptsTestsParams TestTree
 testNominalCasesR = do
-  -- Mint
-  yieldingMPScript <- yieldingMPScriptR
-  mintContext' <- mintNominalCaseBuilderR
-  -- Spend
-  yieldingVScript <- yieldingVScriptR
-  spendContext' <- spendNominalCaseBuilderR
-  -- Spend
-  yieldingSVScript <- yieldingSVScriptR
-  rewardContext' <- rewardNominalCaseBuilderR
+  yieldingScript <- yieldingScriptR
+  context' <- mintNominalCaseBuilderR
   pure $
     testGroup
       "Nominal Case"
       [ txfCEKUnitCase $
           nominalCaseBasic
-            "Mint Case"
-            mintContext'
-            yieldingMPScript
-      , txfCEKUnitCase $
-          nominalCaseBasic
-            "Spend Case"
-            spendContext'
-            yieldingVScript
-      , txfCEKUnitCase $
-          nominalCaseBasic
-            "Reward Case"
-            rewardContext'
-            yieldingSVScript
+            "Yielding Case"
+            context'
+            yieldingScript
       ]
 
 -- | Helper that produces a @Reader@ that yields a compiled a redeemerScript, throws an error is compilation fails

@@ -24,9 +24,7 @@ import Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (
   spendNominalCaseBuilderR,
  )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.ScriptsBuilders (
-  yieldingMPScriptR,
-  yieldingSVScriptR,
-  yieldingVScriptR,
+  yieldingScriptR,
  )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   ScriptsTestsParams (
@@ -62,10 +60,8 @@ import Text.RE.TDFA.Text (re)
 
 testAttacksR :: Reader ScriptsTestsParams TestTree
 testAttacksR = do
-  -- Scripts
-  ympScript <- yieldingMPScriptR
-  yvScript <- yieldingVScriptR
-  ysvScript <- yieldingSVScriptR
+  -- Yielding Script
+  yScript <- yieldingScriptR
 
   -- Redeemers and contexts
   mintNominalContext <- mintNominalCaseBuilderR
@@ -99,63 +95,63 @@ testAttacksR = do
             "ref input not present"
             [re|^(.*)$|]
             mintNominalContext
-            ympScript
+            yScript
             ppNoRefInput
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "ref input present but not authorised"
             [re|Reference input does not contain AuthorisedScriptsSTCS|]
             mintNominalContext
-            ympScript
+            yScript
             ppRefInputNoAuth
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "attackAuthorisedScriptIndex does not points to valid reference input"
             [re|^(.*)$|]
             mintNominalContext
-            ympScript
+            yScript
             ppAuthorisedScriptIndexInvalid
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(MP) AuthorisedScriptProofIndex does not index to valid proof"
             [re|^(.*)$|]
             mintNominalContext
-            ympScript
+            yScript
             ppAttackAuthorisedMPProofIndexInvalid
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(MP) AuthorisedScriptProofIndex point to a wrong script"
             [re|Minting policy does not match expected authorised minting policy|]
             mintNominalContext
-            ympScript
+            yScript
             ppAttackAuthorisedMPProofMismatch
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(V) AuthorisedScriptProofIndex does not index to valid proof"
             [re|^(.*)$|]
             spendNominalContext
-            yvScript
+            yScript
             ppAttackAuthorisedVProofIndexInvalid
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(V) AuthorisedScriptProofIndex point to a wrong script"
             [re|Input does not match expected authorised validator|]
             spendNominalContext
-            yvScript
+            yScript
             ppAttackAuthorisedVProofMismatch
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(SV) AuthorisedScriptProofIndex does not index to valid proof"
             [re|^(.*)$|]
             rewardNominalContext
-            ysvScript
+            yScript
             ppAttackAuthorisedSVProofIndexInvalid
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(SV) AuthorisedScriptProofIndex point to a wrong script"
             [re|Withdrawal does not match expected authorised staking validator|]
             rewardNominalContext
-            ysvScript
+            yScript
             ppAttackAuthorisedSVProofMismatch
       ]
 

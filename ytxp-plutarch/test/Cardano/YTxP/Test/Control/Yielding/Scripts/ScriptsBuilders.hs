@@ -1,7 +1,5 @@
 module Cardano.YTxP.Test.Control.Yielding.Scripts.ScriptsBuilders (
-  yieldingMPScriptR,
-  yieldingVScriptR,
-  yieldingSVScriptR,
+  yieldingScriptR,
 ) where
 
 import Cardano.YTxP.Control.Yielding.Scripts (yielding)
@@ -24,32 +22,8 @@ import Plutarch.Internal.Term (
 import Plutarch.LedgerApi.V3 (PScriptContext)
 
 -- | Helper that produces a @Reader@ that yields a compiled Script, throws an error is compilation fails
-yieldingMPScriptR :: Reader ScriptsTestsParams Script
-yieldingMPScriptR = do
-  (AuthorisedScriptsSTCS authorisedScriptsSTCS') <- asks authorisedScriptsSTCS
-  let
-    closedTerm ::
-      forall (s :: S).
-      Term s (PScriptContext :--> PUnit)
-    closedTerm = yielding # pconstant authorisedScriptsSTCS' # pconstant 42
-  case compile (Tracing LogInfo DetTracing) closedTerm of
-    Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
-    Right script' -> pure script'
-
-yieldingVScriptR :: Reader ScriptsTestsParams Script
-yieldingVScriptR = do
-  (AuthorisedScriptsSTCS authorisedScriptsSTCS') <- asks authorisedScriptsSTCS
-  let
-    closedTerm ::
-      forall (s :: S).
-      Term s (PScriptContext :--> PUnit)
-    closedTerm = yielding # pconstant authorisedScriptsSTCS' # pconstant 0
-  case compile (Tracing LogInfo DetTracing) closedTerm of
-    Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
-    Right script' -> pure script'
-
-yieldingSVScriptR :: Reader ScriptsTestsParams Script
-yieldingSVScriptR = do
+yieldingScriptR :: Reader ScriptsTestsParams Script
+yieldingScriptR = do
   (AuthorisedScriptsSTCS authorisedScriptsSTCS') <- asks authorisedScriptsSTCS
   let
     closedTerm ::
