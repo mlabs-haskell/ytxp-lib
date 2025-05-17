@@ -5,9 +5,6 @@ module Cardano.YTxP.Test.Control.Yielding.Scripts.ScriptsBuilders (
 ) where
 
 import Cardano.YTxP.Control.Yielding.Scripts (yielding)
-import Cardano.YTxP.SDK.Redeemers (
-  AuthorisedScriptPurpose (Minting, Rewarding, Spending),
- )
 import Cardano.YTxP.SDK.SdkParameters (
   AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
  )
@@ -34,7 +31,7 @@ yieldingMPScriptR = do
     closedTerm ::
       forall (s :: S).
       Term s (PScriptContext :--> PUnit)
-    closedTerm = yielding Minting # pconstant authorisedScriptsSTCS' # pconstant 42
+    closedTerm = yielding # pconstant authorisedScriptsSTCS' # pconstant 42
   case compile (Tracing LogInfo DetTracing) closedTerm of
     Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
     Right script' -> pure script'
@@ -46,7 +43,7 @@ yieldingVScriptR = do
     closedTerm ::
       forall (s :: S).
       Term s (PScriptContext :--> PUnit)
-    closedTerm = yielding Spending # pconstant authorisedScriptsSTCS' # pconstant 0
+    closedTerm = yielding # pconstant authorisedScriptsSTCS' # pconstant 0
   case compile (Tracing LogInfo DetTracing) closedTerm of
     Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
     Right script' -> pure script'
@@ -58,7 +55,7 @@ yieldingSVScriptR = do
     closedTerm ::
       forall (s :: S).
       Term s (PScriptContext :--> PUnit)
-    closedTerm = yielding Rewarding # pconstant authorisedScriptsSTCS' # pconstant 42
+    closedTerm = yielding # pconstant authorisedScriptsSTCS' # pconstant 42
   case compile (Tracing LogInfo DetTracing) closedTerm of
     Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
     Right script' -> pure script'

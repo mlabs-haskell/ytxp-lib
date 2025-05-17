@@ -11,9 +11,6 @@ configuring the compiler and generating the blueprint.
 module Main (main) where
 
 import Cardano.YTxP (ytxpBlueprint)
-import Cardano.YTxP.SDK.Redeemers (
-  AuthorisedScriptPurpose (Minting, Rewarding, Spending),
- )
 import Cardano.YTxP.SDK.SdkParameters (
   AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
   SdkParameters (SdkParameters),
@@ -55,7 +52,6 @@ data Params = Params
   , numYieldingMP :: !Natural
   , initialNonce :: !Natural
   , stcs :: !CurrencySymbol
-  , txfPurpose :: !AuthorisedScriptPurpose
   , traces :: !Bool
   }
 
@@ -71,7 +67,7 @@ start p =
    in
     writeBlueprint
       (outputFile p)
-      (ytxpBlueprint config (txfPurpose p) sdkParams)
+      (ytxpBlueprint config sdkParams)
 
 {- |
 Converts the given parameters to SDK parameters.
@@ -109,16 +105,6 @@ instance Read CurrencySymbol where
     [(CurrencySymbol . stringToBuiltinByteStringHex $ cs, mempty)]
 
 {- |
-Instance of the Read type class for AuthorisedScriptPurpose.
--}
-instance Read AuthorisedScriptPurpose where
-  readsPrec _ purpose
-    | purpose == "rewarding" = [(Rewarding, mempty)]
-    | purpose == "spending" = [(Spending, mempty)]
-    | purpose == "minting" = [(Minting, mempty)]
-    | otherwise = []
-
-{- |
 Parser for the command-line parameters.
 -}
 params :: Parser Params
@@ -154,13 +140,6 @@ params =
       auto
       ( long "stcs"
           <> help "The authorised scripts STCS"
-      )
-    <*> option
-      auto
-      ( long "txf-script-purpose"
-          <> help "The transaction family script purpose"
-          <> showDefault
-          <> value Rewarding
       )
     <*> switch
       ( long "traces"
