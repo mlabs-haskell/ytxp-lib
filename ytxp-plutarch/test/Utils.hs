@@ -2,7 +2,7 @@
 
 module Utils (tests) where
 
-import Plutarch.LedgerApi.V2 (KeyGuarantees (Unsorted), PMap)
+import Plutarch.LedgerApi.V3 (KeyGuarantees (Unsorted), PMap)
 import PlutusTx.AssocMap qualified as PlutusMap
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertBool, testCase)
@@ -42,7 +42,9 @@ pmemberTestOne :: Term s PBool
 pmemberTestOne =
   pmember
     # (pconstant 1 :: Term s PInteger)
-    # (pconstant (PlutusMap.safeFromList []) :: Term s (PMap 'Unsorted PInteger PInteger))
+    # ( pconstant (PlutusMap.safeFromList []) ::
+          Term s (PMap 'Unsorted PInteger PInteger)
+      )
     #== pexpectedResultFalse
 
 pmemberTestTwo :: Term s PBool

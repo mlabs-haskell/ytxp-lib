@@ -77,14 +77,13 @@ module Cardano.TestUtils (
 
 import Control.Arrow (Kleisli (Kleisli), runKleisli, (>>>))
 import Data.Foldable (fold, foldl')
+import Data.Kind (Type)
 import Data.List (intercalate)
 import Data.Monoid (First (First), getFirst)
 import Data.Text (Text)
-import Plutarch (Script)
-import Plutarch.Evaluate (EvalError, evalScriptHuge)
-import Plutarch.Extra.Script (applyArguments)
-import PlutusCore.Data qualified as PLC
-import PlutusLedgerApi.V2 (Datum, ExBudget, Redeemer, ScriptContext, toData)
+import Plutarch.Evaluate (EvalError, applyArguments, evalScriptHuge)
+import Plutarch.Internal.Term (Script)
+import PlutusLedgerApi.V3 (ExBudget, ScriptContext, toData)
 import Test.Tasty (TestTree)
 import Test.Tasty.HUnit (assertFailure, testCase)
 import Text.RE.TDFA.Text (RE, countMatches, reSource, (*=~))
@@ -194,7 +193,7 @@ data PipelinedTestErrors errPP errPreC errPostC
   the appropriate error message.
 - 2.) All pre-condition checks are run on the pre-processed arguments.
   If any pre-condition checks return Nothing, then the resulting test case fails
-  with the appropriate error meesage.
+  with the appropriate error message.
 - 3.) The pre-processed arguments are fed to the script.
 - 4.) The results of (3) are checked against each post-condition.
   If any of the post-condition checks fail, the test case fails with the appropriate
@@ -238,13 +237,10 @@ pipelinedUnitCase
 -- * TxF CEK Machinery
 
 {- | The arguments needed to run a YTxP-style transaction family (single script)
-on the CEK Machine. Includes a datum (for validators only), a redeemer, script context,
-and the script itself.
+on the CEK Machine. Includes a script context, and the script itself.
 -}
 data TxFCEKInput = TxFCEKInput
-  { cekDatum :: Maybe Datum
-  , cekRedeemer :: Redeemer
-  , cekScriptContext :: ScriptContext
+  { cekScriptContext :: ScriptContext
   , cekScript :: Script
   }
   deriving stock (Eq, Show)
@@ -294,10 +290,9 @@ mkTxFCEKCase name' pps preCs input' postCs =
       }
   where
     comp :: TxFCEKInput -> TxFCEKOutput
-    comp (TxFCEKInput md r sc script) =
+    comp (TxFCEKInput sc script) =
       let
-        dataArgs = mkDataArgs (md, r, sc)
-        (res, budget, logs) = evalScriptHuge . applyArguments script $ dataArgs
+        (res, budget, logs) = evalScriptHuge . applyArguments script $ [toData sc]
        in
         TxFCEKOutput res budget logs
 
@@ -332,17 +327,12 @@ Throws a generic "String" error (not domain-specific)
 nominalCaseBasic ::
   -- | Name of the test case
   String ->
-  -- | Datum to apply to the script. Set this to Nothing unless you are
-  -- testing a validator
-  Maybe Datum ->
-  -- | Redeemer
-  Redeemer ->
   -- | Nominal context to apply Nominal
   ScriptContext ->
   -- | Nominal to apply
   Script ->
   TxFCEKCase String String String
-nominalCaseBasic name' maybeDatum redeemer nominalCtx script =
+nominalCaseBasic name' nominalCtx script =
   let
     errorPrinter :: ((EvalError, [Text]) -> String)
     errorPrinter (err, logs) =
@@ -355,7 +345,7 @@ nominalCaseBasic name' maybeDatum redeemer nominalCtx script =
       name'
       []
       []
-      (TxFCEKInput maybeDatum redeemer nominalCtx script)
+      (TxFCEKInput nominalCtx script)
       [nominalPostCondition errorPrinter]
 
 --------------------------------------------------------------------------------
@@ -397,11 +387,6 @@ attackCaseBasicRegex ::
   -- | Expected Failure String Match; TODO: This can be improved. Maybe use
   -- a discriminated error sum type with a injective string mapping?
   RE ->
-  -- | Datum to apply to the script. Set this to Nothing unless you are
-  -- testing a validator
-  Maybe Datum ->
-  -- | Redeemer
-  Redeemer ->
   -- | Nominal context to apply attack
   ScriptContext ->
   -- | The script to execute
@@ -409,7 +394,7 @@ attackCaseBasicRegex ::
   -- | Attack to apply
   PreProcessor errPP TxFCEKInput ->
   TxFCEKCase errPP String String
-attackCaseBasicRegex name' expectedFailureRE maybeDatum redeemer nominalCtx script' attack =
+attackCaseBasicRegex name' expectedFailureRE nominalCtx script' attack =
   let
     errorPrinter (Nothing, logs) =
       "Script Succeeded, but failure was expected. Logs: \n"
@@ -428,13 +413,5 @@ attackCaseBasicRegex name' expectedFailureRE maybeDatum redeemer nominalCtx scri
       name'
       [attack]
       []
-      (TxFCEKInput maybeDatum redeemer nominalCtx script')
+      (TxFCEKInput nominalCtx script')
       [attackCaseRegexPostCondition errorPrinter expectedFailureRE]
-
---------------------------------------------------------------------------------
--- Helpers
-
--- | Turn a scripts arguments into the appropriate list-of-data representation
-mkDataArgs :: (Maybe Datum, Redeemer, ScriptContext) -> [PLC.Data]
-mkDataArgs (Nothing, redeemer, ctx) = [toData redeemer, toData ctx]
-mkDataArgs (Just datum, redeemer, ctx) = [toData datum, toData redeemer, toData ctx]

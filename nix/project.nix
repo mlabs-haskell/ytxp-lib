@@ -1,6 +1,6 @@
 final: _prev: {
   ytxp-plutarch = final.haskell-nix.cabalProject' {
-    compiler-nix-name = "ghc965";
+    compiler-nix-name = "ghc96";
     src = final.lib.cleanSource ./..;
     shell = import ./shell.nix {
       flake = final.flake;
@@ -10,11 +10,10 @@ final: _prev: {
       "https://chap.intersectmbo.org/" = final.inputs.CHaP;
     };
     sha256map = {
-      "https://github.com/j-mueller/sc-tools"."188933df37fdcc11e6b91f83a7acdbeac4a09c2f" = "sha256-Lv3jjXdlwGxG05rckpgolp6ruWkO76E/xpEdpBVyBEA=";
-      "https://github.com/input-output-hk/xsy-liqwid-libs"."d63f0d52bc1c5d55c7056fdb6f01a08d49eced95" = "sha256-VWWE07vuZIJDt55EjICA/dUo2jXLL68PDJ46zs9Obbo=";
-      "https://github.com/mlabs-haskell/ply"."7fb83df1397eba057d00fd03f0af04a61512d9ef" = "sha256-G9zKpDgYhcFAejwI8lZ0pQnHm+WOlQNXZ1146+FwmQQ=";
-      "https://github.com/mlabs-haskell/ytxp-sdk"."6f3165049771d027eae958f8067e6b7a5955f50f" = "sha256-XpSCNMnzRvYWUXQiDakQ5YLkEBbUzQ3tnEVksILBycU=";
-      "https://github.com/Plutonomicon/plutarch-plutus"."7913e2d883530f569b16c02878989d3394bab727" = "sha256-Vg0U0QHolNHhBH2EaMHmFxeMt+Mv+thbY58PuVpWRlQ=";
+      "https://github.com/mlabs-haskell/plutus-test"."648adbd910e7e9ae0efb082bc936eb304c610ef0" = "sha256-YVHoY4Pg+v0S+2isuEpZ5Krg9o3+wQcWX9zo6DtgDb8=";
+      "https://github.com/mlabs-haskell/ply"."b24c919a0cddc3a3a2ace4c88f8a185db01bca04" = "sha256-wXklqWiB/zB+97A3WcdPJfFFSqiPr+4X7EZXBYesUck=";
+      "https://github.com/mlabs-haskell/ytxp-sdk"."2ab220ccd2e17f67fd85905b4b39a740abdad340" = "sha256-oFc7qFRmxoQX0J1e8Ge/98r5pTgeASowfnh8ynGNJXo=";
+      "https://github.com/Plutonomicon/plutarch-plutus"."f84a46287b06f36abf8d2d63bec7ff75d32f3e91" = "sha256-gKBk9D6DHSEudq7P9+07yXWcgM/QX7NFp0tJXBodopM=";
     };
   };
 }

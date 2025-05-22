@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedRecordDot #-}
-{-# LANGUAGE PackageImports #-}
 
 module Cardano.YTxP.Example.Offer.Executing (
   -- * TxF Params
@@ -9,26 +8,36 @@ module Cardano.YTxP.Example.Offer.Executing (
   executingTxF,
 ) where
 
-import Cardano.YTxP.Example.Offer (POfferDatum)
+import Cardano.YTxP.Example.Offer (POfferDatum (creator, toBuy))
 import Cardano.YTxP.Example.Offer.PUtils (
   pisRewarding,
-  pmkAddress,
   ptraceDebugC,
   tryGetOfferInput,
  )
 import Control.Monad (void)
+import Plutarch.Builtin.Unit (punit)
 import Plutarch.LedgerApi.V3 (
   AmountGuarantees (Positive),
   KeyGuarantees (Sorted),
-  PAddress,
-  PScriptContext,
+  PAddress (PAddress),
+  PCredential (PPubKeyCredential),
+  PDatum (PDatum),
+  POutputDatum (POutputDatum),
+  PScriptContext (pscriptContext'scriptInfo),
   PTxOut,
   PValue,
   pdnothing,
+  pscriptContext'txInfo,
+  ptxInfo'inputs,
+  ptxInfo'mint,
+  ptxInfo'outputs,
+  ptxOut'address,
+  ptxOut'datum,
+  ptxOut'referenceScript,
+  ptxOut'value,
  )
 import Plutarch.LedgerApi.Value (pvalueOf)
-import PlutusLedgerApi.V3 (CurrencySymbol)
-import "liqwid-plutarch-extra" Plutarch.Extra.ScriptContext (ptryFromOutputDatum)
+import PlutusLedgerApi.V3 (CurrencySymbol, TokenName (TokenName))
 
 -- * Parameters
 
@@ -44,34 +53,28 @@ newtype Params = Params
 Refer to the transaction family specification (examples/direct-offer/doc/transaction-families/executing.md)
 for a complete description.
 -}
-executingTxF :: Params -> Term s (PData :--> PScriptContext :--> POpaque)
-executingTxF params = phoistAcyclic $ plam $ \_redeemer context -> unTermCont $ do
+executingTxF :: Params -> Term s (PScriptContext :--> PUnit)
+executingTxF params = phoistAcyclic $ plam $ \context' -> unTermCont $ do
   -- ScriptContext extraction
 
   ptraceDebugC "ScriptContext extraction"
 
-  contextFields <- pletFieldsC @'["txInfo", "scriptInfo"] context
+  context <- pmatchC context'
+  txInfo' <- pletC $ pscriptContext'txInfo context
+  scriptInfo <- pletC $ pscriptContext'scriptInfo context
+  txInfo <- pmatchC txInfo'
 
   -- Ensures that this script is activated by the rewarding event
   void $
     pguardC "The current script is expected to be activated by a rewarding event" $
-      pisRewarding # contextFields.scriptInfo
-
-  txInfoFields <-
-    pletFieldsC
-      @'[ "inputs"
-        , "outputs"
-        , "mint"
-        , "data"
-        ]
-      contextFields.txInfo
+      pisRewarding # scriptInfo
 
   -- The component token must be burned
   pguardC "The component token is expected to be burned" $
     pvalueOf
-      # txInfoFields.mint
+      # pfromData (ptxInfo'mint txInfo)
       # pconstant params.yieldingMPSymbol
-      # pconstant ""
+      # pconstant (TokenName "")
       #== -1
 
   -- Offer input extraction
@@ -79,22 +82,18 @@ executingTxF params = phoistAcyclic $ plam $ \_redeemer context -> unTermCont $ 
   ptraceDebugC "Offer input extraction"
 
   offerInput <-
-    pletC $
+    pmatchC $
       tryGetOfferInput
         (pconstant params.yieldingMPSymbol)
-        (pfromData txInfoFields.inputs)
+        (pfromData $ ptxInfo'inputs txInfo)
 
-  offerInputFields <- pletFieldsC @'["datum"] offerInput
-
-  offerInputDatum <-
-    pletC
-      ( ptryFromOutputDatum @POfferDatum
-          # offerInputFields.datum
-          # getField @"data" txInfoFields
-      )
-
-  offerInputDatumFields <-
-    pletFieldsC @'["creator", "toBuy"] offerInputDatum
+  -- TODO fix this
+  POutputDatum offerInputDatum <- pmatchC $ ptxOut'datum offerInput
+  PDatum offerInputData <- pmatchC offerInputDatum
+  offerDatum <-
+    pmatchC $
+      pfromData $
+        ptryFrom @(PAsData POfferDatum) (pto offerInputData) fst
 
   -- Wallet output extraction
 
@@ -103,11 +102,11 @@ executingTxF params = phoistAcyclic $ plam $ \_redeemer context -> unTermCont $ 
   void $
     pmatchC $
       tryGetWalletOutput
-        (pmkAddress # offerInputDatumFields.creator)
-        offerInputDatumFields.toBuy
-        (pfromData txInfoFields.outputs)
+        (pcon $ PAddress (pcon $ PPubKeyCredential $ creator offerDatum) pdnothing)
+        (pfromData $ toBuy offerDatum)
+        (pfromData $ ptxInfo'outputs txInfo)
 
-  pure . popaque $ pconstant ()
+  pure punit
 
 -- | Find the first valid wallet output
 tryGetWalletOutput ::
@@ -117,24 +116,23 @@ tryGetWalletOutput ::
   Term s (PAsData PTxOut)
 tryGetWalletOutput walletAddress walletValue outputs =
   pmatch outputs $ \case
-    PCons walletOutput rest ->
-      pif
-        ( walletValue
-            #== pfield @"value"
-            # walletOutput
-            #&& walletAddress
-            #== pfield @"address"
-            # walletOutput
-            #&& pdnothing
-            #== pfield @"referenceScript"
-            # walletOutput
-        )
-        walletOutput
-        ( pif
-            (rest #== pcon PNil)
-            ( ptraceInfoError
-                "tryGetWalletOutput: Offer component not found"
-            )
-            (tryGetWalletOutput walletAddress walletValue rest)
-        )
+    PCons walletOutput' rest -> unTermCont $ do
+      walletOutput <- pmatchC $ pfromData walletOutput'
+      return $
+        pif
+          ( walletValue
+              #== pfromData (ptxOut'value walletOutput)
+              #&& walletAddress
+              #== ptxOut'address walletOutput
+              #&& pdnothing
+              #== ptxOut'referenceScript walletOutput
+          )
+          walletOutput'
+          ( pif
+              (rest #== pcon PNil)
+              ( ptraceInfoError
+                  "tryGetWalletOutput: Offer component not found"
+              )
+              (tryGetWalletOutput walletAddress walletValue rest)
+          )
     _other -> ptraceInfoError "tryGetWalletOutput: Empty output list"

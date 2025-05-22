@@ -5,7 +5,8 @@ module Utils (
 )
 where
 
-import Plutarch.LedgerApi.V2 (
+import Plutarch.Builtin.Unit (punit)
+import Plutarch.LedgerApi.V3 (
   PCurrencySymbol,
   PMap,
   PScriptHash,
@@ -33,9 +34,9 @@ pmember = phoistAcyclic $
 pcheck ::
   forall (s :: S).
   Term s PBool ->
-  Term s POpaque
+  Term s PUnit
 pcheck b =
   pif
     b
-    (popaque $ pconstant ())
+    punit
     perror

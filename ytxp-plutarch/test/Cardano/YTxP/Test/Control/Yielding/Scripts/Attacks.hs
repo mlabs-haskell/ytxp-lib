@@ -4,22 +4,27 @@
 
 module Cardano.YTxP.Test.Control.Yielding.Scripts.Attacks (testAttacksR) where
 
-import Cardano.TestUtils (PreProcessor, TxFCEKInput (TxFCEKInput), attackCaseBasicRegex, mkPreProcessor, txfCEKUnitCase)
+import Cardano.TestUtils (
+  PreProcessor,
+  TxFCEKInput (TxFCEKInput),
+  attackCaseBasicRegex,
+  mkPreProcessor,
+  txfCEKUnitCase,
+ )
 import Cardano.YTxP.SDK.Optics qualified as SDKOptics
 import Cardano.YTxP.SDK.Redeemers (
   AuthorisedScriptPurpose (Minting, Rewarding, Spending),
-  YieldingRedeemer,
  )
-import Cardano.YTxP.SDK.SdkParameters (AuthorisedScriptsSTCS (AuthorisedScriptsSTCS))
+import Cardano.YTxP.SDK.SdkParameters (
+  AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
+ )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (
   mintNominalCaseBuilderR,
   rewardNominalCaseBuilderR,
   spendNominalCaseBuilderR,
  )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.ScriptsBuilders (
-  yieldingMPScriptR,
-  yieldingSVScriptR,
-  yieldingVScriptR,
+  yieldingScriptR,
  )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   ScriptsTestsParams (
@@ -30,10 +35,24 @@ import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
  )
 import Control.Lens (over, set, traversed, view, (&), _1, _2, _Wrapped)
 import Control.Monad.Reader (Reader, asks)
-import Convex.PlutusLedgerApi.Optics qualified as PlutusLedgerApiOptics
-import Data.Bifunctor (Bifunctor (second))
 import Data.Monoid (Endo (Endo, appEndo))
-import PlutusLedgerApi.V2 (Credential (ScriptCredential), CurrencySymbol (CurrencySymbol), Datum (Datum), ScriptContext, ScriptHash, StakingCredential (StakingHash), ToData (toBuiltinData), TxInInfo, Value (Value, getValue), getScriptHash, unsafeFromBuiltinData)
+import Optics qualified as PlutusLedgerApiOptics
+import PlutusLedgerApi.V3 (
+  Credential (ScriptCredential),
+  CurrencySymbol (CurrencySymbol),
+  Lovelace,
+  ScriptContext (scriptContextRedeemer),
+  ScriptHash,
+  ToData (toBuiltinData),
+  TxInInfo,
+  Value (Value, getValue),
+  getScriptHash,
+  unsafeFromBuiltinData,
+ )
+import PlutusLedgerApi.V3.MintValue (
+  MintValue (UnsafeMintValue),
+  mintValueToMap,
+ )
 import PlutusTx.AssocMap qualified as PTx.Map
 import PlutusTx.Eq qualified
 import Test.Tasty (TestTree, testGroup)
@@ -41,29 +60,32 @@ import Text.RE.TDFA.Text (re)
 
 testAttacksR :: Reader ScriptsTestsParams TestTree
 testAttacksR = do
-  -- Scripts
-  ympScript <- yieldingMPScriptR
-  yvScript <- yieldingVScriptR
-  ysvScript <- yieldingSVScriptR
+  -- Yielding Script
+  yScript <- yieldingScriptR
 
   -- Redeemers and contexts
-  (mintNominalRedeemer, mintNominalContext) <- mintNominalCaseBuilderR
-  (spendNominalRedeemer, spendNominalContext) <- spendNominalCaseBuilderR
-  (rewardNominalRedeemer, rewardNominalContext) <- rewardNominalCaseBuilderR
+  mintNominalContext <- mintNominalCaseBuilderR
+  spendNominalContext <- spendNominalCaseBuilderR
+  rewardNominalContext <- rewardNominalCaseBuilderR
 
   -- Attacks
   ppNoRefInput <- mkAttack attackRefInputNotPresent
   ppRefInputNoAuth <- mkAttack attackRefInputNotAuthorised
   ppAuthorisedScriptIndexInvalid <- mkAttack attackAuthorisedScriptIndexInvalid
 
-  ppAttackAuthorisedMPProofIndexInvalid <- mkAttack attackAuthorisedProofIndexInvalidIndex
-  ppAttackAuthorisedMPProofMismatch <- mkAttack attackAuthorisedMPProofIndexMismatch
+  ppAttackAuthorisedMPProofIndexInvalid <-
+    mkAttack attackAuthorisedProofIndexInvalidIndex
+  ppAttackAuthorisedMPProofMismatch <-
+    mkAttack attackAuthorisedMPProofIndexMismatch
 
-  ppAttackAuthorisedVProofIndexInvalid <- mkAttack attackAuthorisedProofIndexInvalidIndex
+  ppAttackAuthorisedVProofIndexInvalid <-
+    mkAttack attackAuthorisedProofIndexInvalidIndex
   ppAttackAuthorisedVProofMismatch <- mkAttack attackAuthorisedVProofIndexMismatch
 
-  ppAttackAuthorisedSVProofIndexInvalid <- mkAttack attackAuthorisedProofIndexInvalidIndex
-  ppAttackAuthorisedSVProofMismatch <- mkAttack attackAuthorisedSVProofIndexMismatch
+  ppAttackAuthorisedSVProofIndexInvalid <-
+    mkAttack attackAuthorisedProofIndexInvalidIndex
+  ppAttackAuthorisedSVProofMismatch <-
+    mkAttack attackAuthorisedSVProofIndexMismatch
 
   pure $
     testGroup
@@ -71,83 +93,65 @@ testAttacksR = do
       [ txfCEKUnitCase $
           attackCaseBasicRegex
             "ref input not present"
-            [re|.*|]
-            Nothing
-            (toLedgerRedeemer mintNominalRedeemer)
+            [re|^(.*)$|]
             mintNominalContext
-            ympScript
+            yScript
             ppNoRefInput
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "ref input present but not authorised"
             [re|Reference input does not contain AuthorisedScriptsSTCS|]
-            Nothing
-            (toLedgerRedeemer mintNominalRedeemer)
             mintNominalContext
-            ympScript
+            yScript
             ppRefInputNoAuth
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "attackAuthorisedScriptIndex does not points to valid reference input"
-            [re|.*|]
-            Nothing
-            (toLedgerRedeemer mintNominalRedeemer)
+            [re|^(.*)$|]
             mintNominalContext
-            ympScript
+            yScript
             ppAuthorisedScriptIndexInvalid
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(MP) AuthorisedScriptProofIndex does not index to valid proof"
-            [re|.*|]
-            Nothing
-            (toLedgerRedeemer mintNominalRedeemer)
+            [re|^(.*)$|]
             mintNominalContext
-            ympScript
+            yScript
             ppAttackAuthorisedMPProofIndexInvalid
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(MP) AuthorisedScriptProofIndex point to a wrong script"
             [re|Minting policy does not match expected authorised minting policy|]
-            Nothing
-            (toLedgerRedeemer mintNominalRedeemer)
             mintNominalContext
-            ympScript
+            yScript
             ppAttackAuthorisedMPProofMismatch
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(V) AuthorisedScriptProofIndex does not index to valid proof"
-            [re|.*|]
-            (Just $ Datum $ toBuiltinData ())
-            (toLedgerRedeemer spendNominalRedeemer)
+            [re|^(.*)$|]
             spendNominalContext
-            yvScript
+            yScript
             ppAttackAuthorisedVProofIndexInvalid
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(V) AuthorisedScriptProofIndex point to a wrong script"
             [re|Input does not match expected authorised validator|]
-            (Just $ Datum $ toBuiltinData ())
-            (toLedgerRedeemer spendNominalRedeemer)
             spendNominalContext
-            yvScript
+            yScript
             ppAttackAuthorisedVProofMismatch
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(SV) AuthorisedScriptProofIndex does not index to valid proof"
-            [re|.*|]
-            Nothing
-            (toLedgerRedeemer rewardNominalRedeemer)
+            [re|^(.*)$|]
             rewardNominalContext
-            ysvScript
+            yScript
             ppAttackAuthorisedSVProofIndexInvalid
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(SV) AuthorisedScriptProofIndex point to a wrong script"
             [re|Withdrawal does not match expected authorised staking validator|]
-            Nothing
-            (toLedgerRedeemer rewardNominalRedeemer)
             rewardNominalContext
-            ysvScript
+            yScript
             ppAttackAuthorisedSVProofMismatch
       ]
 
@@ -155,23 +159,22 @@ testAttacksR = do
 -- Attacks helpers
 
 mkAttack ::
-  Reader ScriptsTestsParams (Endo (YieldingRedeemer, ScriptContext)) ->
+  Reader ScriptsTestsParams (Endo ScriptContext) ->
   Reader ScriptsTestsParams (PreProcessor () TxFCEKInput)
 mkAttack attack = mkPreProcessor . attackHelper <$> attack
 
 attackHelper ::
-  Endo (YieldingRedeemer, ScriptContext) ->
+  Endo ScriptContext ->
   TxFCEKInput ->
   Either () TxFCEKInput
-attackHelper attack (TxFCEKInput md r sc script) =
+attackHelper attack (TxFCEKInput sc script) =
   let
-    redeemer = unsafeFromBuiltinData (toBuiltinData r)
-    (badRedeemer, sc') = appEndo attack (redeemer, sc)
-    badLedgerRedeemer = toLedgerRedeemer badRedeemer
+    sc' = appEndo attack sc
    in
-    Right (TxFCEKInput md badLedgerRedeemer sc' script)
+    Right (TxFCEKInput sc' script)
 
-replaceIfPresent :: (PlutusTx.Eq.Eq k) => k -> k -> PTx.Map.Map k v -> PTx.Map.Map k v
+replaceIfPresent ::
+  (PlutusTx.Eq.Eq k) => k -> k -> PTx.Map.Map k v -> PTx.Map.Map k v
 replaceIfPresent oldKey newKey m =
   case PTx.Map.lookup oldKey m of
     Just v ->
@@ -182,8 +185,8 @@ replaceIfPresent oldKey newKey m =
 {- | Replace all tokens with the given currency symbol from a value with a different currency symbol
 Does nothing if the CS to replace is not found
 -}
-replaceTokenByCS :: CurrencySymbol -> CurrencySymbol -> Value -> Value
-replaceTokenByCS oldCS newCS = Value . replaceIfPresent oldCS newCS . getValue
+replaceTokenByCS :: CurrencySymbol -> CurrencySymbol -> MintValue -> MintValue
+replaceTokenByCS oldCS newCS = UnsafeMintValue . replaceIfPresent oldCS newCS . mintValueToMap
 
 -- | Remove all tokens with the given currency symbol from a value
 removeTokenByCS :: CurrencySymbol -> Value -> Value
@@ -200,56 +203,60 @@ updateScriptCredential oldScriptHash newScriptHash cred
 replaceInput :: ScriptHash -> ScriptHash -> TxInInfo -> TxInInfo
 replaceInput oldScriptHash newScriptHash =
   over
-    (PlutusLedgerApiOptics.txOut . PlutusLedgerApiOptics.address . PlutusLedgerApiOptics.credential)
+    ( PlutusLedgerApiOptics.txOut
+        . PlutusLedgerApiOptics.address
+        . PlutusLedgerApiOptics.credential
+    )
     (updateScriptCredential oldScriptHash newScriptHash)
 
 -- | Replace an @ScriptHash@ for withdrawal with a provided one (if present)
 replaceWdrl ::
   ScriptHash ->
   ScriptHash ->
-  PTx.Map.Map StakingCredential Integer ->
-  PTx.Map.Map StakingCredential Integer
+  PTx.Map.Map Credential Lovelace ->
+  PTx.Map.Map Credential Lovelace
 replaceWdrl oldScript newScript =
   let
-    oldCredential = StakingHash $ ScriptCredential oldScript
-    newCredential = StakingHash $ ScriptCredential newScript
+    oldCredential = ScriptCredential oldScript
+    newCredential = ScriptCredential newScript
    in
     replaceIfPresent oldCredential newCredential
 
 -----------------------------------------------------------------------
 -- Attacks
 
-attackRefInputNotPresent :: Reader ScriptsTestsParams (Endo (YieldingRedeemer, ScriptContext))
+attackRefInputNotPresent ::
+  Reader ScriptsTestsParams (Endo ScriptContext)
 attackRefInputNotPresent =
   pure
     . Endo
-    . fmap
     $ set
       (PlutusLedgerApiOptics.txInfo . PlutusLedgerApiOptics.referenceInputs)
       []
 
-attackRefInputNotAuthorised :: Reader ScriptsTestsParams (Endo (YieldingRedeemer, ScriptContext))
+attackRefInputNotAuthorised ::
+  Reader ScriptsTestsParams (Endo ScriptContext)
 attackRefInputNotAuthorised = do
   AuthorisedScriptsSTCS authorisedScriptsSTCS' <- asks authorisedScriptsSTCS
   pure $
     Endo $
-      fmap $
-        over
-          ( PlutusLedgerApiOptics.txInfo
-              . PlutusLedgerApiOptics.referenceInputs
-              . traversed
-              . PlutusLedgerApiOptics.txOut
-              . PlutusLedgerApiOptics.value
-          )
-          (removeTokenByCS authorisedScriptsSTCS')
+      over
+        ( PlutusLedgerApiOptics.txInfo
+            . PlutusLedgerApiOptics.referenceInputs
+            . traversed
+            . PlutusLedgerApiOptics.txOut
+            . PlutusLedgerApiOptics.value
+        )
+        (removeTokenByCS authorisedScriptsSTCS')
 
 attackAuthorisedScriptIndexInvalid ::
-  Reader ScriptsTestsParams (Endo (YieldingRedeemer, ScriptContext))
+  Reader ScriptsTestsParams (Endo ScriptContext)
 attackAuthorisedScriptIndexInvalid =
   pure $
     Endo $
-      \(redeemer, context) ->
+      \context ->
         let
+          redeemer = unsafeFromBuiltinData (toBuiltinData $ scriptContextRedeemer context)
           tooLargeIndex =
             fromIntegral $ length $ view PlutusLedgerApiOptics.referenceInputs context
           attackRedeemer =
@@ -257,8 +264,9 @@ attackAuthorisedScriptIndexInvalid =
               (SDKOptics.authorisedScriptIndex . _Wrapped)
               tooLargeIndex
               redeemer
+          context' = context {scriptContextRedeemer = toLedgerRedeemer attackRedeemer}
          in
-          (attackRedeemer, context)
+          context'
 
 getTooLargeIndexForProof ::
   AuthorisedScriptPurpose ->
@@ -267,18 +275,20 @@ getTooLargeIndexForProof ::
 getTooLargeIndexForProof purpose =
   let
     accessor = case purpose of
-      Minting -> length . PTx.Map.toList . getValue . view PlutusLedgerApiOptics.mint
+      Minting -> length . PTx.Map.toList . mintValueToMap . view PlutusLedgerApiOptics.mint
       Spending -> length . view PlutusLedgerApiOptics.inputs
       Rewarding -> length . PTx.Map.toList . view PlutusLedgerApiOptics.wdrl
    in
     fromIntegral . accessor
+
 attackAuthorisedProofIndexInvalidIndex ::
-  Reader ScriptsTestsParams (Endo (YieldingRedeemer, ScriptContext))
+  Reader ScriptsTestsParams (Endo ScriptContext)
 attackAuthorisedProofIndexInvalidIndex =
   pure $
     Endo $
-      \(redeemer, scriptContext) ->
+      \scriptContext ->
         let
+          redeemer = unsafeFromBuiltinData (toBuiltinData $ scriptContextRedeemer scriptContext)
           tooLargeIndex =
             getTooLargeIndexForProof
               (view (SDKOptics.authorisedScriptProofIndex . _Wrapped . _1) redeemer)
@@ -288,26 +298,27 @@ attackAuthorisedProofIndexInvalidIndex =
               (SDKOptics.authorisedScriptProofIndex . _Wrapped . _2)
               tooLargeIndex
               redeemer
+          scriptContext' = scriptContext {scriptContextRedeemer = toLedgerRedeemer attackRedeemer}
          in
-          (attackRedeemer, scriptContext)
+          scriptContext'
 
 attackAuthorisedMPProofIndexMismatch ::
-  Reader ScriptsTestsParams (Endo (YieldingRedeemer, ScriptContext))
+  Reader ScriptsTestsParams (Endo ScriptContext)
 attackAuthorisedMPProofIndexMismatch = do
-  authorisedMintingPolicy <- asks $ CurrencySymbol . getScriptHash . authorisedScriptHash
+  authorisedMintingPolicy <-
+    asks $ CurrencySymbol . getScriptHash . authorisedScriptHash
   let
     -- NOTE: this is arbitrary but different from the one in the test params
     differentMintingPolicy :: CurrencySymbol
-    differentMintingPolicy = "42424242424242424242424242424242424242424242424242424242"
+    differentMintingPolicy = CurrencySymbol "42424242424242424242424242424242424242424242424242424242"
   pure $
     Endo $
-      second $
-        over
-          (PlutusLedgerApiOptics.txInfo . PlutusLedgerApiOptics.mint)
-          (replaceTokenByCS authorisedMintingPolicy differentMintingPolicy)
+      over
+        (PlutusLedgerApiOptics.txInfo . PlutusLedgerApiOptics.mint)
+        (replaceTokenByCS authorisedMintingPolicy differentMintingPolicy)
 
 attackAuthorisedVProofIndexMismatch ::
-  Reader ScriptsTestsParams (Endo (YieldingRedeemer, ScriptContext))
+  Reader ScriptsTestsParams (Endo ScriptContext)
 attackAuthorisedVProofIndexMismatch = do
   authorisedValidator <- asks authorisedScriptHash
   let
@@ -316,13 +327,12 @@ attackAuthorisedVProofIndexMismatch = do
     differentValidator = "42424242424242424242424242424242424242424242424242424242"
   pure $
     Endo $
-      second $
-        over
-          (PlutusLedgerApiOptics.txInfo . PlutusLedgerApiOptics.inputs . traversed)
-          (replaceInput authorisedValidator differentValidator)
+      over
+        (PlutusLedgerApiOptics.txInfo . PlutusLedgerApiOptics.inputs . traversed)
+        (replaceInput authorisedValidator differentValidator)
 
 attackAuthorisedSVProofIndexMismatch ::
-  Reader ScriptsTestsParams (Endo (YieldingRedeemer, ScriptContext))
+  Reader ScriptsTestsParams (Endo ScriptContext)
 attackAuthorisedSVProofIndexMismatch = do
   authorisedValidator <- asks authorisedScriptHash
   let
@@ -331,7 +341,6 @@ attackAuthorisedSVProofIndexMismatch = do
     differentValidator = "42424242424242424242424242424242424242424242424242424242"
   pure $
     Endo $
-      second $
-        over
-          (PlutusLedgerApiOptics.txInfo . PlutusLedgerApiOptics.wdrl)
-          (replaceWdrl authorisedValidator differentValidator)
+      over
+        (PlutusLedgerApiOptics.txInfo . PlutusLedgerApiOptics.wdrl)
+        (replaceWdrl authorisedValidator differentValidator)

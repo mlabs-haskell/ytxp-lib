@@ -1,6 +1,8 @@
 [default]
 extend-ignore-identifiers-re = [
-    "orgc.*"
+    "orgc.*",
+    "hask",
+    "Hask"
 ]
 [ default.extend-words ]
 strat = "strat"
