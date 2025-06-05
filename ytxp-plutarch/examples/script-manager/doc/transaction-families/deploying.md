@@ -52,6 +52,8 @@ The outputs of this transaction family are
 
 1. Script (1)
     - The Script component is created at the yielding validator script address with no staking address
+    - The Script component value has
+      - 1 Script component token
     - The datum must:
       - Must have a unit datum
 
