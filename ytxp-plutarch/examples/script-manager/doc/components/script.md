@@ -30,7 +30,7 @@ The Script component does not have meaningful states.
 
 ### Introduction
 
-- [Script deploying](../transaction-families/creating.md)
+- [Script deploying](../transaction-families/deploying.md)
 
 ### Modification
 
