@@ -19,8 +19,8 @@ flag dev
 common common-language
   ghc-options:
     -Wall -Wcompat -fprint-explicit-foralls -fprint-explicit-kinds
-    -fwarn-missing-import-lists -Weverything -Wno-unsafe
-    -Wno-missing-safe-haskell-mode -Wno-implicit-prelude
+    -fwrite-ide-info -fwarn-missing-import-lists -Weverything
+    -Wno-unsafe -Wno-missing-safe-haskell-mode -Wno-implicit-prelude
     -Wno-missing-kind-signatures -Wno-all-missed-specializations
     -Wno-unused-packages -Wno-operator-whitespace
 
