@@ -1,6 +1,6 @@
 # Script manager
 
-This script manager serves as a simple example illustrating a solution to the chicken-and-egg problem.
+This is a script manager example.
 
 ## Components
 
