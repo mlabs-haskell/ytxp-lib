@@ -13,7 +13,6 @@ import Plutarch.LedgerApi.V3 (
   PScriptContext,
   PTxOutRef,
  )
-import Utils (pcheck)
 
 --------------------------------------------------------------------------------
 -- Plutarch level terms
@@ -26,7 +25,7 @@ yielding ::
     ( PCurrencySymbol :--> PAsData PInteger :--> PScriptContext :--> PUnit
     )
 yielding = plam $ \psymbol _nonce ctx ->
-  pcheck $ yieldingHelper # psymbol # ctx
+  yieldingHelper # psymbol # ctx
 
 -- | Yielding Validator with one shot backdoor
 yielding' ::
@@ -41,6 +40,6 @@ yielding' ::
     )
 yielding' = plam $ \oref psymbol _nonce ctx ->
   pif
-    (yieldingHelper # psymbol # ctx)
+    (oneshotHelper # oref # ctx)
     punit
-    (pcheck $ oneshotHelper # oref # ctx)
+    (yieldingHelper # psymbol # ctx)

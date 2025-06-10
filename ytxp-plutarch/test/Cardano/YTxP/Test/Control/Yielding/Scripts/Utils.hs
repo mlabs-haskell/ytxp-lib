@@ -6,13 +6,15 @@ module Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
     ScriptsTestsParams,
     authorisedScriptsSTCS,
     authorisedScriptHash,
-    authorisedScriptsManagerHash
+    authorisedScriptsManagerHash,
+    oneshotUtxo
   ),
 
   -- * Script context builders
   authorisedScriptRefInputContext,
   mintContext,
   spendContext,
+  oneshotSpendContext,
   rewardContext,
 
   -- * Misc
@@ -48,6 +50,7 @@ import Plutus.ContextBuilder (
   referenceInput,
   script,
   withMinting,
+  withRef,
   withReferenceScript,
   withRewarding,
   withSpendingUTXO,
@@ -61,6 +64,7 @@ import PlutusLedgerApi.V3 (
   ScriptHash (getScriptHash),
   StakingCredential (StakingHash),
   TokenName (TokenName),
+  TxOutRef,
   singleton,
   toBuiltinData,
  )
@@ -70,6 +74,7 @@ data ScriptsTestsParams = ScriptsTestsParams
   { authorisedScriptsSTCS :: AuthorisedScriptsSTCS
   , authorisedScriptHash :: ScriptHash
   , authorisedScriptsManagerHash :: ScriptHash
+  , oneshotUtxo :: TxOutRef
   }
 
 -- | Produces a @Reader@ that yields a context builder with an _authorised_ reference using @ScriptsTestsParams@
@@ -109,6 +114,15 @@ spendContext = do
             )
   return $
     input consumedUTxO <> withSpendingUTXO consumedUTxO
+
+-- | Produces a @Reader@ that yields a context builder for one shot spending use case
+oneshotSpendContext :: Reader ScriptsTestsParams SpendingBuilder
+oneshotSpendContext = do
+  oref <- asks oneshotUtxo
+  let
+    oneshot = withRef oref
+  return $
+    input oneshot <> withSpendingUTXO oneshot
 
 -- | Produces a @Reader@ that yields a context builder for a rewarding use case
 rewardContext :: Reader ScriptsTestsParams RewardingBuilder
