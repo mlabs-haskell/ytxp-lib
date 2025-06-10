@@ -20,6 +20,7 @@ import Cardano.YTxP.SDK.SdkParameters (
  )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (
   mintNominalCaseBuilderR,
+  oneshotNominalCaseBuilderR,
   rewardNominalCaseBuilderR,
   spendNominalCaseBuilderR,
  )
@@ -32,6 +33,7 @@ import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
     authorisedScriptHash,
     authorisedScriptsSTCS
   ),
+  oneshotUtxo,
   toLedgerRedeemer,
  )
 import Control.Lens (over, set, traversed, view, (&), _1, _2, _Wrapped)
@@ -47,6 +49,7 @@ import PlutusLedgerApi.V3 (
   ScriptHash,
   ToData (toBuiltinData),
   TxInInfo,
+  TxOutRef (TxOutRef),
   Value (Value, getValue),
   getScriptHash,
   unsafeFromBuiltinData,
@@ -76,6 +79,7 @@ attackTestTrees script = do
   -- Redeemers and contexts
   mintNominalContext <- mintNominalCaseBuilderR
   spendNominalContext <- spendNominalCaseBuilderR
+  oneshotNominalContext <- oneshotNominalCaseBuilderR
   rewardNominalContext <- rewardNominalCaseBuilderR
 
   -- Attacks
@@ -90,12 +94,16 @@ attackTestTrees script = do
 
   ppAttackAuthorisedVProofIndexInvalid <-
     mkAttack attackAuthorisedProofIndexInvalidIndex
-  ppAttackAuthorisedVProofMismatch <- mkAttack attackAuthorisedVProofIndexMismatch
+  ppAttackAuthorisedVProofMismatch <-
+    mkAttack attackAuthorisedVProofIndexMismatch
 
   ppAttackAuthorisedSVProofIndexInvalid <-
     mkAttack attackAuthorisedProofIndexInvalidIndex
   ppAttackAuthorisedSVProofMismatch <-
     mkAttack attackAuthorisedSVProofIndexMismatch
+
+  ppAttackOneshotTxOutRefMismatch <-
+    mkAttack attackOneshotTxOutRefMismatch
 
   pure
     [ txfCEKUnitCase $
@@ -161,6 +169,13 @@ attackTestTrees script = do
           rewardNominalContext
           script
           ppAttackAuthorisedSVProofMismatch
+    , txfCEKUnitCase $
+        attackCaseBasicRegex
+          "Spend the wrong oneshot UTXO"
+          [re|^(.*)$|]
+          oneshotNominalContext
+          script
+          ppAttackOneshotTxOutRefMismatch
     ]
 
 -----------------------------------------------------------------------
@@ -207,6 +222,12 @@ updateScriptCredential oldScriptHash newScriptHash cred
   | cred == ScriptCredential oldScriptHash = ScriptCredential newScriptHash
   | otherwise = cred
 
+-- | Replace an @TxOutRef@ with a new one if a match is found
+updateUtxo :: TxOutRef -> TxOutRef -> TxOutRef -> TxOutRef
+updateUtxo oldUtxo newUtxo currentUtxo
+  | currentUtxo == oldUtxo = newUtxo
+  | otherwise = oldUtxo
+
 -- | Replace an @ScriptHash@ credentials for input with a provided one (if present)
 replaceInput :: ScriptHash -> ScriptHash -> TxInInfo -> TxInInfo
 replaceInput oldScriptHash newScriptHash =
@@ -229,6 +250,13 @@ replaceWdrl oldScript newScript =
     newCredential = ScriptCredential newScript
    in
     replaceIfPresent oldCredential newCredential
+
+-- | Replace an @TxOutRef@ for input with a provided one (if present)
+replaceUtxo :: TxOutRef -> TxOutRef -> TxInInfo -> TxInInfo
+replaceUtxo oldUtxo newUtxo =
+  over
+    PlutusLedgerApiOptics.txOutRef
+    (updateUtxo oldUtxo newUtxo)
 
 -----------------------------------------------------------------------
 -- Attacks
@@ -352,3 +380,16 @@ attackAuthorisedSVProofIndexMismatch = do
       over
         (PlutusLedgerApiOptics.txInfo . PlutusLedgerApiOptics.wdrl)
         (replaceWdrl authorisedValidator differentValidator)
+
+attackOneshotTxOutRefMismatch ::
+  Reader ScriptsTestsParams (Endo ScriptContext)
+attackOneshotTxOutRefMismatch = do
+  outref <- asks oneshotUtxo
+  let
+    differentOneshotUtxo =
+      TxOutRef "d44c22ef78ab49fd975ef4f07e0c8440ede296efca48eeed425096ab783c41d1" 1
+  pure $
+    Endo $
+      over
+        (PlutusLedgerApiOptics.txInfo . PlutusLedgerApiOptics.inputs . traversed)
+        (replaceUtxo outref differentOneshotUtxo)

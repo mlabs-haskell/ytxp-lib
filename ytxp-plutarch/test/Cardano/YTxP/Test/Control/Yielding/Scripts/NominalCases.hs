@@ -3,6 +3,7 @@ module Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (
   mintNominalCaseBuilderR,
   spendNominalCaseBuilderR,
   rewardNominalCaseBuilderR,
+  oneshotNominalCaseBuilderR,
 ) where
 
 import Cardano.TestUtils (nominalCaseBasic, txfCEKUnitCase)
