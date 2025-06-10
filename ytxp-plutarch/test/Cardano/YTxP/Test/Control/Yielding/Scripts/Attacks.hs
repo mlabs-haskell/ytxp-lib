@@ -25,6 +25,7 @@ import Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (
  )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.ScriptsBuilders (
   yieldingScriptR,
+  yieldingScriptR',
  )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   ScriptsTestsParams (
@@ -37,6 +38,7 @@ import Control.Lens (over, set, traversed, view, (&), _1, _2, _Wrapped)
 import Control.Monad.Reader (Reader, asks)
 import Data.Monoid (Endo (Endo, appEndo))
 import Optics qualified as PlutusLedgerApiOptics
+import Plutarch.Script (Script)
 import PlutusLedgerApi.V3 (
   Credential (ScriptCredential),
   CurrencySymbol (CurrencySymbol),
@@ -60,9 +62,17 @@ import Text.RE.TDFA.Text (re)
 
 testAttacksR :: Reader ScriptsTestsParams TestTree
 testAttacksR = do
-  -- Yielding Script
-  yScript <- yieldingScriptR
+  yAttacks <- yieldingScriptR >>= attackTestTrees
+  yOneshotAttacks <- yieldingScriptR' >>= attackTestTrees
+  pure $
+    testGroup
+      "Attacks"
+      [ testGroup "Yielding" yAttacks
+      , testGroup "Yielding with oneshot backdoor" yOneshotAttacks
+      ]
 
+attackTestTrees :: Script -> Reader ScriptsTestsParams [TestTree]
+attackTestTrees script = do
   -- Redeemers and contexts
   mintNominalContext <- mintNominalCaseBuilderR
   spendNominalContext <- spendNominalCaseBuilderR
@@ -87,73 +97,71 @@ testAttacksR = do
   ppAttackAuthorisedSVProofMismatch <-
     mkAttack attackAuthorisedSVProofIndexMismatch
 
-  pure $
-    testGroup
-      "Attacks"
-      [ txfCEKUnitCase $
-          attackCaseBasicRegex
-            "ref input not present"
-            [re|^(.*)$|]
-            mintNominalContext
-            yScript
-            ppNoRefInput
-      , txfCEKUnitCase $
-          attackCaseBasicRegex
-            "ref input present but not authorised"
-            [re|Reference input does not contain AuthorisedScriptsSTCS|]
-            mintNominalContext
-            yScript
-            ppRefInputNoAuth
-      , txfCEKUnitCase $
-          attackCaseBasicRegex
-            "attackAuthorisedScriptIndex does not points to valid reference input"
-            [re|^(.*)$|]
-            mintNominalContext
-            yScript
-            ppAuthorisedScriptIndexInvalid
-      , txfCEKUnitCase $
-          attackCaseBasicRegex
-            "(MP) AuthorisedScriptProofIndex does not index to valid proof"
-            [re|^(.*)$|]
-            mintNominalContext
-            yScript
-            ppAttackAuthorisedMPProofIndexInvalid
-      , txfCEKUnitCase $
-          attackCaseBasicRegex
-            "(MP) AuthorisedScriptProofIndex point to a wrong script"
-            [re|Minting policy does not match expected authorised minting policy|]
-            mintNominalContext
-            yScript
-            ppAttackAuthorisedMPProofMismatch
-      , txfCEKUnitCase $
-          attackCaseBasicRegex
-            "(V) AuthorisedScriptProofIndex does not index to valid proof"
-            [re|^(.*)$|]
-            spendNominalContext
-            yScript
-            ppAttackAuthorisedVProofIndexInvalid
-      , txfCEKUnitCase $
-          attackCaseBasicRegex
-            "(V) AuthorisedScriptProofIndex point to a wrong script"
-            [re|Input does not match expected authorised validator|]
-            spendNominalContext
-            yScript
-            ppAttackAuthorisedVProofMismatch
-      , txfCEKUnitCase $
-          attackCaseBasicRegex
-            "(SV) AuthorisedScriptProofIndex does not index to valid proof"
-            [re|^(.*)$|]
-            rewardNominalContext
-            yScript
-            ppAttackAuthorisedSVProofIndexInvalid
-      , txfCEKUnitCase $
-          attackCaseBasicRegex
-            "(SV) AuthorisedScriptProofIndex point to a wrong script"
-            [re|Withdrawal does not match expected authorised staking validator|]
-            rewardNominalContext
-            yScript
-            ppAttackAuthorisedSVProofMismatch
-      ]
+  pure
+    [ txfCEKUnitCase $
+        attackCaseBasicRegex
+          "ref input not present"
+          [re|^(.*)$|]
+          mintNominalContext
+          script
+          ppNoRefInput
+    , txfCEKUnitCase $
+        attackCaseBasicRegex
+          "ref input present but not authorised"
+          [re|Reference input does not contain AuthorisedScriptsSTCS|]
+          mintNominalContext
+          script
+          ppRefInputNoAuth
+    , txfCEKUnitCase $
+        attackCaseBasicRegex
+          "attackAuthorisedScriptIndex does not points to valid reference input"
+          [re|^(.*)$|]
+          mintNominalContext
+          script
+          ppAuthorisedScriptIndexInvalid
+    , txfCEKUnitCase $
+        attackCaseBasicRegex
+          "(MP) AuthorisedScriptProofIndex does not index to valid proof"
+          [re|^(.*)$|]
+          mintNominalContext
+          script
+          ppAttackAuthorisedMPProofIndexInvalid
+    , txfCEKUnitCase $
+        attackCaseBasicRegex
+          "(MP) AuthorisedScriptProofIndex point to a wrong script"
+          [re|Minting policy does not match expected authorised minting policy|]
+          mintNominalContext
+          script
+          ppAttackAuthorisedMPProofMismatch
+    , txfCEKUnitCase $
+        attackCaseBasicRegex
+          "(V) AuthorisedScriptProofIndex does not index to valid proof"
+          [re|^(.*)$|]
+          spendNominalContext
+          script
+          ppAttackAuthorisedVProofIndexInvalid
+    , txfCEKUnitCase $
+        attackCaseBasicRegex
+          "(V) AuthorisedScriptProofIndex point to a wrong script"
+          [re|Input does not match expected authorised validator|]
+          spendNominalContext
+          script
+          ppAttackAuthorisedVProofMismatch
+    , txfCEKUnitCase $
+        attackCaseBasicRegex
+          "(SV) AuthorisedScriptProofIndex does not index to valid proof"
+          [re|^(.*)$|]
+          rewardNominalContext
+          script
+          ppAttackAuthorisedSVProofIndexInvalid
+    , txfCEKUnitCase $
+        attackCaseBasicRegex
+          "(SV) AuthorisedScriptProofIndex point to a wrong script"
+          [re|Withdrawal does not match expected authorised staking validator|]
+          rewardNominalContext
+          script
+          ppAttackAuthorisedSVProofMismatch
+    ]
 
 -----------------------------------------------------------------------
 -- Attacks helpers
