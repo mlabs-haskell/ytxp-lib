@@ -40,7 +40,7 @@ import PlutusLedgerApi.V3 (
   StakingCredential,
   TxCert,
   TxId,
-  TxInInfo (txInInfoResolved),
+  TxInInfo (txInInfoOutRef, txInInfoResolved),
   TxInfo (txInfoId),
   TxOut (txOutAddress),
   TxOutRef (txOutRefId),
@@ -140,6 +140,12 @@ instance HasTxId TxOutRef where
       s txOutRef' txId' = txOutRef' {txOutRefId = txId'}
 
 ----------------------------------------
+
+instance HasTxOutRef TxInInfo where
+  txOutRef = lens g s
+    where
+      g = txInInfoOutRef
+      s txInInfo' txOutRef' = txInInfo' {txInInfoOutRef = txOutRef'}
 
 instance HasTxOut TxInInfo where
   txOut = lens g s

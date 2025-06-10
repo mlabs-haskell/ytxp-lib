@@ -1,6 +1,3 @@
-{-# OPTIONS_GHC -Wno-deferred-out-of-scope-variables #-}
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-
 module Cardano.YTxP.Test.Control.Yielding.Scripts (tests) where
 
 import Cardano.YTxP.SDK.SdkParameters (
@@ -15,11 +12,12 @@ import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
     ScriptsTestsParams,
     authorisedScriptHash,
     authorisedScriptsManagerHash,
-    authorisedScriptsSTCS
+    authorisedScriptsSTCS,
+    oneshotUtxo
   ),
  )
 import Control.Monad.Reader (Reader, runReader)
-import PlutusLedgerApi.V3 (CurrencySymbol (CurrencySymbol))
+import PlutusLedgerApi.V3 (CurrencySymbol (CurrencySymbol), TxOutRef (TxOutRef))
 import Test.Tasty (TestTree, testGroup)
 
 dummyParams :: ScriptsTestsParams
@@ -32,11 +30,17 @@ dummyParams =
           CurrencySymbol "33333333333333333333333333333333333333333333333333333333"
     , authorisedScriptsManagerHash =
         "11111111111111111111111111111111111111111111111111111111"
+    , oneshotUtxo =
+        TxOutRef "d44c22ef78ab49fd975ef4f07e0c8440ede296efca48eeed425096ab783c41d1" 0
     }
 
 tests :: TestTree
 tests = runReader testsR dummyParams
+
 testsR :: Reader ScriptsTestsParams TestTree
 testsR =
-  let tests' = [testNominalCasesR, testAttacksR]
+  let tests' =
+        [ testNominalCasesR
+        , testAttacksR
+        ]
    in testGroup "YieldingScripts" <$> sequence tests'
