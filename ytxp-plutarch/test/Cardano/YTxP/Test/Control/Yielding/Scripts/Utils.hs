@@ -6,7 +6,8 @@ module Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
     ScriptsTestsParams,
     authorisedScriptsSTCS,
     authorisedScriptHash,
-    authorisedScriptsManagerHash
+    authorisedScriptsManagerHash,
+    authorisedScriptPurposes
   ),
 
   -- * Script context builders
@@ -19,6 +20,7 @@ module Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   toLedgerRedeemer,
 ) where
 
+import Cardano.YTxP.Control.Yielding.Helper qualified as YTxP
 import Cardano.YTxP.SDK.Redeemers (
   AuthorisedScriptIndex (AuthorisedScriptIndex),
   AuthorisedScriptProofIndex (AuthorisedScriptProofIndex),
@@ -29,9 +31,7 @@ import Cardano.YTxP.SDK.SdkParameters (
   AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
  )
 import Control.Monad.Reader (Reader, asks)
-
--- TODO which instances are we importing with this? (it does not compile if we remove it)
-import Cardano.YTxP.Control.Yielding.Scripts ()
+import Data.Set (Set)
 import Plutarch.Internal.Term (
   Config (Tracing),
   LogLevel (LogInfo),
@@ -70,6 +70,7 @@ data ScriptsTestsParams = ScriptsTestsParams
   { authorisedScriptsSTCS :: AuthorisedScriptsSTCS
   , authorisedScriptHash :: ScriptHash
   , authorisedScriptsManagerHash :: ScriptHash
+  , authorisedScriptPurposes :: Set YTxP.AuthorisedScriptPurpose
   }
 
 -- | Produces a @Reader@ that yields a context builder with an _authorised_ reference using @ScriptsTestsParams@

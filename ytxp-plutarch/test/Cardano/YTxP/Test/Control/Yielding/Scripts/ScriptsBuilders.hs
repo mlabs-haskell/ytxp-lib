@@ -8,6 +8,7 @@ import Cardano.YTxP.SDK.SdkParameters (
  )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   ScriptsTestsParams,
+  authorisedScriptPurposes,
   authorisedScriptsSTCS,
  )
 import Control.Monad.Reader (Reader, asks)
@@ -25,11 +26,12 @@ import Plutarch.LedgerApi.V3 (PScriptContext)
 yieldingScriptR :: Reader ScriptsTestsParams Script
 yieldingScriptR = do
   (AuthorisedScriptsSTCS authorisedScriptsSTCS') <- asks authorisedScriptsSTCS
+  purposes <- asks authorisedScriptPurposes
   let
     closedTerm ::
       forall (s :: S).
       Term s (PScriptContext :--> PUnit)
-    closedTerm = yielding # pconstant authorisedScriptsSTCS' # pconstant 42
+    closedTerm = yielding purposes # pconstant authorisedScriptsSTCS' # pconstant 42
   case compile (Tracing LogInfo DetTracing) closedTerm of
     Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
     Right script' -> pure script'
