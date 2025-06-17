@@ -6,8 +6,7 @@ module Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
     ScriptsTestsParams,
     authorisedScriptsSTCS,
     authorisedScriptHash,
-    authorisedScriptsManagerHash,
-    authorisedScriptPurposes
+    authorisedScriptsManagerHash
   ),
 
   -- * Script context builders
@@ -70,7 +69,6 @@ data ScriptsTestsParams = ScriptsTestsParams
   { authorisedScriptsSTCS :: AuthorisedScriptsSTCS
   , authorisedScriptHash :: ScriptHash
   , authorisedScriptsManagerHash :: ScriptHash
-  , authorisedScriptPurposes :: Set YTxP.AuthorisedScriptPurpose
   }
 
 -- | Produces a @Reader@ that yields a context builder with an _authorised_ reference using @ScriptsTestsParams@

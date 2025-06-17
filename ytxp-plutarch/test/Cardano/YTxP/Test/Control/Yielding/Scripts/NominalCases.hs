@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedLists #-}
+
 module Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (
   testNominalCasesR,
   mintNominalCaseBuilderR,
@@ -6,6 +8,7 @@ module Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (
 ) where
 
 import Cardano.TestUtils (nominalCaseBasic, txfCEKUnitCase)
+import Cardano.YTxP.Control.Yielding.Helper qualified as Helper
 import Cardano.YTxP.SDK.Redeemers (
   AuthorisedScriptIndex (AuthorisedScriptIndex),
   AuthorisedScriptProofIndex (AuthorisedScriptProofIndex),
@@ -36,7 +39,9 @@ import Test.Tasty (TestTree, testGroup)
 
 testNominalCasesR :: Reader ScriptsTestsParams TestTree
 testNominalCasesR = do
-  yieldingScript <- yieldingScriptR
+  yieldingScript <-
+    yieldingScriptR
+      [Helper.Spending, Helper.Minting, Helper.Rewarding]
   context' <- mintNominalCaseBuilderR
   pure $
     testGroup

@@ -3,13 +3,6 @@
 
 module Cardano.YTxP.Test.Control.Yielding.Scripts (tests) where
 
-import Cardano.YTxP.Control.Yielding.Helper (
-  AuthorisedScriptPurpose (
-    Minting,
-    Rewarding,
-    Spending
-  ),
- )
 import Cardano.YTxP.SDK.SdkParameters (
   AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
  )
@@ -21,13 +14,11 @@ import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   ScriptsTestsParams (
     ScriptsTestsParams,
     authorisedScriptHash,
-    authorisedScriptPurposes,
     authorisedScriptsManagerHash,
     authorisedScriptsSTCS
   ),
  )
 import Control.Monad.Reader (Reader, runReader)
-import Data.Set qualified as Set
 import PlutusLedgerApi.V3 (CurrencySymbol (CurrencySymbol))
 import Test.Tasty (TestTree, testGroup)
 
@@ -41,7 +32,6 @@ dummyParams =
           CurrencySymbol "33333333333333333333333333333333333333333333333333333333"
     , authorisedScriptsManagerHash =
         "11111111111111111111111111111111111111111111111111111111"
-    , authorisedScriptPurposes = Set.fromList [Spending, Minting, Rewarding]
     }
 
 tests :: TestTree
