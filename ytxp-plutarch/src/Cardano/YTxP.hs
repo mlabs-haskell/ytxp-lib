@@ -8,9 +8,15 @@ This module provides the blueprint for the Yielding Transaction Pattern Library 
 -}
 module Cardano.YTxP (
   ytxpBlueprint,
+  CompilationConfig (
+    CompilationConfig,
+    plutarchConfig,
+    authorisedScriptPurposes
+  ),
 ) where
 
 import Cardano.Binary qualified as CBOR
+import Cardano.YTxP.Control.Yielding.Helper (AuthorisedScriptPurpose)
 import Cardano.YTxP.Control.Yielding.Scripts (yielding)
 import Cardano.YTxP.SDK.SdkParameters (
   AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
@@ -22,6 +28,7 @@ import Data.ByteString.Short qualified as SBS
 import Data.Coerce (coerce)
 import Data.Data (Proxy (Proxy))
 import Data.Maybe (isJust)
+import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Text qualified as T
 import GHC.Natural (naturalToInteger)
@@ -87,6 +94,14 @@ import Ply.Plutarch (
  )
 
 {- |
+Configuration settings required for compilation.
+-}
+data CompilationConfig = CompilationConfig
+  { plutarchConfig :: Config
+  , authorisedScriptPurposes :: Set AuthorisedScriptPurpose
+  }
+
+{- |
 Type alias for the Plutarch type.
 -}
 type PType = PScriptContext :--> PUnit
@@ -101,7 +116,7 @@ Generates the blueprint for the Yielding Transaction Pattern Library.
 
 @since 0.1.0
 -}
-ytxpBlueprint :: Config -> SdkParameters -> ContractBlueprint
+ytxpBlueprint :: CompilationConfig -> SdkParameters -> ContractBlueprint
 ytxpBlueprint config params =
   MkContractBlueprint
     { contractId = Nothing
@@ -127,40 +142,52 @@ Generates the validator blueprints.
 @since 0.1.0
 -}
 yieldingBlueprints ::
-  Config -> SdkParameters -> [ValidatorBlueprint YieldingReferenceTypes]
-yieldingBlueprints config (SdkParameters svNonces mpNonces cvNonces vvNonces pvNonces stcs) =
+  CompilationConfig ->
+  SdkParameters ->
+  [ValidatorBlueprint YieldingReferenceTypes]
+yieldingBlueprints (CompilationConfig config purposes) (SdkParameters svNonces mpNonces cvNonces vvNonces pvNonces stcs) =
   mkYieldingBlueprint
     config
     "Yielding Spending"
-    (yielding # pconstant (coerce stcs) # pdata pzero)
+    (yielding purposes # pconstant (coerce stcs) # pdata pzero)
     : fmap
       ( \nonce ->
           mkYieldingBlueprint config "Yielding Rewarding" $
-            yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
+            yielding purposes
+              # pconstant (coerce stcs)
+              # pdata (pconstant $ naturalToInteger nonce)
       )
       svNonces
       <> fmap
         ( \nonce ->
             mkYieldingBlueprint config "Yielding Minting" $
-              yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
+              yielding purposes
+                # pconstant (coerce stcs)
+                # pdata (pconstant $ naturalToInteger nonce)
         )
         mpNonces
       <> fmap
         ( \nonce ->
             mkYieldingBlueprint config "Yielding Certifying" $
-              yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
+              yielding purposes
+                # pconstant (coerce stcs)
+                # pdata (pconstant $ naturalToInteger nonce)
         )
         cvNonces
       <> fmap
         ( \nonce ->
             mkYieldingBlueprint config "Yielding Voting" $
-              yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
+              yielding purposes
+                # pconstant (coerce stcs)
+                # pdata (pconstant $ naturalToInteger nonce)
         )
         vvNonces
       <> fmap
         ( \nonce ->
             mkYieldingBlueprint config "Yielding Proposing" $
-              yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
+              yielding purposes
+                # pconstant (coerce stcs)
+                # pdata (pconstant $ naturalToInteger nonce)
         )
         pvNonces
 

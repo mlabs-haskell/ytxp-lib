@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -11,6 +12,7 @@ import Cardano.TestUtils (
   mkPreProcessor,
   txfCEKUnitCase,
  )
+import Cardano.YTxP.Control.Yielding.Helper qualified as Helper
 import Cardano.YTxP.SDK.Optics qualified as SDKOptics
 import Cardano.YTxP.SDK.Redeemers (
   AuthorisedScriptPurpose (Minting, Rewarding, Spending),
@@ -61,7 +63,12 @@ import Text.RE.TDFA.Text (re)
 testAttacksR :: Reader ScriptsTestsParams TestTree
 testAttacksR = do
   -- Yielding Script
-  yScript <- yieldingScriptR
+  yScriptMinting <- yieldingScriptR [Helper.Minting]
+  yScriptSpending <- yieldingScriptR [Helper.Spending]
+  yScriptRewarding <- yieldingScriptR [Helper.Rewarding]
+  yScriptNoMinting <- yieldingScriptR [Helper.Rewarding, Helper.Spending]
+  yScriptNoSpending <- yieldingScriptR [Helper.Rewarding, Helper.Minting]
+  yScriptNoRewarding <- yieldingScriptR [Helper.Spending, Helper.Minting]
 
   -- Redeemers and contexts
   mintNominalContext <- mintNominalCaseBuilderR
@@ -87,6 +94,8 @@ testAttacksR = do
   ppAttackAuthorisedSVProofMismatch <-
     mkAttack attackAuthorisedSVProofIndexMismatch
 
+  ppAttackNothing <- mkAttack attackNothing
+
   pure $
     testGroup
       "Attacks"
@@ -95,63 +104,84 @@ testAttacksR = do
             "ref input not present"
             [re|^(.*)$|]
             mintNominalContext
-            yScript
+            yScriptMinting
             ppNoRefInput
+      , txfCEKUnitCase $
+          attackCaseBasicRegex
+            "no minting yielding script"
+            [re|^(.*)$|]
+            mintNominalContext
+            yScriptNoMinting
+            ppAttackNothing
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "ref input present but not authorised"
             [re|Reference input does not contain AuthorisedScriptsSTCS|]
             mintNominalContext
-            yScript
+            yScriptMinting
             ppRefInputNoAuth
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "attackAuthorisedScriptIndex does not points to valid reference input"
             [re|^(.*)$|]
             mintNominalContext
-            yScript
+            yScriptMinting
             ppAuthorisedScriptIndexInvalid
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(MP) AuthorisedScriptProofIndex does not index to valid proof"
             [re|^(.*)$|]
             mintNominalContext
-            yScript
+            yScriptMinting
             ppAttackAuthorisedMPProofIndexInvalid
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(MP) AuthorisedScriptProofIndex point to a wrong script"
             [re|Minting policy does not match expected authorised minting policy|]
             mintNominalContext
-            yScript
+            yScriptMinting
             ppAttackAuthorisedMPProofMismatch
+      , txfCEKUnitCase $
+          attackCaseBasicRegex
+            "no spending yielding script"
+            [re|^(.*)$|]
+            spendNominalContext
+            yScriptNoSpending
+            ppAttackNothing
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(V) AuthorisedScriptProofIndex does not index to valid proof"
             [re|^(.*)$|]
             spendNominalContext
-            yScript
+            yScriptSpending
             ppAttackAuthorisedVProofIndexInvalid
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(V) AuthorisedScriptProofIndex point to a wrong script"
             [re|Input does not match expected authorised validator|]
             spendNominalContext
-            yScript
+            yScriptSpending
             ppAttackAuthorisedVProofMismatch
+      , txfCEKUnitCase $
+          attackCaseBasicRegex
+            "no rewarding yielding script"
+            [re|^(.*)$|]
+            rewardNominalContext
+            yScriptNoRewarding
+            ppAttackNothing
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(SV) AuthorisedScriptProofIndex does not index to valid proof"
             [re|^(.*)$|]
             rewardNominalContext
-            yScript
+            yScriptRewarding
             ppAttackAuthorisedSVProofIndexInvalid
       , txfCEKUnitCase $
           attackCaseBasicRegex
             "(SV) AuthorisedScriptProofIndex point to a wrong script"
             [re|Withdrawal does not match expected authorised staking validator|]
             rewardNominalContext
-            yScript
+            yScriptRewarding
             ppAttackAuthorisedSVProofMismatch
       ]
 
@@ -224,6 +254,13 @@ replaceWdrl oldScript newScript =
 
 -----------------------------------------------------------------------
 -- Attacks
+
+attackNothing ::
+  Reader ScriptsTestsParams (Endo a)
+attackNothing =
+  pure
+    . Endo
+    $ id
 
 attackRefInputNotPresent ::
   Reader ScriptsTestsParams (Endo ScriptContext)
