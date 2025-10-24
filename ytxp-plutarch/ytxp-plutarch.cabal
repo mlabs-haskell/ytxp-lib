@@ -5,7 +5,7 @@ synopsis:
   Control scripts, types, and utilities for the YTxP architecture
 
 author:        Peter Dragos, Koz Ross
-maintainer:    edi@mlabs.city, peter@mlabs.city, koz@mlabs.city
+maintainer:    edigranado@mlabs.city, giovanni@mlabs.city, koz@mlabs.city
 
 flag dev
   description: Enable non-strict compilation for development
