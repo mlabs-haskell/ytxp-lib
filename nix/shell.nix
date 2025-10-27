@@ -8,8 +8,8 @@ in
 {
   withHoogle = true;
   additional = ps: with ps; [
-    plutarch
     ytxp-plutarch
+    ytxp-sdk
     plutarch
     plutus-core
     plutus-tx

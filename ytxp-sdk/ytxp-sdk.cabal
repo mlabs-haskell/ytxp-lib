@@ -1,0 +1,154 @@
+cabal-version: 3.0
+name:          ytxp-sdk
+version:       0.2.0
+synopsis:
+  Provides off-chain and on-chain interoperability tools for YTxP pattern implementations
+
+author:        Peter Dragos, Koz Ross
+maintainer:    peter@mlabs.city, koz@mlabs.city
+
+flag dev
+  description: Enable non-strict compilation for development
+  manual:      True
+  default:     False
+
+-- Common stanzas
+
+common common-language
+  ghc-options:
+    -Wall -Wcompat -fprint-explicit-foralls -fprint-explicit-kinds
+    -fwarn-missing-import-lists -Weverything -Wno-unsafe
+    -Wno-missing-safe-haskell-mode -Wno-implicit-prelude
+    -Wno-all-missed-specializations -fno-strictness -fno-specialise
+    -fno-spec-constr -fno-unbox-strict-fields
+    -fno-unbox-small-strict-fields
+
+  if impl(ghc >9)
+    ghc-options: -Wno-missing-kind-signatures -Wno-operator-whitespace
+
+  if !flag(dev)
+    ghc-options: -Werror
+
+  default-extensions:
+    BangPatterns
+    BinaryLiterals
+    ConstrainedClassMethods
+    ConstraintKinds
+    DataKinds
+    DeriveAnyClass
+    DeriveDataTypeable
+    DeriveFoldable
+    DeriveFunctor
+    DeriveGeneric
+    DeriveLift
+    DeriveTraversable
+    DerivingStrategies
+    DerivingVia
+    DoAndIfThenElse
+    DuplicateRecordFields
+    EmptyCase
+    EmptyDataDecls
+    EmptyDataDeriving
+    ExistentialQuantification
+    ExplicitForAll
+    ExplicitNamespaces
+    FlexibleContexts
+    FlexibleInstances
+    ForeignFunctionInterface
+    GADTSyntax
+    GeneralizedNewtypeDeriving
+    HexFloatLiterals
+    ImportQualifiedPost
+    InstanceSigs
+    KindSignatures
+    LambdaCase
+    MonomorphismRestriction
+    MultiParamTypeClasses
+    NamedFieldPuns
+    NamedWildCards
+    NoStarIsType
+    NumericUnderscores
+    OverloadedLabels
+    OverloadedStrings
+    PartialTypeSignatures
+    PatternGuards
+    PolyKinds
+    PostfixOperators
+    RankNTypes
+    RecordWildCards
+    RelaxedPolyRec
+    ScopedTypeVariables
+    StandaloneDeriving
+    StandaloneKindSignatures
+    TemplateHaskell
+    TraditionalRecordSyntax
+    TupleSections
+    TypeApplications
+    TypeFamilies
+    TypeOperators
+    TypeSynonymInstances
+    UndecidableInstances
+    ViewPatterns
+
+  default-language:   Haskell2010
+
+-- Libraries
+
+library
+  import:          common-language
+  hs-source-dirs:  src
+  exposed-modules:
+    Cardano.YTxP.SDK.ControlParameters
+    Cardano.YTxP.SDK.Optics
+    Cardano.YTxP.SDK.Redeemers
+    Cardano.YTxP.SDK.SdkParameters
+
+  build-depends:
+    , aeson
+    , base
+    , base16-bytestring
+    , bytestring
+    , generics-sop
+    , lens
+    , plutus-core
+    , plutus-ledger-api
+    , plutus-tx
+    , prettyprinter
+    , QuickCheck
+    , text
+
+library testlib
+  import:          common-language
+  build-depends:
+    , aeson
+    , base
+    , plutus-tx
+    , QuickCheck
+    , tasty
+    , tasty-quickcheck
+
+  hs-source-dirs:  testlib
+  exposed-modules: Test.Laws
+
+-- Executables
+
+test-suite ytxp-sdk-test
+  import:         common-language
+  type:           exitcode-stdio-1.0
+  main-is:        Main.hs
+  build-depends:
+    , aeson
+    , base
+    , bytestring
+    , plutus-ledger-api
+    , plutus-tx
+    , QuickCheck
+    , tasty
+    , tasty-golden
+    , tasty-quickcheck
+    , testlib
+    , text
+    , ytxp-sdk
+
+  ghc-options:    -O2 -threaded -rtsopts -with-rtsopts=-N
+  hs-source-dirs: test

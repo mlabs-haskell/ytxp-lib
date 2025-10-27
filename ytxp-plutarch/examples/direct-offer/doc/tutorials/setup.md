@@ -41,4 +41,4 @@ With the setup complete, you can now execute a transaction family using the yiel
 
 For the yielding script to succeed, you need to populate the yielding redeemer. This involves specifying the index of the authorized reference script (the transaction family), the yielding purpose, and the proof index. Specifically, for the yielding spending validator, if you need to reclaim the offer, you should declare Spending as your purpose and the index of the offer UTXO in txInfoInputs. For minting, declare the Minting purpose and the index position of your minting value in the txInfoMints field.
 
-For more information on the yielding redeemer, check out [ytxp-sdk](https://github.com/mlabs-haskell/ytxp-sdk/blob/master/ytxp-sdk/src/Cardano/YTxP/SDK/Redeemers.hs).
+For more information on the yielding redeemer, check out [ytxp-sdk](https://github.com/mlabs-haskell/ytxp-lib/blob/master/ytxp-sdk/src/Cardano/YTxP/SDK/Redeemers.hs).
