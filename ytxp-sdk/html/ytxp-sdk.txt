@@ -7,7 +7,7 @@
 --   Provides off-chain and on-chain interoperability tools for YTxP
 --   pattern implementations
 @package ytxp-sdk
-@version 0.2.0
+@version 0.2.1
 
 module Cardano.YTxP.SDK.Redeemers
 
@@ -59,6 +59,7 @@ instance PlutusTx.IsData.Class.FromData Cardano.YTxP.SDK.Redeemers.AuthorisedScr
 instance PlutusTx.IsData.Class.ToData Cardano.YTxP.SDK.Redeemers.AuthorisedScriptProofIndex
 instance GHC.Classes.Eq Cardano.YTxP.SDK.Redeemers.AuthorisedScriptProofIndex
 instance GHC.Show.Show Cardano.YTxP.SDK.Redeemers.AuthorisedScriptProofIndex
+instance PlutusTx.Blueprint.Definition.Unroll.HasBlueprintDefinition Cardano.YTxP.SDK.Redeemers.YieldingRedeemer
 instance GHC.Classes.Eq Cardano.YTxP.SDK.Redeemers.YieldingRedeemer
 instance GHC.Generics.Generic Cardano.YTxP.SDK.Redeemers.YieldingRedeemer
 instance GHC.Show.Show Cardano.YTxP.SDK.Redeemers.YieldingRedeemer
@@ -71,10 +72,10 @@ instance PlutusTx.IsData.Class.UnsafeFromData Cardano.YTxP.SDK.Redeemers.Authori
 instance PlutusTx.Eq.Eq Cardano.YTxP.SDK.Redeemers.AuthorisedScriptPurpose
 
 module Cardano.YTxP.SDK.Optics
-class HasYieldingRedeemer c_auhf
-yieldingRedeemer :: HasYieldingRedeemer c_auhf => Lens' c_auhf YieldingRedeemer
-authorisedScriptIndex :: HasYieldingRedeemer c_auhf => Lens' c_auhf AuthorisedScriptIndex
-authorisedScriptProofIndex :: HasYieldingRedeemer c_auhf => Lens' c_auhf AuthorisedScriptProofIndex
+class HasYieldingRedeemer c_aupF
+yieldingRedeemer :: HasYieldingRedeemer c_aupF => Lens' c_aupF YieldingRedeemer
+authorisedScriptIndex :: HasYieldingRedeemer c_aupF => Lens' c_aupF AuthorisedScriptIndex
+authorisedScriptProofIndex :: HasYieldingRedeemer c_aupF => Lens' c_aupF AuthorisedScriptProofIndex
 instance Cardano.YTxP.SDK.Optics.HasYieldingRedeemer Cardano.YTxP.SDK.Redeemers.YieldingRedeemer
 instance forall t. ((Cardano.YTxP.SDK.Redeemers.AuthorisedScriptIndex :: GHC.Types.Type) GHC.Types.~ (t :: GHC.Types.Type)) => Control.Lens.Wrapped.Rewrapped Cardano.YTxP.SDK.Redeemers.AuthorisedScriptIndex t
 instance Control.Lens.Wrapped.Wrapped Cardano.YTxP.SDK.Redeemers.AuthorisedScriptIndex
@@ -87,27 +88,11 @@ module Cardano.YTxP.SDK.SdkParameters
 -- | Parameters available during compilation (therefore not containing any
 --   script hashes).
 data SdkParameters
-SdkParameters :: [Natural] -> [Natural] -> [Natural] -> [Natural] -> [Natural] -> AuthorisedScriptsSTCS -> SdkParameters
+SdkParameters :: [Natural] -> AuthorisedScriptsSTCS -> SdkParameters
 
--- | A list of nonces for the yielding staking validators. One staking
---   validator is compiled for each nonce. @since 0.1.0
-[$sel:stakingValidatorsNonceList:SdkParameters] :: SdkParameters -> [Natural]
-
--- | A list of nonces for the yielding minting policies. One minting policy
---   is compiled for each nonce. @since 0.1.0
-[$sel:mintingPoliciesNonceList:SdkParameters] :: SdkParameters -> [Natural]
-
--- | A list of nonces for the certifying staking validators. One certifying
---   validator is compiled for each nonce. @since 0.2.0
-[$sel:certifyingValidatorsNonceList:SdkParameters] :: SdkParameters -> [Natural]
-
--- | A list of nonces for the voting staking validators. One voting
---   validator is compiled for each nonce. @since 0.2.0
-[$sel:votingValidatorsNonceList:SdkParameters] :: SdkParameters -> [Natural]
-
--- | A list of nonces for the proposing staking validators. One proposing
---   validator is compiled for each nonce. @since 0.2.0
-[$sel:proposingValidatorsNonceList:SdkParameters] :: SdkParameters -> [Natural]
+-- | A list of nonces for the validators. One validator is compiled for
+--   each nonce. @since 0.2.1
+[$sel:validatorsNonceList:SdkParameters] :: SdkParameters -> [Natural]
 
 -- | The Currency symbol of the token that identifies authorised reference
 --   scripts . @since 0.1.0

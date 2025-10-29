@@ -6,7 +6,7 @@
 --   
 --   Control scripts, types, and utilities for the YTxP architecture
 @package ytxp-plutarch
-@version 0.2.0
+@version 0.2.1
 
 
 -- | This module exposes a flexible way to generate test cases that go
@@ -258,4 +258,4 @@ yielding :: forall (s :: S). Term s (PCurrencySymbol :--> (PAsData PInteger :-->
 module Cardano.YTxP
 
 -- | Generates the blueprint for the Yielding Transaction Pattern Library.
-ytxpBlueprint :: Config -> SdkParameters -> ContractBlueprint
+ytxpBlueprint :: Text -> Text -> Text -> Config -> SdkParameters -> ContractBlueprint
