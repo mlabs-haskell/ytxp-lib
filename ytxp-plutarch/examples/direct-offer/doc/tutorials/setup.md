@@ -24,10 +24,10 @@ The direct offer consists of three transaction families, all triggered by mintin
 Use the following command to compile the yielding scripts:
 
 ```bash
-cabal run ytxp -- -o ytxp.json -m 1 --stcs "ffff" --traces
+cabal run ytxp -- -o ytxp.json -m 1 --stcs "ffff" --txf-purpose rewarding minting --traces
 ```
 
-This command automatically creates a yielding validator script. The `-m 1` option indicates that you want one yielding minting policy script. The `--stcs "ffff"` option informs the YTxP compiler about the authorized script token.
+This command automatically creates a yielding validator script. The `-m 1` option indicates that you want one yielding minting policy script. The `--stcs "ffff"` option informs the YTxP compiler about the authorized script token. The `--txf-purpose rewarding minting` option specifies which script purposes are permitted for authenticated scripts.
 
 ## Deploying the scripts
 

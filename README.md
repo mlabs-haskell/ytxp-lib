@@ -71,6 +71,7 @@ The `ytxp` executable supports the following command-line options:
 * `--yielding-proposing-validator-number` or `-p`: Specifies the number of yielding proposing validators. **Optional**.
 * `--stcs`: Specifies the authorised scripts STCS. **Required**.
 * `--initial-nonce`: Specifies the initial nonce value. **Optional**. Default value is `42`.
+* `--txf-purpose`: Specifies which script purposes are permitted for authenticated scripts. The possible options include `minting`, `spending`, and `rewarding`. Multiple options can be selected. **Required**
 * `--traces`: Enables tracing for the compiler. **Optional**.
 
 #### Example
@@ -78,7 +79,7 @@ The `ytxp` executable supports the following command-line options:
 To generate a blueprint with five yielding staking validators, one yielding minting policy, and a yielding spending validator:
 
 ```bash
-cabal run ytxp -- -o blueprint.json -s 5 -m 1 --stcs "333333"
+cabal run ytxp -- -o blueprint.json -s 5 -m 1 --stcs "333333" --txf-purpose rewarding
 ```
 
 ## Tests

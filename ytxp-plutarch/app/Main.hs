@@ -10,20 +10,28 @@ configuring the compiler and generating the blueprint.
 -}
 module Main (main) where
 
-import Cardano.YTxP (ytxpBlueprint)
+import Cardano.YTxP (CompilationConfig (CompilationConfig), ytxpBlueprint)
+import Cardano.YTxP.Control.Yielding.Helper (
+  AuthorisedScriptPurpose (Minting, Rewarding, Spending),
+ )
 import Cardano.YTxP.SDK.SdkParameters (
   AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
   SdkParameters (SdkParameters),
  )
+import Data.Set qualified as Set
 import Numeric.Natural (Natural)
 import Options.Applicative (
+  Alternative (some),
   Parser,
+  argument,
   auto,
   execParser,
+  flag',
   fullDesc,
   header,
   help,
   helper,
+  idm,
   info,
   long,
   option,
@@ -55,7 +63,14 @@ data Params = Params
   , numYieldingPV :: !Natural
   , initialNonce :: !Natural
   , stcs :: !CurrencySymbol
+  , authPurposes :: !AuthorisedScriptPurposeParams
   , traces :: !Bool
+  }
+
+-- | Hack to allow to declare multiple purposes
+data AuthorisedScriptPurposeParams = AuthorisedScriptPurposeParams
+  { _authParamsSwitch :: !Bool
+  , authParamsPurposes :: ![AuthorisedScriptPurpose]
   }
 
 {- |
@@ -66,7 +81,9 @@ start p =
   let
     sdkParams = params2SdkParameters p
     config =
-      if traces p then Tracing LogInfo DetTracing else NoTracing
+      CompilationConfig
+        (if traces p then Tracing LogInfo DetTracing else NoTracing)
+        (Set.fromList $ authParamsPurposes (authPurposes p))
    in
     writeBlueprint
       (outputFile p)
@@ -146,6 +163,29 @@ instance Read CurrencySymbol where
     [(CurrencySymbol . stringToBuiltinByteStringHex $ cs, mempty)]
 
 {- |
+Instance of the Read type class for AuthorisedScriptPurpose.
+-}
+instance Read AuthorisedScriptPurpose where
+  readsPrec _ purpose
+    | purpose == "rewarding" = [(Rewarding, mempty)]
+    | purpose == "spending" = [(Spending, mempty)]
+    | purpose == "minting" = [(Minting, mempty)]
+    | otherwise = []
+
+{- |
+Parser for the multi argument parameter
+-}
+authorisedScriptPurposesParams :: Parser AuthorisedScriptPurposeParams
+authorisedScriptPurposesParams =
+  AuthorisedScriptPurposeParams
+    <$> flag'
+      True
+      ( long "txf-purpose"
+          <> help "The transaction family script purpose"
+      )
+    <*> some (argument auto idm)
+
+{- |
 Parser for the command-line parameters.
 -}
 params :: Parser Params
@@ -203,6 +243,7 @@ params =
       ( long "stcs"
           <> help "The authorised scripts STCS"
       )
+    <*> authorisedScriptPurposesParams
     <*> switch
       ( long "traces"
           <> help "Whether to compile with traces"
