@@ -45,14 +45,6 @@ make build_docs
 
 After the execution, this command will specify the location of the generated documentation.
 
-##### Using Nix
-
-If you are using nix, the documentation for `ytxp-plutarch library` , generating documentation can be achieved by running:
-
-```bash
-nix build .#ytxp-plutarch-lib.doc
-```
-
 #### Serve documentation locally
 
 To serve the documentation locally, utilize the following make target:
