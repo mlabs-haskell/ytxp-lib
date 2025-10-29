@@ -12,6 +12,7 @@
         default_stages = [ "commit" "push" ];
         rootSrc = self.outPath;
         hooks = {
+          treefmt.enable = true;
           cabal-fmt.enable = true;
           deadnix.enable = true;
           fourmolu.enable = true;

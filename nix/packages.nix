@@ -13,7 +13,7 @@
         })
       ];
       pkgs = config._module.args.pkgs.extend (lib.composeManyExtensions overlays);
-      flake = pkgs.ytxp-plutarch.flake { };
+      flake = pkgs.ytxp-plutarch.flake { } // pkgs.ytxp-sdk.flake { };
       combine-haddock = pkgs.fetchurl {
         url = "https://raw.githubusercontent.com/Plutonomicon/plutarch-plutus/f78b70eca8841a4a009cb6791a59c999cbc68745/nix/combine-haddock.nix";
         sha256 = "sha256-Th7HnBErgCdwwdszZ8gQz94V87gqEbzHAqN7QhRROMc=";
@@ -21,11 +21,12 @@
     in
     {
       packages = with flake.packages; {
-        inherit "ytxp-plutarch:lib:ytxp-plutarch" "ytxp-plutarch:test:ytxp-lib-test" "ytxp-plutarch:exe:ytxp";
+        inherit "ytxp-plutarch:lib:ytxp-plutarch" "ytxp-plutarch:test:ytxp-lib-test" "ytxp-plutarch:exe:ytxp" "ytxp-sdk:lib:ytxp-sdk" "ytxp-sdk:test:ytxp-sdk-test";
         docs = import combine-haddock { inherit pkgs lib; } {
           cabalProject = pkgs.ytxp-plutarch;
           targetPackages = [
             "ytxp-plutarch"
+            "ytxp-sdk"
           ];
           prologue = ''
             = YTxP Documentation

@@ -24,12 +24,11 @@ usage:
 	@echo "    build_all                                                   -- Build all"
 	@echo "    build_all_dev                                               -- Build all (-fdev)"
 	@echo "    build_ytxp-plutarch                                         -- Build ytxp-plutarch"
-	@echo "    build_testlib                                               -- Build testlib"
-	@echo "    build_pprelude                                              -- Build pprelude"
+	@echo "    build_ytxp-sdk                                              -- Build ytxp-sdk"
 	@echo ""
 	# Test
 	@echo "    test_all                                                    -- Run all the tests"
-	@echo "    test_all_dev                                                    -- Run all the tests ignoring warning"
+	@echo "    test_all_dev                                                -- Run all the tests ignoring warning"
 	@echo ""
 	# Check Typos
 	@echo "    typos_check                                                 -- Check typos"
@@ -130,14 +129,9 @@ build_all_dev:
 .PHONY: build_ytxp-plutarch
 build_ytxp-plutarch:
 	cabal build -j ytxp-plutarch
-
-.PHONY: build_testlib
-build_testlib:
-	cabal build -j testlib
-
-.PHONY: build_pprelude
-build_pprelude:
-	cabal build -j pprelude
+.PHONY: build_ytxp-sdk
+build_ytxp-sdk:
+	cabal build -j ytxp-sdk
 
 ################################################################################
 # Test
