@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name:          ytxp-plutarch
-version:       0.2.0
+version:       0.2.1
 synopsis:
   Control scripts, types, and utilities for the YTxP architecture
 
@@ -178,6 +178,7 @@ executable ytxp
     , plutus-ledger-api
     , plutus-tx
     , pprelude
+    , text
     , ytxp-plutarch
     , ytxp-sdk
 

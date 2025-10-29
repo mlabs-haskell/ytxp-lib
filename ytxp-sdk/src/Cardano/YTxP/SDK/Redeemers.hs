@@ -12,6 +12,7 @@ module Cardano.YTxP.SDK.Redeemers (
 import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
 import PlutusTx qualified
+import PlutusTx.Blueprint (HasBlueprintDefinition)
 import PlutusTx.Prelude qualified as PlutusTx
 import Test.QuickCheck (Arbitrary (arbitrary), arbitraryBoundedEnum)
 
@@ -94,6 +95,7 @@ data YieldingRedeemer = YieldingRedeemer
   -- ^ A tuple containing yielded to script type and the index at which to find proof: this allows us to avoid having to loop through inputs/mints/withdrawls to find the script we want to ensure is run.
   }
   deriving stock (Show, Generic, Eq)
+  deriving anyclass (HasBlueprintDefinition)
 
 instance Arbitrary YieldingRedeemer where
   arbitrary = YieldingRedeemer <$> arbitrary <*> arbitrary

@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name:          ytxp-sdk
-version:       0.2.0
+version:       0.2.1
 synopsis:
   Provides off-chain and on-chain interoperability tools for YTxP pattern implementations
 

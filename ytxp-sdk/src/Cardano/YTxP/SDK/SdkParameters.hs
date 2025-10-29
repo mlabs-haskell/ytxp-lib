@@ -38,26 +38,9 @@ import Prettyprinter (
 
 -- | Parameters available during compilation (therefore not containing any script hashes).
 data SdkParameters = SdkParameters
-  { stakingValidatorsNonceList :: [Natural]
-  -- ^ A list of nonces for the yielding staking validators. One staking
-  -- validator is compiled for each nonce.
-  -- @since 0.1.0
-  , mintingPoliciesNonceList :: [Natural]
-  -- ^ A list of nonces for the yielding minting policies. One minting
-  -- policy is compiled for each nonce.
-  -- @since 0.1.0
-  , certifyingValidatorsNonceList :: [Natural]
-  -- ^ A list of nonces for the certifying staking validators. One certifying
-  -- validator is compiled for each nonce.
-  -- @since 0.2.0
-  , votingValidatorsNonceList :: [Natural]
-  -- ^ A list of nonces for the voting staking validators. One voting
-  -- validator is compiled for each nonce.
-  -- @since 0.2.0
-  , proposingValidatorsNonceList :: [Natural]
-  -- ^ A list of nonces for the proposing staking validators. One proposing
-  -- validator is compiled for each nonce.
-  -- @since 0.2.0
+  { validatorsNonceList :: [Natural]
+  -- ^ A list of nonces for the validators. One validator is compiled for each nonce.
+  -- @since 0.2.1
   , authorisedScriptsSTCS :: AuthorisedScriptsSTCS
   -- ^ The Currency symbol of the token that identifies authorised reference scripts .
   -- @since 0.1.0
@@ -68,19 +51,11 @@ data SdkParameters = SdkParameters
 instance Pretty SdkParameters where
   pretty
     SdkParameters
-      { stakingValidatorsNonceList
-      , mintingPoliciesNonceList
-      , certifyingValidatorsNonceList
-      , votingValidatorsNonceList
-      , proposingValidatorsNonceList
+      { validatorsNonceList
       , authorisedScriptsSTCS
       } =
       ("SdkParameters:" <+>) . braces . align . vsep . punctuate "," $
-        [ "stakingValidatorsNonceList:" <+> pretty stakingValidatorsNonceList
-        , "mintingPoliciesNonceList:" <+> pretty mintingPoliciesNonceList
-        , "certifyingValidatorsNonceList:" <+> pretty certifyingValidatorsNonceList
-        , "votingValidatorsNonceList:" <+> pretty votingValidatorsNonceList
-        , "proposingValidatorsNonceList:" <+> pretty proposingValidatorsNonceList
+        [ "validatorsNonceList:" <+> pretty validatorsNonceList
         , "authorisedScriptsSTCS:" <+> dquotes (pretty authorisedScriptsSTCS)
         ]
 

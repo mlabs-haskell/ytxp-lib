@@ -64,21 +64,17 @@ The `ytxp` executable is a command-line tool for compiling the yielding validato
 The `ytxp` executable supports the following command-line options:
 
 * `--output` or `-o`: Specifies the output blueprint file. **Required**.
-* `--yielding-staking-validator-number` or `-s`: Specifies the number of yielding staking validators. **Optional**.
-* `--yielding-minting-policy-number` or `-m`: Specifies the number of yielding minting policies. **Optional**.
-* `--yielding-certifying-validator-number` or `-c`: Specifies the number of yielding certifying validators. **Optional**.
-* `--yielding-voting-validator-number` or `-v`: Specifies the number of yielding voting validators. **Optional**.
-* `--yielding-proposing-validator-number` or `-p`: Specifies the number of yielding proposing validators. **Optional**.
+* `--yielding-validator-number` or `-y`: Specifies the number of yielding validators. **Optional**. Default value is `1`.
 * `--stcs`: Specifies the authorised scripts STCS. **Required**.
 * `--initial-nonce`: Specifies the initial nonce value. **Optional**. Default value is `42`.
 * `--traces`: Enables tracing for the compiler. **Optional**.
 
 #### Example
 
-To generate a blueprint with five yielding staking validators, one yielding minting policy, and a yielding spending validator:
+To generate a blueprint with five yielding validators:
 
 ```bash
-cabal run ytxp -- -o blueprint.json -s 5 -m 1 --stcs "333333"
+cabal run ytxp -- -o blueprint.json -y 5 --stcs "333333"
 ```
 
 ## Tests
