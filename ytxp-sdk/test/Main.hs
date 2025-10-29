@@ -93,10 +93,6 @@ main =
 sampleYLS :: SdkParameters
 sampleYLS =
   SdkParameters
-    [1, 2]
-    [3, 4, 5]
-    [6]
-    [7, 8]
     [9, 10, 11]
     (AuthorisedScriptsSTCS dummySymbolOne)
 
@@ -114,22 +110,12 @@ sampleYieldingRedeemer = YieldingRedeemer sampleAuthScriptIndex sampleAuthorised
 
 -- Generators and shrinkers
 
--- TODO: This definitely needs more thought.
 genSdkParams :: Gen SdkParameters
 genSdkParams = do
-  stakingValsNonceList <- map (fromInteger . getNonNegative) <$> arbitrary
-  mintingPoliciesNonceList <- map (fromInteger . getNonNegative) <$> arbitrary
-  certifyingValidatorsNonceList <-
-    map (fromInteger . getNonNegative) <$> arbitrary
-  votingValidatorsNonceList <- map (fromInteger . getNonNegative) <$> arbitrary
-  proposingValidatorsNonceList <- map (fromInteger . getNonNegative) <$> arbitrary
+  nonceList <- map (fromInteger . getNonNegative) <$> arbitrary
   pure $
     SdkParameters
-      stakingValsNonceList
-      mintingPoliciesNonceList
-      certifyingValidatorsNonceList
-      votingValidatorsNonceList
-      proposingValidatorsNonceList
+      nonceList
       (AuthorisedScriptsSTCS dummySymbolOne)
 
 genControlParams :: Gen ControlParameters

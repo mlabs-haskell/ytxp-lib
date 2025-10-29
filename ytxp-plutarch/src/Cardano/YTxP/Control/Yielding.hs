@@ -46,6 +46,7 @@ import Plutarch.LedgerApi.V3 (
   ptxOut'referenceScript,
  )
 import Plutarch.Repr.Tag (DeriveAsTag (DeriveAsTag))
+import Ply.Plutarch (PlyArgOf)
 import Utils (pmember)
 
 -- | A newtype wrapper for 'AuthorisedScriptIndex'.
@@ -112,6 +113,8 @@ data PYieldingRedeemer (s :: S) = PYieldingRedeemer
   deriving
     (PLiftable)
     via (DeriveDataPLiftable PYieldingRedeemer YieldingRedeemer)
+
+type instance PlyArgOf PYieldingRedeemer = YieldingRedeemer
 
 instance PTryFrom PData (PAsData PYieldingRedeemer)
 

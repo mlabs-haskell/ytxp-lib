@@ -15,6 +15,7 @@ import Cardano.YTxP.SDK.SdkParameters (
   AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
   SdkParameters (SdkParameters),
  )
+import Data.Text qualified as T
 import Numeric.Natural (Natural)
 import Options.Applicative (
   Parser,
@@ -48,15 +49,12 @@ Data type representing the parameters for the YTxP compiler.
 -}
 data Params = Params
   { outputFile :: !FilePath
-  , numYieldingSV :: !Natural
-  , numYieldingMP :: !Natural
-  , numYieldingCV :: !Natural
-  , numYieldingVV :: !Natural
-  , numYieldingPV :: !Natural
+  , numYieldingValidators :: !Natural
   , initialNonce :: !Natural
   , stcs :: !CurrencySymbol
   , traces :: !Bool
   }
+  deriving stock (Show)
 
 {- |
 Starts the YTxP compiler with the given parameters.
@@ -70,7 +68,13 @@ start p =
    in
     writeBlueprint
       (outputFile p)
-      (ytxpBlueprint config sdkParams)
+      ( ytxpBlueprint
+          "YTxP Yielding Validators"
+          ("Compilation params: " <> T.pack (show p))
+          "0.0.0"
+          config
+          sdkParams
+      )
 
 {- |
 Converts the given parameters to SDK parameters.
@@ -78,50 +82,13 @@ Converts the given parameters to SDK parameters.
 params2SdkParameters :: Params -> SdkParameters
 params2SdkParameters
   Params
-    { numYieldingSV
-    , numYieldingMP
-    , numYieldingCV
-    , numYieldingVV
-    , numYieldingPV
+    { numYieldingValidators
     , initialNonce
     , stcs
     } =
     SdkParameters
-      (f initialNonce numYieldingSV)
-      ( f
-          ( initialNonce
-              + numYieldingSV
-          )
-          numYieldingMP
-      )
-      ( f
-          ( initialNonce
-              + numYieldingSV
-              + numYieldingMP
-          )
-          numYieldingCV
-      )
-      ( f
-          ( initialNonce
-              + numYieldingSV
-              + numYieldingMP
-              + numYieldingCV
-          )
-          numYieldingVV
-      )
-      ( f
-          ( initialNonce
-              + numYieldingSV
-              + numYieldingMP
-              + numYieldingCV
-              + numYieldingVV
-          )
-          numYieldingPV
-      )
+      [initialNonce .. initialNonce + numYieldingValidators - 1]
       (AuthorisedScriptsSTCS stcs)
-    where
-      f :: Natural -> Natural -> [Natural]
-      f n k = [n .. n + k - 1]
 
 -- CLI Parser
 
@@ -158,38 +125,10 @@ params =
       )
     <*> option
       auto
-      ( long "yielding-staking-validator-number"
-          <> short 's'
-          <> help "The number of yielding staking validators"
-          <> value 0
-      )
-    <*> option
-      auto
-      ( long "yielding-minting-policy-number"
-          <> short 'm'
-          <> help "The number of yielding minting policies"
-          <> value 0
-      )
-    <*> option
-      auto
-      ( long "yielding-certifying-validator-number"
-          <> short 'c'
-          <> help "The number of yielding certifying validators"
-          <> value 0
-      )
-    <*> option
-      auto
-      ( long "yielding-voting-validator-number"
-          <> short 'v'
-          <> help "The number of yielding voting validators"
-          <> value 0
-      )
-    <*> option
-      auto
-      ( long "yielding-proposing-validator-number"
-          <> short 'p'
-          <> help "The number of yielding proposing validators"
-          <> value 0
+      ( long "yielding-validator-number"
+          <> short 'y'
+          <> help "The number of yielding validators"
+          <> value 1
       )
     <*> option
       auto
