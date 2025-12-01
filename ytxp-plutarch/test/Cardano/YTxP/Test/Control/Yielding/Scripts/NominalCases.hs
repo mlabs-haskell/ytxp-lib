@@ -3,6 +3,7 @@ module Cardano.YTxP.Test.Control.Yielding.Scripts.NominalCases (
   mintNominalCaseBuilderR,
   spendNominalCaseBuilderR,
   rewardNominalCaseBuilderR,
+  oneshotNominalCaseBuilderR,
 ) where
 
 import Cardano.TestUtils (nominalCaseBasic, txfCEKUnitCase)
@@ -14,11 +15,13 @@ import Cardano.YTxP.SDK.Redeemers (
  )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.ScriptsBuilders (
   yieldingScriptR,
+  yieldingScriptR',
  )
 import Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   ScriptsTestsParams,
   authorisedScriptRefInputContext,
   mintContext,
+  oneshotSpendContext,
   rewardContext,
   spendContext,
  )
@@ -37,15 +40,27 @@ import Test.Tasty (TestTree, testGroup)
 testNominalCasesR :: Reader ScriptsTestsParams TestTree
 testNominalCasesR = do
   yieldingScript <- yieldingScriptR
-  context' <- mintNominalCaseBuilderR
+  oneshotYieldingScript <- yieldingScriptR'
+  context <- mintNominalCaseBuilderR
+  oneshotContext <- oneshotNominalCaseBuilderR
   pure $
     testGroup
       "Nominal Case"
       [ txfCEKUnitCase $
           nominalCaseBasic
             "Yielding Case"
-            context'
+            context
             yieldingScript
+      , txfCEKUnitCase $
+          nominalCaseBasic
+            "Yielding Case (with oneshot backdoor script)"
+            context
+            oneshotYieldingScript
+      , txfCEKUnitCase $
+          nominalCaseBasic
+            "Backdoor Case"
+            oneshotContext
+            oneshotYieldingScript
       ]
 
 -- | Helper that produces a @Reader@ that yields a compiled a redeemerScript, throws an error is compilation fails
@@ -58,6 +73,11 @@ mkNominalCaseBuilderR ::
 mkNominalCaseBuilderR redeemer builder contextBuilder = do
   context <- (<>) <$> authorisedScriptRefInputContext <*> builder
   pure $ contextBuilder $ scriptRedeemer redeemer <> mkOutRefIndices context
+
+oneshotNominalCaseBuilderR ::
+  Reader ScriptsTestsParams ScriptContext
+oneshotNominalCaseBuilderR =
+  buildSpending' . mkOutRefIndices <$> oneshotSpendContext
 
 mintNominalCaseBuilderR ::
   Reader ScriptsTestsParams ScriptContext

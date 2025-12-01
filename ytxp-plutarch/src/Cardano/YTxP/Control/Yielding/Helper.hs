@@ -1,7 +1,11 @@
 {- | This module export a helper function that produces a two argument yielding script that
 we use to implement the logic for yielding validator, minting policy and staking validator
 -}
-module Cardano.YTxP.Control.Yielding.Helper (yieldingHelper) where
+module Cardano.YTxP.Control.Yielding.Helper (
+  yieldingHelper,
+  oneshotHelper,
+)
+where
 
 import Cardano.YTxP.Control.Yielding (
   PAuthorisedScriptPurpose (PMinting, PRewarding, PSpending),
@@ -14,7 +18,9 @@ import Plutarch.LedgerApi.V3 (
   PCurrencySymbol,
   PRedeemer (PRedeemer),
   PScriptContext,
+  PTxOutRef,
   paddress'credential,
+  pfindOwnInput,
   pscriptContext'redeemer,
   pscriptContext'txInfo,
   ptxInInfo'resolved,
@@ -24,6 +30,7 @@ import Plutarch.LedgerApi.V3 (
   ptxInfo'wdrl,
   ptxOut'address,
  )
+import Plutarch.Maybe (pisJust)
 import Utils (pcheck, pscriptHashToCurrencySymbol)
 
 -- -   Look at the UTxO at the `n` th entry in the `txInfoReferenceInputs`, where `n` is equal to `authorisedScriptIndex`.
@@ -90,3 +97,17 @@ yieldingHelper = plam $ \pylstcs ctx' -> unTermCont $ do
               PPubKeyCredential _ ->
                 ptraceInfoError
                   "Staking credential at specified index is not a script credential"
+
+-- | One-Shot check
+oneshotHelper ::
+  forall (s :: S).
+  Term
+    s
+    ( PTxOutRef :--> PScriptContext :--> PBool
+    )
+oneshotHelper = plam $ \oref ctx -> pmatch ctx $
+  \ctx' -> pmatch (pscriptContext'txInfo ctx') $
+    \txInfo ->
+      -- FIXME: There is no list fusion atm.
+      let inputs = pmap # plam pfromData # pfromData (ptxInfo'inputs txInfo)
+       in pisJust #$ pfindOwnInput # inputs # oref
