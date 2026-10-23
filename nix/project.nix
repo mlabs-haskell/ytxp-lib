@@ -10,9 +10,9 @@ final: _prev: {
       "https://chap.intersectmbo.org/" = final.inputs.CHaP;
     };
     sha256map = {
-      "https://github.com/mlabs-haskell/plutus-test"."648adbd910e7e9ae0efb082bc936eb304c610ef0" = "sha256-YVHoY4Pg+v0S+2isuEpZ5Krg9o3+wQcWX9zo6DtgDb8=";
-      "https://github.com/mlabs-haskell/ply"."b24c919a0cddc3a3a2ace4c88f8a185db01bca04" = "sha256-wXklqWiB/zB+97A3WcdPJfFFSqiPr+4X7EZXBYesUck=";
-      "https://github.com/Plutonomicon/plutarch-plutus"."f84a46287b06f36abf8d2d63bec7ff75d32f3e91" = "sha256-gKBk9D6DHSEudq7P9+07yXWcgM/QX7NFp0tJXBodopM=";
+      "https://github.com/mlabs-haskell/plutus-test"."2c54dd73c2f5c8f48102efc39dceb8756db3d664" = "sha256-cgBJzs3ZFZT/JnBr6z/rYmMXWebyNWbvo4e4Qj4CniQ=";
+      "https://github.com/mlabs-haskell/ply"."98a7f0e236e9b0a8b4bc2f8dcba2a6eaacd24ae1" = "sha256-GY8UcL34ooHkyvBiZoqRhdI1PcrVr2XdpMmbus6GuEI=";
+      "https://github.com/Plutonomicon/plutarch-plutus"."7237f3982e47f447d27ba0a07f91503566e01d80" = "sha256-Wm/cPFbRAI4NJqD/z0B4IsiViMUhrMG2REuARRitwAs=";
     };
   };
 
