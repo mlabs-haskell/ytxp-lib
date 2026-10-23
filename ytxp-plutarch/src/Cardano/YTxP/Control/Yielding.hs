@@ -45,7 +45,6 @@ import Plutarch.LedgerApi.V3 (
   ptxInInfo'resolved,
   ptxOut'referenceScript,
  )
-import Plutarch.Repr.Tag (DeriveAsTag (DeriveAsTag))
 import Ply.Plutarch (PlyArgOf)
 import Utils (pmember)
 
@@ -66,7 +65,7 @@ data PAuthorisedScriptPurpose (s :: S) = PMinting | PSpending | PRewarding
   deriving anyclass (SOP.Generic, PIsData, PEq)
   deriving
     (PlutusType)
-    via DeriveAsTag PAuthorisedScriptPurpose
+    via DeriveTagPlutusType PAuthorisedScriptPurpose
 
 instance PLiftable PAuthorisedScriptPurpose where
   type AsHaskell PAuthorisedScriptPurpose = AuthorisedScriptPurpose

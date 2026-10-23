@@ -115,7 +115,7 @@ library pprelude
   build-depends:
     , base
     , plutarch
-    , plutus-core  >=1.40.0.0 && <1.41
+    , plutus-core  >=1.45.0.0 && <1.46
 
   exposed-modules:  PPrelude
   hs-source-dirs:   src
