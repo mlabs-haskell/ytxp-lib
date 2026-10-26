@@ -86,7 +86,8 @@ type PType = PScriptContext :--> PUnit
 {- |
 Type alias for the referenced types.
 -}
-type YieldingReferenceTypes = ReferencedTypesOf (PData ': ParamsOf PType)
+type YieldingReferenceTypes =
+  ReferencedTypesOf (PData ': PYieldingRedeemer ': ParamsOf PType)
 
 {- |
 Generates the blueprint for the Yielding Transaction Pattern Library.
@@ -107,12 +108,10 @@ ytxpBlueprint title description version config params =
   MkContractBlueprint
     { contractId = Nothing
     , contractPreamble =
-        -- TODO Use compiler field
         MkPreamble
           { preambleTitle = title
           , preambleDescription = Just description
-          , -- TODO Should be optional and set to Nothing
-            preambleVersion = version
+          , preambleVersion = version
           , preamblePlutusVersion =
               reifyVersion $ Proxy @(VersionOf PType)
           , preambleLicense = Nothing
@@ -120,8 +119,7 @@ ytxpBlueprint title description version config params =
     , contractValidators =
         Set.fromList $ yieldingBlueprints config params
     , contractDefinitions =
-        -- TODO: Should be optional and set to Nothing
-        derivePDefinitions @(PData ': ParamsOf PType)
+        derivePDefinitions @(PData ': PYieldingRedeemer ': ParamsOf PType)
     }
 
 {- |
