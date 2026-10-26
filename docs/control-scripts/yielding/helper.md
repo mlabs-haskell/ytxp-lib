@@ -32,7 +32,7 @@ It is used as the basis for implementing the yielding minting policy, yielding v
 
 - Look at the UTxO at the `n` th entry in the `txInfoReferenceInputs`, where `n` is equal to `authorisedScriptIndex`.
   - Call this UTxO `authorisedScriptUTxO`.
-  - Check that the `authorisedScriptUTxO` is carrying exactly one token with the `authorisedScriptsSTCS`. Blow up if not.
+  - Check that the `authorisedScriptUTxO` carries at least one token with the `authorisedScriptsSTCS`. Blow up if not.
   - Call the hash of the reference script carried by the `authorisedScriptUTxO` the `AuthorisedScriptHash`.
 - Obtain evidence that the script with `AuthorisedScriptHash` was triggered via the `checkAuthorisedScript` function. TODO(alberto 20240-05-24) checkAuthorisedTo function does not exist yet
     This function looks at `authorisedScriptProofIndex` and indexes in one of the following ways:
