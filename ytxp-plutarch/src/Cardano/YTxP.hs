@@ -143,7 +143,9 @@ yieldingBlueprints config (SdkParameters nonces stcs) =
   fmap
     ( \nonce ->
         mkYieldingBlueprint config nonce stcs $
-          yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
+          yielding
+            # pdata (pconstant (coerce stcs))
+            # pdata (pconstant $ naturalToInteger nonce)
     )
     nonces
 

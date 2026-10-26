@@ -8,12 +8,12 @@ import Plutarch.LedgerApi.V3 (PCurrencySymbol, PScriptContext)
 --------------------------------------------------------------------------------
 -- Plutarch level terms
 
--- | Yielding Validator
+-- | Yielding Validator.
 yielding ::
   forall (s :: S).
   Term
     s
-    ( PCurrencySymbol :--> PAsData PInteger :--> PScriptContext :--> PUnit
+    ( PAsData PCurrencySymbol :--> PAsData PInteger :--> PScriptContext :--> PUnit
     )
 yielding = plam $ \psymbol _nonce ctx ->
-  yieldingHelper # psymbol # ctx
+  yieldingHelper # pfromData psymbol # ctx
