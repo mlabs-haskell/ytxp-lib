@@ -6,7 +6,7 @@
 --   
 --   Control scripts, types, and utilities for the YTxP architecture
 @package ytxp-plutarch
-@version 0.2.1
+@version 0.3.0
 
 
 -- | This module exposes a flexible way to generate test cases that go
@@ -249,8 +249,14 @@ yieldingHelper :: forall (s :: S). Term s (PCurrencySymbol :--> (PScriptContext 
 
 module Cardano.YTxP.Control.Yielding.Scripts
 
--- | Yielding Validator
-yielding :: forall (s :: S). Term s (PCurrencySymbol :--> (PAsData PInteger :--> (PScriptContext :--> PUnit)))
+-- | The yielding validator with its parameters.
+--   
+--   Both parameters are <tt>Data</tt>-encoded, so they can be applied with
+--   the standard tooling.
+type PYieldingScript = PAsData PCurrencySymbol :--> PAsData PInteger :--> PScriptContext :--> PUnit
+
+-- | Yielding Validator.
+yielding :: forall (s :: S). Term s PYieldingScript
 
 
 -- | This module provides the blueprint for the Yielding Transaction

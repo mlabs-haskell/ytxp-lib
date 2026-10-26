@@ -7,7 +7,7 @@
 --   Provides off-chain and on-chain interoperability tools for YTxP
 --   pattern implementations
 @package ytxp-sdk
-@version 0.2.1
+@version 0.3.0
 
 module Cardano.YTxP.SDK.Redeemers
 
@@ -39,6 +39,13 @@ YieldingRedeemer :: AuthorisedScriptIndex -> AuthorisedScriptProofIndex -> Yield
 instance PlutusTx.IsData.Class.ToData Cardano.YTxP.SDK.Redeemers.YieldingRedeemer
 instance PlutusTx.IsData.Class.FromData Cardano.YTxP.SDK.Redeemers.YieldingRedeemer
 instance PlutusTx.IsData.Class.UnsafeFromData Cardano.YTxP.SDK.Redeemers.YieldingRedeemer
+instance forall (referencedTypes :: [GHC.Types.Type]). PlutusTx.Blueprint.Class.HasBlueprintSchema Cardano.YTxP.SDK.Redeemers.AuthorisedScriptPurpose referencedTypes
+instance PlutusTx.Blueprint.Definition.Unroll.HasBlueprintDefinition Cardano.YTxP.SDK.Redeemers.AuthorisedScriptPurpose
+instance forall (referencedTypes :: [GHC.Types.Type]). PlutusTx.Blueprint.Class.HasBlueprintSchema Cardano.YTxP.SDK.Redeemers.AuthorisedScriptIndex referencedTypes
+instance PlutusTx.Blueprint.Definition.Unroll.HasBlueprintDefinition Cardano.YTxP.SDK.Redeemers.AuthorisedScriptIndex
+instance forall (referencedTypes :: [GHC.Types.Type]). PlutusTx.Blueprint.Class.HasBlueprintSchema Cardano.YTxP.SDK.Redeemers.AuthorisedScriptProofIndex referencedTypes
+instance PlutusTx.Blueprint.Definition.Unroll.HasBlueprintDefinition Cardano.YTxP.SDK.Redeemers.AuthorisedScriptProofIndex
+instance forall (referencedTypes :: [GHC.Types.Type]). PlutusTx.Blueprint.Class.HasBlueprintSchema Cardano.YTxP.SDK.Redeemers.YieldingRedeemer referencedTypes
 instance Test.QuickCheck.Arbitrary.Arbitrary Cardano.YTxP.SDK.Redeemers.AuthorisedScriptIndex
 instance PlutusTx.Eq.Eq Cardano.YTxP.SDK.Redeemers.AuthorisedScriptIndex
 instance PlutusTx.IsData.Class.UnsafeFromData Cardano.YTxP.SDK.Redeemers.AuthorisedScriptIndex
@@ -72,10 +79,10 @@ instance PlutusTx.IsData.Class.UnsafeFromData Cardano.YTxP.SDK.Redeemers.Authori
 instance PlutusTx.Eq.Eq Cardano.YTxP.SDK.Redeemers.AuthorisedScriptPurpose
 
 module Cardano.YTxP.SDK.Optics
-class HasYieldingRedeemer c_aupF
-yieldingRedeemer :: HasYieldingRedeemer c_aupF => Lens' c_aupF YieldingRedeemer
-authorisedScriptIndex :: HasYieldingRedeemer c_aupF => Lens' c_aupF AuthorisedScriptIndex
-authorisedScriptProofIndex :: HasYieldingRedeemer c_aupF => Lens' c_aupF AuthorisedScriptProofIndex
+class HasYieldingRedeemer c_auIb
+yieldingRedeemer :: HasYieldingRedeemer c_auIb => Lens' c_auIb YieldingRedeemer
+authorisedScriptIndex :: HasYieldingRedeemer c_auIb => Lens' c_auIb AuthorisedScriptIndex
+authorisedScriptProofIndex :: HasYieldingRedeemer c_auIb => Lens' c_auIb AuthorisedScriptProofIndex
 instance Cardano.YTxP.SDK.Optics.HasYieldingRedeemer Cardano.YTxP.SDK.Redeemers.YieldingRedeemer
 instance forall t. ((Cardano.YTxP.SDK.Redeemers.AuthorisedScriptIndex :: GHC.Types.Type) GHC.Types.~ (t :: GHC.Types.Type)) => Control.Lens.Wrapped.Rewrapped Cardano.YTxP.SDK.Redeemers.AuthorisedScriptIndex t
 instance Control.Lens.Wrapped.Wrapped Cardano.YTxP.SDK.Redeemers.AuthorisedScriptIndex
@@ -117,64 +124,3 @@ instance GHC.Classes.Eq Cardano.YTxP.SDK.SdkParameters.SdkParameters
 instance Prettyprinter.Internal.Pretty Cardano.YTxP.SDK.SdkParameters.SdkParameters
 instance Data.Aeson.Types.FromJSON.FromJSON Cardano.YTxP.SDK.SdkParameters.AuthorisedScriptsSTCS
 instance Data.Aeson.Types.ToJSON.ToJSON Cardano.YTxP.SDK.SdkParameters.AuthorisedScriptsSTCS
-
-
--- | This module is consider deprecated. Use Ply instead.
-
--- | <i>Deprecated: Use Ply instead.</i>
-module Cardano.YTxP.SDK.ControlParameters
-
--- | Scripts that yield to transaction families identified by reference
---   scripts which carry a state thread token
-data YieldingScripts
-YieldingScripts :: [HexStringScript "YieldingMP"] -> HexStringScript "YieldingValidator" -> [HexStringScript "YieldingSV"] -> YieldingScripts
-
-[$sel:yieldingMintingPolicies:YieldingScripts] :: YieldingScripts -> [HexStringScript "YieldingMP"]
-
-[$sel:yieldingValidator:YieldingScripts] :: YieldingScripts -> HexStringScript "YieldingValidator"
-
-[$sel:yieldingStakingValidators:YieldingScripts] :: YieldingScripts -> [HexStringScript "YieldingSV"]
-
--- | Contains the compiled scripts along with the parameters they were
---   compiled against. This is useful for _library consumers_ and should
---   contain all of the information needed to work with the library.
-data ControlParameters
-ControlParameters :: YieldingScripts -> SdkParameters -> ControlParameters
-
-[$sel:yieldingScripts:ControlParameters] :: ControlParameters -> YieldingScripts
-
-[$sel:sdkParameters:ControlParameters] :: ControlParameters -> SdkParameters
-
--- | A helper newtype to ensure that any <tt>Script</tt>s we use are
---   serialized (and deserialized), consistently. We also have a 'tag' for
---   a more specific type name or label when using a via derivation with
---   this, or as part of a larger type.
---   
---   See <tt>JSON.md</tt> for an explanation of our policy. TODO: update
---   json policy
-newtype HexStringScript (scriptLabel :: Symbol)
-HexStringScript :: ShortByteString -> HexStringScript (scriptLabel :: Symbol)
-
--- | Converts a <a>ShortByteString</a> into a textual representation in
---   hex.
-sbsToHexText :: ShortByteString -> Text
-
--- | Attempts to parse the given <a>Text</a> into the
---   <a>ShortByteString</a> that would have produced it via
---   <a>sbsToHexText</a>, indicating parse failures with <a>fail</a>.
-hexTextToSbs :: MonadFail m => Text -> m ShortByteString
-instance forall (scriptLabel :: GHC.Types.Symbol). GHC.Classes.Eq (Cardano.YTxP.SDK.ControlParameters.HexStringScript scriptLabel)
-instance GHC.Show.Show Cardano.YTxP.SDK.ControlParameters.YieldingScripts
-instance GHC.Classes.Eq Cardano.YTxP.SDK.ControlParameters.YieldingScripts
-instance GHC.Show.Show Cardano.YTxP.SDK.ControlParameters.ControlParameters
-instance GHC.Classes.Eq Cardano.YTxP.SDK.ControlParameters.ControlParameters
-instance Data.Aeson.Types.ToJSON.ToJSON Cardano.YTxP.SDK.ControlParameters.ControlParameters
-instance Data.Aeson.Types.FromJSON.FromJSON Cardano.YTxP.SDK.ControlParameters.ControlParameters
-instance Prettyprinter.Internal.Pretty Cardano.YTxP.SDK.ControlParameters.ControlParameters
-instance Prettyprinter.Internal.Pretty Cardano.YTxP.SDK.ControlParameters.YieldingScripts
-instance Data.Aeson.Types.ToJSON.ToJSON Cardano.YTxP.SDK.ControlParameters.YieldingScripts
-instance Data.Aeson.Types.FromJSON.FromJSON Cardano.YTxP.SDK.ControlParameters.YieldingScripts
-instance forall (scriptLabel :: GHC.Types.Symbol). Prettyprinter.Internal.Pretty (Cardano.YTxP.SDK.ControlParameters.HexStringScript scriptLabel)
-instance forall (scriptLabel :: GHC.Types.Symbol). Data.Aeson.Types.ToJSON.ToJSON (Cardano.YTxP.SDK.ControlParameters.HexStringScript scriptLabel)
-instance forall (scriptLabel :: GHC.Types.Symbol). GHC.TypeLits.KnownSymbol scriptLabel => Data.Aeson.Types.FromJSON.FromJSON (Cardano.YTxP.SDK.ControlParameters.HexStringScript scriptLabel)
-instance forall (scriptLabel :: GHC.Types.Symbol). GHC.TypeLits.KnownSymbol scriptLabel => GHC.Show.Show (Cardano.YTxP.SDK.ControlParameters.HexStringScript scriptLabel)
