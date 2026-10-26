@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name:          ytxp-plutarch
-version:       0.2.1
+version:       0.3.0
 synopsis:
   Control scripts, types, and utilities for the YTxP architecture
 
@@ -103,7 +103,7 @@ common common-test
     , pprelude
     , tasty
     , ytxp-plutarch
-    , ytxp-sdk
+    , ytxp-sdk       ^>=0.3
 
   ghc-options:   -O2 -threaded -rtsopts -with-rtsopts=-N
 
@@ -137,7 +137,7 @@ library
     , tasty
     , tasty-hunit
     , text
-    , ytxp-sdk
+    , ytxp-sdk           ^>=0.3
 
   hs-source-dirs:  src
   exposed-modules:
@@ -180,7 +180,7 @@ executable ytxp
     , pprelude
     , text
     , ytxp-plutarch
-    , ytxp-sdk
+    , ytxp-sdk              ^>=0.3
 
   hs-source-dirs: app
 

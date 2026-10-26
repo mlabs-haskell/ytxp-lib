@@ -12,7 +12,18 @@ module Cardano.YTxP.SDK.Redeemers (
 import GHC.Generics (Generic)
 import Generics.SOP qualified as SOP
 import PlutusTx qualified
-import PlutusTx.Blueprint (HasBlueprintDefinition)
+import PlutusTx.Blueprint (
+  ConstructorSchema (MkConstructorSchema),
+  HasBlueprintDefinition (Unroll),
+  HasBlueprintSchema (schema),
+  Schema (
+    SchemaConstructor,
+    SchemaInteger
+  ),
+  definitionRef,
+  emptyIntegerSchema,
+  emptySchemaInfo,
+ )
 import PlutusTx.Prelude qualified as PlutusTx
 import Test.QuickCheck (Arbitrary (arbitrary), arbitraryBoundedEnum)
 
@@ -106,3 +117,43 @@ instance PlutusTx.Eq YieldingRedeemer where
     si PlutusTx.== si' PlutusTx.&& spi PlutusTx.== spi'
 
 PlutusTx.makeIsDataIndexed ''YieldingRedeemer [('YieldingRedeemer, 0)]
+
+{- Blueprint schemas for the redeemer.
+-}
+instance HasBlueprintSchema AuthorisedScriptPurpose referencedTypes where
+  schema = SchemaInteger emptySchemaInfo emptyIntegerSchema
+
+instance HasBlueprintDefinition AuthorisedScriptPurpose where
+  type Unroll AuthorisedScriptPurpose = '[AuthorisedScriptPurpose]
+
+instance HasBlueprintSchema AuthorisedScriptIndex referencedTypes where
+  schema = SchemaInteger emptySchemaInfo emptyIntegerSchema
+
+instance HasBlueprintDefinition AuthorisedScriptIndex where
+  type Unroll AuthorisedScriptIndex = '[AuthorisedScriptIndex]
+
+-- | Encoded as @Constr 0 [purpose, index]@: a newtype over a pair.
+instance HasBlueprintSchema AuthorisedScriptProofIndex referencedTypes where
+  schema =
+    SchemaConstructor emptySchemaInfo $
+      MkConstructorSchema
+        0
+        [ definitionRef @AuthorisedScriptPurpose
+        , SchemaInteger emptySchemaInfo emptyIntegerSchema
+        ]
+
+-- The schema refers to 'AuthorisedScriptPurpose', so its definition travels with it.
+instance HasBlueprintDefinition AuthorisedScriptProofIndex where
+  type
+    Unroll AuthorisedScriptProofIndex =
+      '[AuthorisedScriptProofIndex, AuthorisedScriptPurpose]
+
+-- | Encoded as @Constr 0 [index, proofIndex]@ by 'PlutusTx.makeIsDataIndexed'.
+instance HasBlueprintSchema YieldingRedeemer referencedTypes where
+  schema =
+    SchemaConstructor emptySchemaInfo $
+      MkConstructorSchema
+        0
+        [ definitionRef @AuthorisedScriptIndex
+        , definitionRef @AuthorisedScriptProofIndex
+        ]

@@ -24,7 +24,7 @@ import Data.Coerce (coerce)
 import Data.Data (Proxy (Proxy))
 import Data.Set qualified as Set
 import Data.Text qualified as T
-import GHC.Natural (naturalToInteger)
+import GHC.Natural (Natural, naturalToInteger)
 import Plutarch.Internal.Term (Config, compile)
 import Plutarch.LedgerApi.V3 (PScriptContext, scriptHash)
 import Plutarch.Script (serialiseScript)
@@ -48,13 +48,6 @@ import PlutusTx.Blueprint (
     contractId,
     contractPreamble,
     contractValidators
-  ),
-  ParameterBlueprint (
-    MkParameterBlueprint,
-    parameterDescription,
-    parameterPurpose,
-    parameterSchema,
-    parameterTitle
   ),
   Preamble (
     MkPreamble,
@@ -83,7 +76,6 @@ import Ply.Plutarch (
   ReferencedTypesOf,
   VersionOf,
   derivePDefinitions,
-  mkParamSchemas,
  )
 
 {- |
@@ -94,7 +86,8 @@ type PType = PScriptContext :--> PUnit
 {- |
 Type alias for the referenced types.
 -}
-type YieldingReferenceTypes = ReferencedTypesOf (PData ': ParamsOf PType)
+type YieldingReferenceTypes =
+  ReferencedTypesOf (PData ': PYieldingRedeemer ': ParamsOf PType)
 
 {- |
 Generates the blueprint for the Yielding Transaction Pattern Library.
@@ -115,12 +108,10 @@ ytxpBlueprint title description version config params =
   MkContractBlueprint
     { contractId = Nothing
     , contractPreamble =
-        -- TODO Use compiler field
         MkPreamble
           { preambleTitle = title
           , preambleDescription = Just description
-          , -- TODO Should be optional and set to Nothing
-            preambleVersion = version
+          , preambleVersion = version
           , preamblePlutusVersion =
               reifyVersion $ Proxy @(VersionOf PType)
           , preambleLicense = Nothing
@@ -128,8 +119,7 @@ ytxpBlueprint title description version config params =
     , contractValidators =
         Set.fromList $ yieldingBlueprints config params
     , contractDefinitions =
-        -- TODO: Should be optional and set to Nothing
-        derivePDefinitions @(PData ': ParamsOf PType)
+        derivePDefinitions @(PData ': PYieldingRedeemer ': ParamsOf PType)
     }
 
 {- |
@@ -142,8 +132,10 @@ yieldingBlueprints ::
 yieldingBlueprints config (SdkParameters nonces stcs) =
   fmap
     ( \nonce ->
-        mkYieldingBlueprint config $
-          yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
+        mkYieldingBlueprint config nonce stcs $
+          yielding
+            # pdata (pconstant (coerce stcs))
+            # pdata (pconstant $ naturalToInteger nonce)
     )
     nonces
 
@@ -154,23 +146,20 @@ Creates a validator blueprint.
 -}
 mkYieldingBlueprint ::
   Config ->
+  Natural ->
+  AuthorisedScriptsSTCS ->
   ClosedTerm PType ->
   ValidatorBlueprint YieldingReferenceTypes
-mkYieldingBlueprint config ct =
+mkYieldingBlueprint config nonce stcs ct =
   MkValidatorBlueprint
-    { validatorTitle = "Yielding validator"
-    , validatorDescription = Nothing
+    { validatorTitle = "Yielding validator (nonce " <> T.pack (show nonce) <> ")"
+    , validatorDescription =
+        Just $ "Yielding validator for authorised-scripts STCS " <> T.pack (show stcs)
     , validatorParameters =
-        map
-          ( \sch ->
-              MkParameterBlueprint
-                { parameterTitle = Nothing
-                , parameterDescription = Nothing
-                , parameterPurpose = []
-                , parameterSchema = sch
-                }
-          )
-          $ mkParamSchemas @YieldingReferenceTypes @(ParamsOf PType)
+        -- Both parameters (the STCS and the nonce) are already applied to the
+        -- compiled script below, so there is nothing left for a consumer to
+        -- apply.
+        []
     , validatorRedeemer =
         MkArgumentBlueprint
           { argumentTitle = Just "Yielding redeemer"

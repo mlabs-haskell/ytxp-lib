@@ -1,4 +1,5 @@
 module Cardano.YTxP.Control.Yielding.Scripts (
+  PYieldingScript,
   yielding,
 ) where
 
@@ -8,12 +9,15 @@ import Plutarch.LedgerApi.V3 (PCurrencySymbol, PScriptContext)
 --------------------------------------------------------------------------------
 -- Plutarch level terms
 
--- | Yielding Validator
-yielding ::
-  forall (s :: S).
-  Term
-    s
-    ( PCurrencySymbol :--> PAsData PInteger :--> PScriptContext :--> PUnit
-    )
+{- | The yielding validator with its parameters.
+
+Both parameters are @Data@-encoded, so they can be applied with the standard
+tooling.
+-}
+type PYieldingScript =
+  PAsData PCurrencySymbol :--> PAsData PInteger :--> PScriptContext :--> PUnit
+
+-- | Yielding Validator.
+yielding :: forall (s :: S). Term s PYieldingScript
 yielding = plam $ \psymbol _nonce ctx ->
-  yieldingHelper # psymbol # ctx
+  yieldingHelper # pfromData psymbol # ctx

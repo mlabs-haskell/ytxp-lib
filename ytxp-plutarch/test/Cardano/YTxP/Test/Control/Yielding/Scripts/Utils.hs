@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wno-unused-imports #-}
-
 module Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
   -- * Yielding Script tests static parameters
   ScriptsTestsParams (
@@ -20,24 +18,13 @@ module Cardano.YTxP.Test.Control.Yielding.Scripts.Utils (
 ) where
 
 import Cardano.YTxP.SDK.Redeemers (
-  AuthorisedScriptIndex (AuthorisedScriptIndex),
-  AuthorisedScriptProofIndex (AuthorisedScriptProofIndex),
-  AuthorisedScriptPurpose (Minting, Rewarding, Spending),
-  YieldingRedeemer (YieldingRedeemer),
+  YieldingRedeemer,
  )
 import Cardano.YTxP.SDK.SdkParameters (
   AuthorisedScriptsSTCS (AuthorisedScriptsSTCS),
  )
 import Control.Monad.Reader (Reader, asks)
 
--- TODO which instances are we importing with this? (it does not compile if we remove it)
-import Cardano.YTxP.Control.Yielding.Scripts ()
-import Plutarch.Internal.Term (
-  Config (Tracing),
-  LogLevel (LogInfo),
-  Script,
-  TracingMode (DetTracing),
- )
 import Plutus.ContextBuilder (
   Builder,
   MintingBuilder,
@@ -59,7 +46,6 @@ import PlutusLedgerApi.V3 (
   CurrencySymbol (CurrencySymbol),
   Redeemer (Redeemer),
   ScriptHash (getScriptHash),
-  StakingCredential (StakingHash),
   TokenName (TokenName),
   singleton,
   toBuiltinData,

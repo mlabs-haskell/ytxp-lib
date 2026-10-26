@@ -29,7 +29,7 @@ yieldingScriptR = do
     closedTerm ::
       forall (s :: S).
       Term s (PScriptContext :--> PUnit)
-    closedTerm = yielding # pconstant authorisedScriptsSTCS' # pconstant 42
+    closedTerm = yielding # pdata (pconstant authorisedScriptsSTCS') # pconstant 42
   case compile (Tracing LogInfo DetTracing) closedTerm of
     Left err -> error $ unwords ["Plutarch compilation error:", T.unpack err]
     Right script' -> pure script'

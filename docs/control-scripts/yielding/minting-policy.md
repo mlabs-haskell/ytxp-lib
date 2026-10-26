@@ -14,9 +14,12 @@ This script is implemented via the ["yield helper"](./helper.md) script.
 
 ## Parameters
 
-This script has all of the parameter of the  ["yield helper"](./helper.md) script, as well as:
+This script has all of the parameters of the ["yield helper"](./helper.md) script, as well as:
 
-- **yieldingMintingPolicyNonce**: `BuiltinInteger`
+- **nonce**: `BuiltinInteger`
+    One minting policy is compiled per nonce.
+    The nonce is not used by the validation logic; it exists only to give each compiled instance a
+    distinct script hash.
 
 <a id="org45e406a"></a>
 
@@ -34,10 +37,9 @@ Unspecified; library-user-defined
 
 ## Semantics
 
-Almost identical to the ["yield helper"](./helper.md) script, with the additional behavior that a "nonce" is used to change the script hash.
-The nonce can be included in as a `plet` binding, similar to
+Identical to the ["yield helper"](./helper.md) script, with the additional `nonce` parameter.
+In Plutarch the minting policy is simply the exported term with both parameters applied.
 
-```hs
-mkYieldingMintingPolicy ylstcs nonce =
-  plet (pconstant nonce) $ const (... yielding helper ...)
-```
+The nonce does not appear in the validation body, so it only affects the script hash.
+That is what lets several policies share one STCS while remaining distinguishable by currency
+symbol.

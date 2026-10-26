@@ -28,7 +28,7 @@ import Utils (pcheck, pscriptHashToCurrencySymbol)
 
 -- -   Look at the UTxO at the `n` th entry in the `txInfoReferenceInputs`, where `n` is equal to `authorisedScriptIndex`.
 --     -   Call this UTxO `authorisedScriptUTxO`.
---     -   Check that this UTxO is carrying exactly one token with the `authorisedScriptSTCS`. Blow up if not.
+--     -   Check that this UTxO carries at least one token with the `authorisedScriptsSTCS`. Blow up if not.
 --     -   Obtain the hash of the reference script from the authorisedScriptUTxO. Call this hash `AuthorisedScriptHash`.
 -- -   Obtain evidence that the a script with `AuthorisedScriptHash` was triggered.
 --     If not, blow up. In practice, this will involve either:

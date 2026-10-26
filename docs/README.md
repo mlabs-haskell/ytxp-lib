@@ -8,7 +8,7 @@ The Yielding Transaction Pattern is pretty simple.
   - Indexing the reference inputs to find evidence that a `AuthorisedScript` containing a token minted with the `authorisedScriptsSTCS` is being referenced
   - Searching for evidence that this script was triggered
     In practice this will involve either:
-    - Looking at the `txInfoWithdrawls` field for a staking validator being triggered with the correct StakingCredential
+    - Looking at the `txInfoWdrl` field for a staking validator being triggered with the correct credential
     - Looking at the `txInfoInputs` field for a UTxO being spent at the correct address
     - Looking at the `txInfoMints` field for a mint with the correct currency symbol
 
