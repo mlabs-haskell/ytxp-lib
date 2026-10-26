@@ -49,13 +49,6 @@ import PlutusTx.Blueprint (
     contractPreamble,
     contractValidators
   ),
-  ParameterBlueprint (
-    MkParameterBlueprint,
-    parameterDescription,
-    parameterPurpose,
-    parameterSchema,
-    parameterTitle
-  ),
   Preamble (
     MkPreamble,
     preambleDescription,
@@ -83,7 +76,6 @@ import Ply.Plutarch (
   ReferencedTypesOf,
   VersionOf,
   derivePDefinitions,
-  mkParamSchemas,
  )
 
 {- |
@@ -166,16 +158,10 @@ mkYieldingBlueprint config nonce stcs ct =
     , validatorDescription =
         Just $ "Yielding validator for authorised-scripts STCS " <> T.pack (show stcs)
     , validatorParameters =
-        map
-          ( \sch ->
-              MkParameterBlueprint
-                { parameterTitle = Nothing
-                , parameterDescription = Nothing
-                , parameterPurpose = []
-                , parameterSchema = sch
-                }
-          )
-          $ mkParamSchemas @YieldingReferenceTypes @(ParamsOf PType)
+        -- Both parameters (the STCS and the nonce) are already applied to the
+        -- compiled script below, so there is nothing left for a consumer to
+        -- apply.
+        []
     , validatorRedeemer =
         MkArgumentBlueprint
           { argumentTitle = Just "Yielding redeemer"
