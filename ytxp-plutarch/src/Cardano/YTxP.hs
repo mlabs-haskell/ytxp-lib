@@ -24,7 +24,7 @@ import Data.Coerce (coerce)
 import Data.Data (Proxy (Proxy))
 import Data.Set qualified as Set
 import Data.Text qualified as T
-import GHC.Natural (naturalToInteger)
+import GHC.Natural (Natural, naturalToInteger)
 import Plutarch.Internal.Term (Config, compile)
 import Plutarch.LedgerApi.V3 (PScriptContext, scriptHash)
 import Plutarch.Script (serialiseScript)
@@ -142,7 +142,7 @@ yieldingBlueprints ::
 yieldingBlueprints config (SdkParameters nonces stcs) =
   fmap
     ( \nonce ->
-        mkYieldingBlueprint config $
+        mkYieldingBlueprint config nonce stcs $
           yielding # pconstant (coerce stcs) # pdata (pconstant $ naturalToInteger nonce)
     )
     nonces
@@ -154,12 +154,15 @@ Creates a validator blueprint.
 -}
 mkYieldingBlueprint ::
   Config ->
+  Natural ->
+  AuthorisedScriptsSTCS ->
   ClosedTerm PType ->
   ValidatorBlueprint YieldingReferenceTypes
-mkYieldingBlueprint config ct =
+mkYieldingBlueprint config nonce stcs ct =
   MkValidatorBlueprint
-    { validatorTitle = "Yielding validator"
-    , validatorDescription = Nothing
+    { validatorTitle = "Yielding validator (nonce " <> T.pack (show nonce) <> ")"
+    , validatorDescription =
+        Just $ "Yielding validator for authorised-scripts STCS " <> T.pack (show stcs)
     , validatorParameters =
         map
           ( \sch ->
