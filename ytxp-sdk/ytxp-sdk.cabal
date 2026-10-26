@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name:          ytxp-sdk
-version:       0.2.1
+version:       0.3.0
 synopsis:
   Provides off-chain and on-chain interoperability tools for YTxP pattern implementations
 
@@ -98,7 +98,6 @@ library
   import:          common-language
   hs-source-dirs:  src
   exposed-modules:
-    Cardano.YTxP.SDK.ControlParameters
     Cardano.YTxP.SDK.Optics
     Cardano.YTxP.SDK.Redeemers
     Cardano.YTxP.SDK.SdkParameters
@@ -106,8 +105,6 @@ library
   build-depends:
     , aeson
     , base
-    , base16-bytestring
-    , bytestring
     , generics-sop
     , lens
     , plutus-core
@@ -139,7 +136,6 @@ test-suite ytxp-sdk-test
   build-depends:
     , aeson
     , base
-    , bytestring
     , plutus-ledger-api
     , plutus-tx
     , QuickCheck
@@ -147,7 +143,6 @@ test-suite ytxp-sdk-test
     , tasty-golden
     , tasty-quickcheck
     , testlib
-    , text
     , ytxp-sdk
 
   ghc-options:    -O2 -threaded -rtsopts -with-rtsopts=-N
